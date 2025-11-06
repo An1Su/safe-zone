@@ -1,6 +1,6 @@
 # Buy-01 E-commerce Frontend
 
-A multi-stage CAPTCHA web application built with Angular that challenges users with interactive tasks to verify they are human. This project demonstrates Angular fundamentals including components, services, routing, form validation, state management, and responsive design.
+A modern e-commerce frontend built with Angular, featuring a responsive product catalog, shopping cart, checkout process, and user authentication. This project demonstrates Angular fundamentals including components, services, routing, form validation, state management, and responsive design.
 
 ## Project Overview
 
