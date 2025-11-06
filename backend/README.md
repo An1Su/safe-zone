@@ -1,4 +1,4 @@
-# letsplay
+# Buy-01 E-commerce Backend
 
 A RESTful CRUD API for user and product management, built with Spring Boot, MongoDB, and JWT authentication.
 
@@ -55,7 +55,7 @@ A RESTful CRUD API for user and product management, built with Spring Boot, Mong
 1. **Clone the repo:**
    ```sh
    git clone <your-repo-url>
-   cd letsplay
+   cd buy-01
    ```
 
 2. **Start MongoDB** (if not running):
@@ -80,7 +80,7 @@ A RESTful CRUD API for user and product management, built with Spring Boot, Mong
 #### Option 2: Running in IntelliJ IDEA
 
 1. **Open the project:**
-   - File → Open → Select the `letsplay` folder (containing `pom.xml`)
+   - File → Open → Select the `buy-01` folder (containing `pom.xml`)
    - IntelliJ will automatically detect it as a Maven project
 
 2. **Start MongoDB** (if not running):
@@ -89,12 +89,12 @@ A RESTful CRUD API for user and product management, built with Spring Boot, Mong
    ```
 
 3. **Run the application:**
-   - **Method A:** Click the green ▶️ button next to the `main` method in `LetsplayApplication.java`
-   - **Method B:** Right-click `LetsplayApplication.java` → Run 'LetsplayApplication'
+   - **Method A:** Click the green ▶️ button next to the `main` method in `EcommerceApplication.java`
+   - **Method B:** Right-click `EcommerceApplication.java` → Run 'EcommerceApplication'
    - **Method C:** Use Run Configuration:
      - Run → Edit Configurations → ➕ → Spring Boot
-     - Name: `Letsplay`
-     - Main class: `com.toft.letsplay.LetsplayApplication`
+     - Name: `Buy-01 Backend`
+     - Main class: `com.buyapp.ecommerce.EcommerceApplication`
      - Click OK → Run
 
 4. **To stop the application:**
@@ -200,10 +200,10 @@ A RESTful CRUD API for user and product management, built with Spring Boot, Mong
 ## Project Structure
 
 ```
-letsplay/
+buy-01/
 ├── src/
 │   ├── main/
-│   │   ├── java/com/toft/letsplay/
+│   │   ├── java/com/toft/buy-01/
 │   │   │   ├── model/        # User, Product
 │   │   │   ├── repository/   # UserRepository, ProductRepository, BlacklistedTokenRepository
 │   │   │   ├── service/      # UserService, ProductService
@@ -214,8 +214,8 @@ letsplay/
 │   │   └── resources/
 │   │       ├── application.properties
 │   │       └── keystore.p12  # Self-signed cert for HTTPS
-│   └── test/java/com/toft/letsplay/
-│       └── LetsplayApplicationTests.java
+│   └── test/java/com/toft/buy-01/
+│       └── EcommerceApplicationTests.java
 ├── .gitignore
 ├── pom.xml
 ├── README.md
@@ -224,7 +224,7 @@ letsplay/
 
 ## Generate a new self-signed certificate for development
 ```
-keytool -genkeypair -alias letsplay -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore src/main/resources/keystore.p12 -validity 3650 -storepass changeit -dname "CN=localhost, OU=Development, O=Letsplay, L=City, ST=State, C=US"
+keytool -genkeypair -alias buy-01 -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore src/main/resources/keystore.p12 -validity 3650 -storepass changeit -dname "CN=localhost, OU=Development, O=BuyApp, L=City, ST=State, C=US"
 ```
 
 ## Requirements
