@@ -47,11 +47,44 @@ The project includes recommended extensions that VS Code will suggest upon openi
 - Push regularly to avoid merge conflicts
 
 ### Commit Messages
-Use clear, descriptive commit messages:
+Use clear, descriptive commit messages. Consider following these conventions:
+
+#### Common Commit Types:
 ```
-Add user authentication
-Fix media upload validation
-Update product API documentation
+feat: add new feature or functionality
+fix: bug fixes
+docs: documentation changes
+style: code formatting, missing semicolons, etc (no code change)
+refactor: code refactoring without adding features or fixing bugs
+test: adding or updating tests
+chore: maintenance tasks, dependency updates
+```
+
+#### Examples by Scenario:
+```
+# Adding new features
+feat: add user authentication system
+feat: implement product search functionality
+feat: add media upload validation
+
+# Bug fixes
+fix: resolve media upload size validation
+fix: correct user login redirect issue
+fix: handle null pointer in product service
+
+# Documentation updates
+docs: update API documentation
+docs: add setup instructions for Docker
+docs: update task description and requirements
+
+# Code improvements
+refactor: simplify user service authentication logic
+style: format code according to team standards
+chore: update dependencies to latest versions
+
+# Testing
+test: add unit tests for product service
+test: add integration tests for user authentication
 ```
 
 ### Pull Requests

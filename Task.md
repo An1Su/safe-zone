@@ -1,17 +1,41 @@
 # Task description
-## Microservices with Angular
 
-### Objectives
+## Overview
+In this project, you will build an end-to-end e-commerce platform using Spring Boot microservices on the backend and Angular on the frontend.
+Users can register as clients or sellers; sellers manage products and related media (images).
 
-Develop an end-to-end e-commerce platform with Spring Boot microservices and Angular. The platform should support user registration (either as a client or seller), authentication, product CRUD functionality exclusively for sellers, and media management for product images.
+You will practice service decomposition, inter-service communication and a clean Angular UI that consumes these services.
 
-### Instructions
+## Role Play
+You are a full-stack engineer designing a small but realistic marketplace composed of independently deployable services.
+Your mission: deliver a secure, observable, and scalable platform where clients browse products and sellers manage their catalog and media.
 
-#### 1. Microservices Setup
+## Learning Objectives
+Design and implement Spring Boot microservices (User, Product, Media)
 
-- Set up your microservice architecture. Consider Kafka for services communications.
+Apply asynchronous communication (e.g., Kafka) where appropriate
 
-#### 2. Enhanced Database Design
+Implement JWT or OAuth2 with Spring Security for role-based access
+
+Enforce secure file uploads with validation and size limits
+
+Model and persist data in MongoDB (or polyglot where justified)
+
+Build an Angular SPA with routing, guards, interceptors, and forms
+
+## Instructions
+### 1) Microservices Setup
+Create separate services:
+
+User Service (auth, profiles, roles: CLIENT, SELLER)
+
+Product Service (CRUD for products, image references)
+
+Media Service (image upload/download, validation, 2 MB limit)
+
+Configure Kafka (optional but recommended) for events such as PRODUCT_CREATED, IMAGE_UPLOADED (useful for audit, cache invalidation, thumbnails).
+
+### 2) Enhanced Database Design
 
 ```
 ┌─────────────────────────┐        ┌─────────────────────────┐        ┌─────────────────────────┐
@@ -31,59 +55,119 @@ Develop an end-to-end e-commerce platform with Spring Boot microservices and Ang
 - **Media** `has` **Product**: One-to-many relationship where each media item belongs to a specific product
 - **User** `owns` **Product**: One-to-many relationship where each user (seller) can own multiple products
 
-#### 3. API Development Enhancement
+### 3) API Development Enhancement
+**User Service**
 
-- **User Microservice**:
-    - Users can register as clients or sellers, with sellers having the option to upload an avatar.
-    - Authentication and profile management functions should be available.
+Auth: POST /auth/register (role: CLIENT | SELLER), POST /auth/login → JWT/OAuth2 token
 
-- **Product Microservice**:
-    - CRUD operations for products, with only authenticated sellers being able to create/update/delete their products.
-    - Products should support an associated list of images.
+Profile: GET /me, PUT /me (seller may upload/update avatar → delegated to Media Service)
 
-- **Media Microservice**:
-    - Handle media uploads with a size limit of 2MB.
-    - Ensure only legitimate image files are uploaded.
+**Product Service**
 
-#### 4. Front-end Development with Angular
+Public: GET /products (list), GET /products/{id}
 
-- **Sign-In/Up Pages**: Implement authentication views. Sellers should have the option to upload/update their avatar.
-- **Seller Product Management**: A dashboard where sellers can manage their products, including uploading images.
-- **Product Listing**: A simple view to display all products without filtering or search capabilities.
-- **Media Management**: A dedicated view for sellers to manage and upload media specifically for their products. Ensure appropriate file size and type validation.
+Seller-only: POST /products, PUT /products/{id}, DELETE /products/{id} (enforce ownership)
 
-#### 5. Authentication & Authorization
+Associate imageUrls[]; uploading images is performed via Media Service then linked here.
 
-- Implement role-based authentication.
-- Use **Spring Security** with **JWT** or **OAuth2** to distinguish between clients and sellers, ensuring only sellers can manage products and their associated media.
+**Media Service**
 
-#### 6. Error Handling and Validation
+POST /media/images (seller-only): validate MIME type (image/*) and ≤ 2 MB
 
-- Provide feedback for incorrect file types or when exceeding the upload size limit.
-- Handle cases like a client trying to add a product or a seller trying to modify another seller's product.
-- Provide validation for all forms in the application.
+GET /media/images/{id}: serve image (with proper caching headers)
 
-#### 7. Security Measures
+Optional: DELETE /media/images/{id} (seller must own media)
 
-- **HTTPS Encryption**: Always use HTTPS to encrypt data in transit. Consider tools like **Let's Encrypt** for free SSL certificates.
-- **Sensitive Information Protection**: Protect sensitive user information. Passwords and other details should never be exposed in API responses.
-- **Password Security**: Use **Spring Security** to hash and salt passwords before saving them in the MongoDB database.
-- **Access Control**: Ensure only the seller who created a product can modify or delete it and manage its media.
+All services expose /actuator/health; gateway routes external traffic and applies cross-cutting filters (CORS, auth propagation, rate limiting if added).
 
-### Testing
+### 4) Front-End Development with Angular
+**Auth Pages**: Sign-in & Sign-up (role selection). Sellers can upload/update avatar.
 
-Emphasize testing:
-- Role-based functionalities.
-- Media upload constraints.
-- Authentication flows.
-- Data integrity for product and media management by sellers.
+**Seller Dashboard**:
 
-### Resources
+Manage products (create/edit/delete) and attach images (preview, remove).
+
+Show validation messages (price > 0, required fields).
+
+**Product Listing (Public)**:
+
+Simple grid/list of products (no search/filter required).
+
+**Media Management**:
+
+Dedicated view to upload/manage images for the seller's products.
+
+Enforce file type/size in the UI before calling the API.
+
+**Technical**
+
+Use route guards (AuthGuard, RoleGuard), HTTP interceptors (attach token, handle 401/403), Reactive Forms, and Angular Material/Bootstrap for responsive UI.
+
+### 5) Authentication & Authorization
+Spring Security with JWT or OAuth2 at the gateway and propagated downstream.
+
+Roles: CLIENT (browse) vs SELLER (manage own products/media). ADMIN (optional) for moderation.
+
+Enforce ownership checks in Product/Media services (sellerId == auth.subject).
+
+### 6) Error Handling & Validation
+Return meaningful status codes:
+
+400 invalid input / file type / file too large
+
+401/403 unauthenticated/unauthorized
+
+404 not found (product/media not owned or missing)
+
+Avoid unhandled 5xx via global exception handlers.
+
+Angular: show inline form errors; display toast/snackbar for upload failures, oversized files, or forbidden actions.
+
+### 7) Security Measures
+HTTPS end-to-end (e.g., Let's Encrypt for certs).
+
+Password Security: hash+salt with BCrypt in User Service (never expose password).
+
+Input Validation: validate filenames/MIME; verify content by sniffing headers; reject non-image payloads.
+
+Access Control: only the creating seller can modify/delete a product or its images.
+
+CORS: gateway enforces allowed origins and headers.
+
+(Optional) Rate Limiting at the gateway for auth and media endpoints.
+
+## Constraints
+Backend split into at least 3 microservices (User, Product, Media) + Gateway + Discovery.
+
+MongoDB for persistence; images stored in object storage (not in DB).
+
+Public endpoints: product GETs; all write operations require auth and role checks.
+
+Media uploads: image/* only, max 2 MB; reject others.
+
+Provide a comprehensive README with run scripts (Docker Compose encouraged).
+
+## Evaluation
+⚙️ Functionality: Role flow works; sellers can CRUD products & images; clients can browse.
+
+🔐 Security: JWT/OAuth2, password hashing, ownership enforcement, CORS.
+
+🧩 Architecture: Clean service boundaries, gateway & discovery configured, optional Kafka events.
+
+🚫 Reliability: Proper error handling (no unhandled 5xx); health checks.
+
+🎨 UX: Angular app is responsive, guards/interceptors implemented, clear validation.
+
+## Resources
 [Spring Boot Microservices Guide](https://spring.io/guides/tutorials/rest/)
 
-[Spring Cloud Eureka Service Discovery Client Setup](https://www.baeldung.com/spring-cloud-netflix-eureka)
+[Spring Security (JWT/OAuth2)](https://spring.io/guides/tutorials/rest/)
 
-[Let's Encrypt for ssl(HTTPS)](https://letsencrypt.org/getting-started/)
+[MongoDB Docs](https://docs.mongodb.com/)
+
+[Angular Documentation](https://angular.io/docs)
+
+[Let's Encrypt (HTTPS)](https://letsencrypt.org/getting-started/)
 
 ## Audit
 ### Initial Setup & Access:
