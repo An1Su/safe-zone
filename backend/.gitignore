@@ -1,7 +1,12 @@
 # macOS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 
 # Maven
+target/
 /target/
 !.mvn/Wrapper/maven-wrapper.jar
 
@@ -14,6 +19,16 @@
 # IDE
 .idea/
 *.iml
+.vscode/
+*.ipr
+*.iws
+
+# Eclipse
+.metadata/
+.settings/
+.project
+.classpath
+bin/
 
 # BlueJ files
 *.ctxt
@@ -36,8 +51,17 @@ replay_pid*
 
 # Environment files
 .env
+.env.local
+.env.development
+.env.test
+.env.production
 
 # SSL Certificates
 *.p12
 *.jks
 keystore.*
+
+# Temporary files
+*.tmp
+*.temp
+*~
