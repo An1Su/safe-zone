@@ -27,14 +27,13 @@ eureka:
     fetch-registry: true
     register-with-eureka: true
   instance:
-    instance-id: ${spring.application.name}:${server.port}
-    hostname: localhost
+    prefer-ip-address: true
 
 management:
   endpoints:
     web:
       exposure:
-        include: health, info
+        include: health,info
   endpoint:
     health:
       show-details: always

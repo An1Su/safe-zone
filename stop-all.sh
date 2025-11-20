@@ -1,5 +1,5 @@
 #!/bin/bash
-# Stop all Buy-01 microservices
+# filepath: stop-all.sh
 
 echo "Stopping Buy-01 Microservices..."
 

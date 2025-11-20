@@ -34,5 +34,5 @@ management:
 
 logging:
   level:
-    com.netflix.eureka: INFO
-    com.netflix.discovery: INFO
+    '[com.netflix.eureka]': INFO
+    '[com.netflix.discovery]': INFO

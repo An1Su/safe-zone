@@ -61,7 +61,7 @@ cd ../..
 # 6. API Gateway
 echo -e "${YELLO} Building API Gateway...${NC}"
 cd api-gateway
-../../mvnw clean install -DskipTests
+../mvnw clean install -DskipTests
 print_status $? "API Gateway"
 cd ../..
 

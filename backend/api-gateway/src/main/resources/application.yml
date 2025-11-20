@@ -6,65 +6,8 @@ spring:
     gateway:
       server:
         webflux:
-          # Updated for Spring Cloud 2025.0.0
-          discovery:
-            locator:
-              enabled: true
-              lower-case-service-id: true
-
-          routes:
-            # User Service Routes
-            - id: user-service-auth
-              uri: lb://user-service
-              predicates:
-                - Path=/auth/**
-              filters:
-                - name: RequestRateLimiter
-                  args:
-                    redis-rate-limiter.replenish-rate: 10
-                    redis-rate-limiter.burst-capacity: 20
-
-            - id: user-service
-              uri: lb://user-service
-              predicates:
-                - Path=/users/**
-              filters:
-                - JwtAuthenticationGatewayFilterFactory
-
-            # Product Service Routes
-            - id: product-service-public
-              uri: lb://product-service
-              predicates:
-                - Path=/products
-                - Method=GET
-
-            - id: product-service-public-by-id
-              uri: lb://product-service
-              predicates:
-                - Path=/products/{id}
-                - Method=GET
-
-            - id: product-service-protected
-              uri: lb://product-service
-              predicates:
-                - Path=/products/**
-              filters:
-                - JwtAuthenticationGatewayFilterFactory
-
-            # Media Service Routes
-            - id: media-service
-              uri: lb://media-service
-              predicates:
-                - Path=/media/**
-              filters:
-                - JwtAuthenticationGatewayFilterFactory
-                - name: RequestSize
-                  args:
-                    maxSize: 2MB
-
           default-filters:
             - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-
           globalcors:
             cors-configurations:
               '[/**]':
@@ -78,6 +21,47 @@ spring:
                 allowedHeaders: '*'
                 allowCredentials: true
                 maxAge: 3600
+          routes:
+            # Auth routes (no auth)
+            - id: user-service-auth
+              uri: lb://user-service
+              predicates:
+                - Path=/auth/**
+
+            # User Service routes
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/users/**
+
+            # Public Product routes (no auth)
+            - id: product-service-public
+              uri: lb://product-service
+              predicates:
+                - Path=/products
+                - Method=GET
+
+            - id: product-service-public-by-id
+              uri: lb://product-service
+              predicates:
+                - Path=/products/{id}
+                - Method=GET
+
+            # Protected product routes (auth required)
+            - id: product-service-protected
+              uri: lb://product-service
+              predicates:
+                - Path=/products/**
+
+            # Media Service Routes (auth requiered for uploads)
+            - id: media-service
+              uri: lb://media-service
+              predicates:
+                - Path=/media/**
+              filters:
+                - name: RequestSize
+                  args:
+                    maxSize: 2MB
 
 server:
   port: 8080
@@ -89,8 +73,7 @@ eureka:
     fetch-registry: true
     register-with-eureka: true
   instance:
-    instance-id: ${spring.application.name}:${server.port}
-    hostname: localhost
+    prefer-ip-address: true
 
 management:
   endpoints:
@@ -109,4 +92,5 @@ logging:
 application:
   security:
     jwt:
-      secret-key: bXlTZWNyZXRLZXlGb3JKV1RBdXRoZW50aWNhdGlvbjEyMzQ1Njc4OTBhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ej==
+      secret-key: mySecretKey
+      expiration: 86400000

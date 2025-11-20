@@ -18,14 +18,13 @@ eureka:
     fetch-registry: true
     register-with-eureka: true
   instance:
-    instance-id: ${spring.application.name}:${server.port}
-    hostname: localhost
+    prefer-ip-address: true
 
 management:
   endpoints:
     web:
       exposure:
-        include: health, info
+        include: health,info
   endpoint:
     health:
       show-details: always
@@ -33,5 +32,5 @@ management:
 application:
   security:
     jwt:
-      secret-key: bXlTZWNyZXRLZXlGb3JKV1RBdXRoZW50aWNhdGlvbjEyMzQ1Njc4OTBhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ej==
+      secret-key: mySecretKey
       expiration: 86400000
