@@ -68,7 +68,7 @@ class AuthControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").exists())
                 .andExpect(jsonPath("$.user.email").value("client@test.com"))
-                .andExpect(jsonPath("$.user.role").value("CLIENT"))
+                .andExpect(jsonPath("$.user.role").value("client"))
                 .andExpect(jsonPath("$.message").value("User registered successfully"));
     }
 
@@ -88,7 +88,7 @@ class AuthControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").exists())
                 .andExpect(jsonPath("$.user.email").value("seller@test.com"))
-                .andExpect(jsonPath("$.user.role").value("SELLER"));
+                .andExpect(jsonPath("$.user.role").value("seller"));
     }
 
     @Test
