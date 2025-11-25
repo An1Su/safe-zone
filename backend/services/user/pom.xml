@@ -69,7 +69,13 @@
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
         
-        <!-- JWT dependencies -->
+        <!-- Kafka for event streaming -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        
+        <!-- Test dependencies -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>

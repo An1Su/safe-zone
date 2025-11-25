@@ -25,5 +25,13 @@ else
     echo -e "${GREEN}✅ All Spring Boot processes stopped${NC}"
 fi
 
+# Stop Docker Compose infrastructure
+echo -e "${GREEN}🐳 Stopping Docker infrastructure (MongoDB, Zookeeper, Kafka)...${NC}"
+if docker-compose down; then
+    echo -e "${GREEN}✅ Docker infrastructure stopped${NC}"
+else
+    echo -e "${RED}❌ Failed to stop Docker infrastructure (may not be running)${NC}"
+fi
+
 echo ""
 echo -e "${GREEN} All services stopped!${NC}"

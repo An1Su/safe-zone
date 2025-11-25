@@ -2,6 +2,7 @@ package com.buyapp.productservice.service;
 
 import com.buyapp.common.dto.ProductDto;
 import com.buyapp.common.dto.UserDto;
+import com.buyapp.common.event.ProductEvent;
 import com.buyapp.common.exception.ForbiddenException;
 import com.buyapp.common.exception.ResourceNotFoundException;
 import com.buyapp.productservice.model.Product;
@@ -23,6 +24,9 @@ public class ProductService {
 
     @Autowired
     private WebClient.Builder webClientBuilder;
+
+    @Autowired
+    private ProductEventProducer productEventProducer;
 
     public List<ProductDto> getAllProducts() {
         return productRepository.findAll()
@@ -54,6 +58,16 @@ public class ProductService {
         Product product = toEntity(productDto);
         product.setUserId(user.getId()); // Store user ID internally
         Product saved = productRepository.save(product);
+
+        // Publish PRODUCT_CREATED event
+        ProductEvent event = new ProductEvent(
+                "PRODUCT_CREATED",
+                saved.getId(),
+                saved.getName(),
+                user.getId(),
+                user.getEmail());
+        productEventProducer.sendProductEvent(event);
+
         return toDto(saved);
     }
 
@@ -71,6 +85,19 @@ public class ProductService {
         existing.setQuality(productDto.getQuality());
 
         Product updated = productRepository.save(existing);
+
+        // Publish PRODUCT_UPDATED event
+        UserDto user = getUserById(updated.getUserId());
+        if (user != null) {
+            ProductEvent event = new ProductEvent(
+                    "PRODUCT_UPDATED",
+                    updated.getId(),
+                    updated.getName(),
+                    user.getId(),
+                    user.getEmail());
+            productEventProducer.sendProductEvent(event);
+        }
+
         return toDto(updated);
     }
 
@@ -80,6 +107,17 @@ public class ProductService {
 
         if (!canModifyProduct(existing, authentication)) {
             throw new ForbiddenException("You don't have permission to modify this product");
+        }
+
+        // Publish PRODUCT_DELETED event before deletion
+        UserDto user = getUserById(existing.getUserId());
+        if (user != null) {
+            ProductEvent event = new ProductEvent(
+                    "PRODUCT_DELETED",
+                    existing.getId(),
+                    user.getId(),
+                    user.getEmail());
+            productEventProducer.sendProductEvent(event);
         }
 
         productRepository.deleteById(id);

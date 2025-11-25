@@ -59,9 +59,20 @@ wait_for_eureka() {
     return 1
 }
 
-# Check if MongoDB is running
-if ! docker ps | grep -q mongodb; then
-    echo -e "${YELLOW}Starting MongoDB...${NC}"
+# Start Docker Compose for MongoDB, Zookeeper, and Kafka
+echo -e "${YELLOW}🐳 Starting Docker infrastructure (MongoDB, Zookeeper, Kafka)...${NC}"
+if docker-compose up -d mongodb zookeeper kafka; then
+    echo -e "${GREEN}✅ Docker infrastructure started${NC}"
+    echo -e "${BLUE} Waiting for services to be healthy...${NC}"
+    sleep 10
+else
+    echo -e "${RED}❌ Failed to start Docker infrastructure${NC}"
+    exit 1
+fi
+
+# Check if MongoDB is running (fallback for old setup)
+if ! docker ps | grep -q mongodb && ! docker ps | grep -q buy.*mongodb; then
+    echo -e "${YELLOW}Starting MongoDB manually (fallback)...${NC}"
     docker run -d -p 27017:27017 --name mongodb mongo
     if [ $? -ne 0 ]; then
         echo -e "${RED} Failed to start MongoDB. Checking if container exists...${NC}"
@@ -72,8 +83,6 @@ if ! docker ps | grep -q mongodb; then
     fi
     echo -e "${GREEN}✅ MongoDB started${NC}"
     sleep 3
-else
-    echo -e "${GREEN}✅ MongoDB already running${NC}"
 fi
 
 cd backend || exit 1
