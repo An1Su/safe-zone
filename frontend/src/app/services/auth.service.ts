@@ -44,6 +44,7 @@ export class AuthService {
       responseType: 'text' as 'json'
     }).pipe(
       tap(() => {
+        console.log('Logout response received, clearing user data');
         this.clearCurrentUser();
       })
     );

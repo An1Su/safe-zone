@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet, RouterModule } from '@angular/router';
+import { RouterOutlet, RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth.service';
 import { User } from './models/ecommerce.model';
@@ -17,9 +17,28 @@ import { User } from './models/ecommerce.model';
           <a routerLink="/products" class="nav-link">Products</a>
           
           <div *ngIf="currentUser$ | async as user; else authLinks" class="user-menu">
-            <span class="welcome">Hello, {{ user.name }}</span>
-            <a *ngIf="user.role === 'seller'" routerLink="/seller/dashboard" class="nav-link">Dashboard</a>
-            <button (click)="logout()" class="btn btn-logout">Logout</button>
+            <div class="user-dropdown">
+              <button (click)="toggleDropdown()" class="user-toggle">
+                <span class="welcome">Hello, {{ user.name }}</span>
+                <span class="chevron" [class.open]="dropdownOpen">▼</span>
+              </button>
+              
+              <div class="dropdown-content" *ngIf="dropdownOpen">
+                <a routerLink="/profile" class="dropdown-item" (click)="closeDropdown()">
+                  👤 My Profile
+                </a>
+                <a routerLink="/profile" class="dropdown-item" (click)="closeDropdown()">
+                  🛍️ My Cart
+                </a>
+                <a *ngIf="user.role === 'seller'" routerLink="/seller/dashboard" class="dropdown-item" (click)="closeDropdown()">
+                  📊 Manage Products
+                </a>
+                <div class="dropdown-divider"></div>
+                <button (click)="logout()" class="dropdown-item logout-btn">
+                  🚪 Logout
+                </button>
+              </div>
+            </div>
           </div>
           
           <ng-template #authLinks>
@@ -87,11 +106,93 @@ import { User } from './models/ecommerce.model';
       display: flex;
       align-items: center;
       gap: 15px;
+      position: relative;
+    }
+
+    .user-dropdown {
+      position: relative;
+    }
+
+    .user-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+      font-size: 14px;
+    }
+
+    .user-toggle:hover {
+      background-color: #f0f0f0;
     }
 
     .welcome {
       color: #666;
       font-weight: 500;
+    }
+
+    .chevron {
+      font-size: 10px;
+      transition: transform 0.3s;
+      display: inline-block;
+    }
+
+    .chevron.open {
+      transform: rotate(180deg);
+    }
+
+    .dropdown-content {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background-color: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      margin-top: 8px;
+      min-width: 200px;
+      z-index: 1001;
+    }
+
+    .dropdown-item {
+      display: block;
+      width: 100%;
+      padding: 12px 16px;
+      text-align: left;
+      color: #333;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.2s;
+      font-size: 14px;
+    }
+
+    .dropdown-item:hover {
+      background-color: #f5f5f5;
+    }
+
+    .dropdown-item:first-child {
+      border-radius: 8px 8px 0 0;
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background-color: #e0e0e0;
+      margin: 0;
+    }
+
+    .logout-btn {
+      color: #f44336;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .logout-btn:hover {
+      background-color: #ffebee;
     }
 
     .btn {
@@ -111,16 +212,6 @@ import { User } from './models/ecommerce.model';
 
     .btn-primary:hover {
       background-color: #45a049;
-    }
-
-    .btn-logout {
-      background-color: #f44336;
-      color: white;
-      font-size: 14px;
-    }
-
-    .btn-logout:hover {
-      background-color: #da190b;
     }
 
     .main-content {
@@ -163,18 +254,35 @@ import { User } from './models/ecommerce.model';
 export class App {
   protected readonly title = signal('buy-01');
   currentUser$;
+  dropdownOpen = false;
 
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.currentUser$ = this.authService.currentUser$;
   }
 
+  toggleDropdown(): void {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  closeDropdown(): void {
+    this.dropdownOpen = false;
+  }
+
   logout(): void {
+    console.log('Logout clicked');
     this.authService.logout().subscribe({
       next: () => {
-        console.log('Logout successful');
+        console.log('✓ Logout successful - navigating to home');
+        this.closeDropdown();
+        this.router.navigate(['/']);
       },
-      error: (error) => {
-        console.error('Logout failed:', error);
+      error: (error: any) => {
+        console.error('✗ Logout failed:', error);
+        // Still navigate even if logout fails
+        this.router.navigate(['/']);
       }
     });
   }
