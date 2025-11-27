@@ -6,7 +6,12 @@ import java.time.LocalDateTime;
 public class MediaEvent implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String eventType; // IMAGE_UPLOADED, IMAGE_DELETED
+    public enum EventType {
+        IMAGE_UPLOADED,
+        IMAGE_DELETED
+    }
+    
+    private EventType eventType;
     private String mediaId;
     private String productId;
     private String fileName;

@@ -75,7 +75,7 @@
             <artifactId>spring-kafka</artifactId>
         </dependency>
         
-        <!-- Test dependencies -->
+        <!-- JWT dependencies -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>

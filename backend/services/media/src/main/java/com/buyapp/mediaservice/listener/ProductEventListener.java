@@ -13,8 +13,11 @@ public class ProductEventListener {
 
     private static final Logger log = LoggerFactory.getLogger(ProductEventListener.class);
 
-    @Autowired
-    private MediaService mediaService;
+    private final MediaService mediaService;
+
+    public ProductEventListener(MediaService mediaService) {
+        this.mediaService = mediaService;
+    }
 
     @KafkaListener(topics = "${kafka.topic.product-events:product-events}", groupId = "${spring.kafka.consumer.group-id:media-service-group}", containerFactory = "productEventKafkaListenerContainerFactory")
     public void handleProductEvent(ProductEvent event) {

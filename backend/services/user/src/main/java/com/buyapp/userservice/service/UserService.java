@@ -106,10 +106,7 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        // Delete the user from repository
-        userRepository.deleteById(id);
-
-        // Publish USER_DELETED event for async cascading deletes
+        // Publish USER_DELETED event for async cascading deletes BEFORE deletion
         if ("seller".equalsIgnoreCase(user.getRole())) {
             UserEvent event = new UserEvent(
                     UserEvent.EventType.USER_DELETED,
@@ -118,6 +115,9 @@ public class UserService {
                     user.getRole());
             userEventProducer.sendUserEvent(event);
         }
+
+        // Delete the user from repository AFTER event is published
+        userRepository.deleteById(id);
     }
 
     // Helper methods

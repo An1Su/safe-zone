@@ -15,9 +15,10 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.add.type.headers: false
-    topic:
-      user-events: user-events
 
+kafka:
+  topic:
+    user-events: user-events
 server:
   port: 8081
 

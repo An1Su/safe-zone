@@ -14,26 +14,29 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class MediaEventProducer {
 
-    private static final Logger log = LoggerFactory.getLogger(MediaEventProducer.class);
+    private static final Logger logger = LoggerFactory.getLogger(MediaEventProducer.class);
 
-    @Autowired
-    private KafkaTemplate<String, MediaEvent> kafkaTemplate;
+    private final KafkaTemplate<String, MediaEvent> kafkaTemplate;
 
     @Value("${kafka.topic.media-events:media-events}")
     private String mediaEventsTopic;
 
+    public MediaEventProducer(KafkaTemplate<String, MediaEvent> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
+
     public void sendMediaEvent(MediaEvent event) {
-        log.info("Sending media event: {}", event);
+        logger.info("Sending media event: {}", event);
 
         CompletableFuture<SendResult<String, MediaEvent>> future = kafkaTemplate.send(mediaEventsTopic,
                 event.getMediaId(), event);
 
         future.whenComplete((result, ex) -> {
             if (ex == null) {
-                log.info("Successfully sent media event [{}] with offset=[{}]",
+                logger.info("Successfully sent media event [{}] with offset=[{}]",
                         event.getEventType(), result.getRecordMetadata().offset());
             } else {
-                log.error("Failed to send media event [{}]: {}",
+                logger.error("Failed to send media event [{}]: {}",
                         event.getEventType(), ex.getMessage());
             }
         });

@@ -88,15 +88,17 @@ public class ProductService {
 
         // Publish PRODUCT_UPDATED event
         UserDto user = getUserById(updated.getUserId());
-        if (user != null) {
-            ProductEvent event = new ProductEvent(
-                    "PRODUCT_UPDATED",
-                    updated.getId(),
-                    updated.getName(),
-                    user.getId(),
-                    user.getEmail());
-            productEventProducer.sendProductEvent(event);
+        if (user == null) {
+            throw new IllegalArgumentException(
+                    "User not found for updated product with userId: " + updated.getUserId());
         }
+        ProductEvent event = new ProductEvent(
+                "PRODUCT_UPDATED",
+                updated.getId(),
+                updated.getName(),
+                user.getId(),
+                user.getEmail());
+        productEventProducer.sendProductEvent(event);
 
         return toDto(updated);
     }
@@ -111,14 +113,16 @@ public class ProductService {
 
         // Publish PRODUCT_DELETED event before deletion
         UserDto user = getUserById(existing.getUserId());
-        if (user != null) {
-            ProductEvent event = new ProductEvent(
-                    "PRODUCT_DELETED",
-                    existing.getId(),
-                    user.getId(),
-                    user.getEmail());
-            productEventProducer.sendProductEvent(event);
+        if (user == null) {
+            throw new IllegalStateException(
+                    "User not found with id: " + existing.getUserId() + " when deleting product: " + id);
         }
+        ProductEvent event = new ProductEvent(
+                "PRODUCT_DELETED",
+                existing.getId(),
+                user.getId(),
+                user.getEmail());
+        productEventProducer.sendProductEvent(event);
 
         productRepository.deleteById(id);
     }

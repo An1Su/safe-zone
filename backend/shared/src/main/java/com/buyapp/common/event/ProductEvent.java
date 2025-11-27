@@ -6,7 +6,13 @@ import java.time.LocalDateTime;
 public class ProductEvent implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String eventType; // PRODUCT_CREATED, PRODUCT_UPDATED, PRODUCT_DELETED
+    public enum EventType {
+        PRODUCT_CREATED,
+        PRODUCT_UPDATED,
+        PRODUCT_DELETED
+    }
+
+    private EventType eventType;
     private String productId;
     private String productName;
     private String sellerId;

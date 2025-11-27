@@ -1,0 +1,67 @@
+package com.buyapp.mediaservice.service;
+
+import com.buyapp.common.event.MediaEvent;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+
+import java.util.concurrent.CompletableFuture;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class MediaEventProducerTest {
+
+    @Mock
+    private KafkaTemplate<String, MediaEvent> kafkaTemplate;
+
+    private MediaEventProducer producer;
+
+    @BeforeEach
+    void setUp() {
+        producer = new MediaEventProducer(kafkaTemplate);
+    }
+
+    @Test
+    void sendsEventUsingKafkaTemplate() {
+        // Arrange: mock kafkaTemplate to return a completed future
+        CompletableFuture<SendResult<String, MediaEvent>> future = CompletableFuture.completedFuture(null);
+        when(kafkaTemplate.send(anyString(), anyString(), any(MediaEvent.class)))
+                .thenReturn(future);
+
+        // Create event
+        MediaEvent event = new MediaEvent();
+        event.setMediaId("m-1");
+        event.setEventType("MEDIA_CREATED");
+
+        // Act
+        producer.sendMediaEvent(event);
+
+        // Assert: verify send was called with expected topic, key, and event
+        verify(kafkaTemplate).send("media-events", "m-1", event);
+    }
+
+    @Test
+    void logsErrorWhenKafkaSendFails() {
+        // Arrange: mock kafkaTemplate to return a failed future
+        CompletableFuture<SendResult<String, MediaEvent>> future = new CompletableFuture<>();
+        future.completeExceptionally(new RuntimeException("Kafka is down"));
+        when(kafkaTemplate.send(anyString(), anyString(), any(MediaEvent.class)))
+                .thenReturn(future);
+
+        MediaEvent event = new MediaEvent();
+        event.setMediaId("m-2");
+        event.setEventType("MEDIA_DELETED");
+
+        // Act: should not throw - error is logged
+        producer.sendMediaEvent(event);
+
+        // Assert: verify send was still called
+        verify(kafkaTemplate).send("media-events", "m-2", event);
+    }
+}

@@ -54,9 +54,7 @@ public class KafkaConfig {
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         configProps.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         configProps.put(JsonDeserializer.VALUE_DEFAULT_TYPE, ProductEvent.class.getName());
-        return new DefaultKafkaConsumerFactory<>(configProps,
-                new StringDeserializer(),
-                new JsonDeserializer<>(ProductEvent.class, false));
+        return new DefaultKafkaConsumerFactory<>(configProps);
     }
 
     @Bean
