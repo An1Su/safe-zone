@@ -90,7 +90,7 @@ cd backend || exit 1
 # Start each service in background
 echo -e "${YELLOW}🔍 Starting Eureka server...${NC}"
 cd services/eureka
-nohup ../../mvnw spring-boot:run > ../../../logs/eureka.log 2>&1 &
+nohup ../../mvnw spring-boot:run >> ../../../logs/eureka.log 2>&1 &
 EUREKA_PID=$!
 echo -e "${BLUE} Launched with PID: $EUREKA_PID${NC}"
 cd ../..
@@ -104,7 +104,7 @@ fi
 
 echo -e "${YELLOW} Starting User Service...${NC}"
 cd services/user
-nohup ../../mvnw spring-boot:run > ../../../logs/user-service.log 2>&1 &
+nohup ../../mvnw spring-boot:run >> ../../../logs/user-service.log 2>&1 &
 USER_PID=$!
 echo -e "${BLUE} Launched with PID: $USER_PID${NC}"
 cd ../..
@@ -118,7 +118,7 @@ fi
 
 echo -e "${YELLOW} Starting Product Service...${NC}"
 cd services/product
-nohup ../../mvnw spring-boot:run > ../../../logs/product-service.log 2>&1 &
+nohup ../../mvnw spring-boot:run >> ../../../logs/product-service.log 2>&1 &
 PRODUCT_PID=$!
 echo -e "${BLUE}   Launched with PID: $PRODUCT_PID${NC}"
 cd ../..
@@ -132,7 +132,7 @@ fi
 
 echo -e "${YELLOW}  Starting Media Service...${NC}"
 cd services/media
-nohup ../../mvnw spring-boot:run > ../../../logs/media-service.log 2>&1 &
+nohup ../../mvnw spring-boot:run >> ../../../logs/media-service.log 2>&1 &
 MEDIA_PID=$!
 echo -e "${BLUE}   Launched with PID: $MEDIA_PID${NC}"
 cd ../..
@@ -146,7 +146,7 @@ if ! wait_for_service "Media Service" 8083; then
 fi
 echo -e "${YELLOW} Starting API Gateway...${NC}"
 cd api-gateway
-nohup ../mvnw spring-boot:run > ../../logs/gateway.log 2>&1 &
+nohup ../mvnw spring-boot:run >> ../../logs/gateway.log 2>&1 &
 GATEWAY_PID=$!
 echo -e "${BLUE}   Launched with PID: $GATEWAY_PID${NC}"
 cd ..
