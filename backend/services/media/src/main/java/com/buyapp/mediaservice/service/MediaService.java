@@ -2,6 +2,7 @@ package com.buyapp.mediaservice.service;
 
 import com.buyapp.common.dto.ProductDto;
 import com.buyapp.common.dto.UserDto;
+import com.buyapp.common.event.MediaEvent;
 import com.buyapp.common.exception.BadRequestException;
 import com.buyapp.common.exception.ForbiddenException;
 import com.buyapp.common.exception.ResourceNotFoundException;
@@ -30,6 +31,9 @@ public class MediaService {
 
     @Autowired
     private WebClient.Builder webClientBuilder;
+
+    @Autowired
+    private MediaEventProducer mediaEventProducer;
 
     private static final String UPLOAD_DIR = "uploads/images/";
     private static final long MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
@@ -91,7 +95,20 @@ public class MediaService {
             media.setContentType(file.getContentType());
             media.setFileSize(file.getSize());
 
-            return mediaRepository.save(media);
+            Media saved = mediaRepository.save(media);
+
+            // Publish IMAGE_UPLOADED event
+            MediaEvent event = new MediaEvent(
+                    MediaEvent.EventType.IMAGE_UPLOADED,
+                    saved.getId(),
+                    productId,
+                    originalFilename,
+                    file.getContentType(),
+                    file.getSize(),
+                    userEmail);
+            mediaEventProducer.sendMediaEvent(event);
+
+            return saved;
         } catch (IOException e) {
             throw new BadRequestException("Could not store file: " + e.getMessage());
         }

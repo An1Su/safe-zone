@@ -1,6 +1,7 @@
 package com.buyapp.userservice.service;
 
 import com.buyapp.common.dto.UserDto;
+import com.buyapp.common.event.UserEvent;
 import com.buyapp.common.exception.BadRequestException;
 import com.buyapp.common.exception.ForbiddenException;
 import com.buyapp.common.exception.ResourceNotFoundException;
@@ -27,6 +28,9 @@ public class UserService {
 
     @Autowired
     private WebClient.Builder webClientBuilder;
+
+    @Autowired
+    private UserEventProducer userEventProducer;
 
     // Helper method to get User from UserDetails
     private User getUserFromUserDetails(UserDetails userDetails) {
@@ -102,23 +106,17 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
+        // Publish USER_DELETED event for async cascading deletes BEFORE deletion
         if ("seller".equalsIgnoreCase(user.getRole())) {
-            // For sellers, we need to call the product service to delete their products
-            // first
-            try {
-                webClientBuilder.build()
-                        .delete()
-                        .uri("http://product-service/products/user/{userId}", id)
-                        .retrieve()
-                        .toBodilessEntity()
-                        .block();
-            } catch (Exception e) {
-                throw new ForbiddenException(
-                        "Cannot delete seller account. Please contact support to remove associated products first.");
-            }
+            UserEvent event = new UserEvent(
+                    UserEvent.EventType.USER_DELETED,
+                    user.getId(),
+                    user.getEmail(),
+                    user.getRole());
+            userEventProducer.sendUserEvent(event);
         }
 
-        // Delete the user
+        // Delete the user from repository AFTER event is published
         userRepository.deleteById(id);
     }
 
