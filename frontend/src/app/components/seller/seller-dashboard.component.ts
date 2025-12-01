@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ProductService } from '../../services/product.service';
+import { Router, RouterModule } from '@angular/router';
+import { Media, Product } from '../../models/ecommerce.model';
 import { AuthService } from '../../services/auth.service';
-import { Product } from '../../models/ecommerce.model';
+import { MediaService } from '../../services/media.service';
+import { ProductService } from '../../services/product.service';
 
 @Component({
   selector: 'app-seller-dashboard',
@@ -15,6 +16,7 @@ import { Product } from '../../models/ecommerce.model';
 })
 export class SellerDashboardComponent implements OnInit {
   myProducts: Product[] = [];
+  productMedia: Map<string, Media[]> = new Map();
   loading = true;
   error = '';
   showAddForm = false;
@@ -23,6 +25,14 @@ export class SellerDashboardComponent implements OnInit {
   formError = '';
   successMessage = '';
   editingProductId: string | null = null;
+
+  // Image upload
+  selectedFiles: Map<string, File[]> = new Map();
+  uploadingImages: Map<string, boolean> = new Map();
+  imageError: Map<string, string> = new Map();
+  maxImagesPerProduct = 5;
+  allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  maxFileSize = 2 * 1024 * 1024; // 2MB
 
   newProduct: Product = {
     name: '',
@@ -41,6 +51,7 @@ export class SellerDashboardComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private authService: AuthService,
+    private mediaService: MediaService,
     private router: Router
   ) {}
 
@@ -62,6 +73,12 @@ export class SellerDashboardComponent implements OnInit {
       next: (products) => {
         this.myProducts = products;
         this.loading = false;
+        // Load media for each product
+        products.forEach((product) => {
+          if (product.id) {
+            this.loadProductMedia(product.id);
+          }
+        });
       },
       error: (error) => {
         console.error('Error loading products:', error);
@@ -69,6 +86,147 @@ export class SellerDashboardComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  loadProductMedia(productId: string): void {
+    this.mediaService.getMediaByProduct(productId).subscribe({
+      next: (media) => {
+        this.productMedia.set(productId, media);
+      },
+      error: (error) => {
+        console.error('Error loading media for product:', productId, error);
+      },
+    });
+  }
+
+  getProductImages(productId: string): Media[] {
+    return this.productMedia.get(productId) || [];
+  }
+
+  getImageUrl(media: Media): string {
+    return this.mediaService.getMediaFile(media.id!);
+  }
+
+  canAddMoreImages(productId: string): boolean {
+    const currentImages = this.getProductImages(productId).length;
+    return currentImages < this.maxImagesPerProduct;
+  }
+
+  getRemainingImageSlots(productId: string): number {
+    const currentImages = this.getProductImages(productId).length;
+    return this.maxImagesPerProduct - currentImages;
+  }
+
+  onFileSelected(event: Event, productId: string): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const files = Array.from(input.files);
+    const remainingSlots = this.getRemainingImageSlots(productId);
+
+    // Clear previous errors
+    this.imageError.delete(productId);
+
+    // Validate files
+    const validFiles: File[] = [];
+    for (const file of files) {
+      if (!this.allowedTypes.includes(file.type)) {
+        this.imageError.set(
+          productId,
+          `Invalid file type: ${file.name}. Only PNG, JPG, GIF, and WebP are allowed.`
+        );
+        input.value = '';
+        return;
+      }
+      if (file.size > this.maxFileSize) {
+        this.imageError.set(productId, `File too large: ${file.name}. Maximum size is 2MB.`);
+        input.value = '';
+        return;
+      }
+      validFiles.push(file);
+    }
+
+    if (validFiles.length > remainingSlots) {
+      this.imageError.set(
+        productId,
+        `Can only add ${remainingSlots} more image(s). Maximum is ${this.maxImagesPerProduct} per product.`
+      );
+      input.value = '';
+      return;
+    }
+
+    this.selectedFiles.set(productId, validFiles);
+    input.value = '';
+  }
+
+  uploadImages(productId: string): void {
+    const files = this.selectedFiles.get(productId);
+    if (!files || files.length === 0) return;
+
+    this.uploadingImages.set(productId, true);
+    this.imageError.delete(productId);
+
+    let uploaded = 0;
+    const total = files.length;
+
+    files.forEach((file) => {
+      this.mediaService.uploadMedia(file, productId).subscribe({
+        next: (media) => {
+          uploaded++;
+          // Add to local media list
+          const currentMedia = this.productMedia.get(productId) || [];
+          currentMedia.push(media);
+          this.productMedia.set(productId, currentMedia);
+
+          if (uploaded === total) {
+            this.uploadingImages.set(productId, false);
+            this.selectedFiles.delete(productId);
+            this.successMessage = `${total} image(s) uploaded successfully!`;
+            setTimeout(() => (this.successMessage = ''), 3000);
+          }
+        },
+        error: (error) => {
+          console.error('Error uploading image:', error);
+          this.imageError.set(productId, error.error?.message || 'Failed to upload image');
+          this.uploadingImages.set(productId, false);
+        },
+      });
+    });
+  }
+
+  deleteImage(productId: string, mediaId: string): void {
+    if (!confirm('Are you sure you want to delete this image?')) return;
+
+    this.mediaService.deleteMedia(mediaId).subscribe({
+      next: () => {
+        const currentMedia = this.productMedia.get(productId) || [];
+        const updatedMedia = currentMedia.filter((m) => m.id !== mediaId);
+        this.productMedia.set(productId, updatedMedia);
+        this.successMessage = 'Image deleted successfully!';
+        setTimeout(() => (this.successMessage = ''), 3000);
+      },
+      error: (error) => {
+        console.error('Error deleting image:', error);
+        this.imageError.set(productId, error.error?.message || 'Failed to delete image');
+      },
+    });
+  }
+
+  isUploading(productId: string): boolean {
+    return this.uploadingImages.get(productId) || false;
+  }
+
+  getSelectedFiles(productId: string): File[] {
+    return this.selectedFiles.get(productId) || [];
+  }
+
+  getImageError(productId: string): string {
+    return this.imageError.get(productId) || '';
+  }
+
+  clearSelectedFiles(productId: string): void {
+    this.selectedFiles.delete(productId);
+    this.imageError.delete(productId);
   }
 
   createProduct(): void {

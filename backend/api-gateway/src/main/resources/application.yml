@@ -55,9 +55,22 @@ spring:
           predicates:
             - Path=/products/**
 
-        # Media Service Routes (auth requiered for uploads)
-        - id: media-service
-          uri: lb://product-service
+        # Public Media Routes (viewing images - no auth)
+        - id: media-service-public-file
+          uri: lb://media-service
+          predicates:
+            - Path=/media/file/**
+            - Method=GET
+
+        - id: media-service-public-product
+          uri: lb://media-service
+          predicates:
+            - Path=/media/product/**
+            - Method=GET
+
+        # Protected Media Routes (upload/delete - auth required)
+        - id: media-service-protected
+          uri: lb://media-service
           predicates:
             - Path=/media/**
           filters:

@@ -34,8 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Skip JWT processing for public endpoints
         String requestPath = request.getRequestURI();
-        if (requestPath.equals("/auth/login") ||
-                requestPath.equals("/auth/register")) {
+        if (isPublicEndpoint(requestPath)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -80,5 +79,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isPublicEndpoint(String path) {
+        // Auth endpoints
+        if (path.equals("/auth/login") || path.equals("/auth/register")) {
+            return true;
+        }
+        // Public media endpoints (viewing images)
+        if (path.startsWith("/media/file/") || path.startsWith("/media/product/")) {
+            return true;
+        }
+        // Public product endpoints (browsing products)
+        if (path.equals("/products")) {
+            return true;
+        }
+        // Single product by ID (e.g., /products/abc123) - but NOT /products/my-products
+        // or /products/user/...
+        if (path.startsWith("/products/")) {
+            String subPath = path.substring("/products/".length());
+            // Only allow if it's a simple ID (no slashes, not "my-products", not "user")
+            if (!subPath.contains("/") && !subPath.equals("my-products") && !subPath.startsWith("user")) {
+                return true;
+            }
+        }
+        // Actuator health checks
+        if (path.startsWith("/actuator/")) {
+            return true;
+        }
+        return false;
     }
 }

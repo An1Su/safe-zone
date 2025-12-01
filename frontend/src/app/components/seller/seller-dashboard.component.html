@@ -157,6 +157,26 @@
 
   <div *ngIf="!showAddForm && !showEditForm" class="products-grid">
     <div *ngFor="let product of myProducts" class="product-card">
+      <!-- Product Images Section -->
+      <div class="product-images">
+        <div class="images-gallery" *ngIf="getProductImages(product.id!).length > 0">
+          <div class="image-item" *ngFor="let media of getProductImages(product.id!)">
+            <img [src]="getImageUrl(media)" [alt]="media.fileName" />
+            <button
+              class="image-delete-btn"
+              (click)="deleteImage(product.id!, media.id!)"
+              title="Delete image"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+        <div class="no-images" *ngIf="getProductImages(product.id!).length === 0">
+          <span class="no-images-icon">📷</span>
+          <span>No images yet</span>
+        </div>
+      </div>
+
       <div class="card-content">
         <h3 class="card-title">{{ product.name }}</h3>
         <p class="card-description">{{ product.description }}</p>
@@ -165,6 +185,51 @@
           <div class="card-quality">{{ product.quality }}%</div>
         </div>
       </div>
+
+      <!-- Image Upload Section -->
+      <div class="image-upload-section">
+        <div class="upload-info">
+          <span class="image-count"
+            >{{ getProductImages(product.id!).length }}/{{ maxImagesPerProduct }} images</span
+          >
+        </div>
+
+        <div *ngIf="canAddMoreImages(product.id!)" class="upload-controls">
+          <label class="file-input-label">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+              multiple
+              (change)="onFileSelected($event, product.id!)"
+              [disabled]="isUploading(product.id!)"
+            />
+            <span class="btn-upload">Choose Images</span>
+          </label>
+
+          <div *ngIf="getSelectedFiles(product.id!).length > 0" class="selected-files">
+            <span>{{ getSelectedFiles(product.id!).length }} file(s) selected</span>
+            <button
+              class="btn-sm btn-primary"
+              (click)="uploadImages(product.id!)"
+              [disabled]="isUploading(product.id!)"
+            >
+              {{ isUploading(product.id!) ? 'Uploading...' : 'Upload' }}
+            </button>
+            <button class="btn-sm btn-secondary" (click)="clearSelectedFiles(product.id!)">
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="!canAddMoreImages(product.id!)" class="upload-limit-reached">
+          Maximum images reached
+        </div>
+
+        <div *ngIf="getImageError(product.id!)" class="image-error">
+          {{ getImageError(product.id!) }}
+        </div>
+      </div>
+
       <div class="card-actions">
         <button (click)="openEditForm(product)" class="btn-edit">Edit</button>
         <button (click)="deleteProduct(product.id!)" class="btn-delete">Delete</button>
