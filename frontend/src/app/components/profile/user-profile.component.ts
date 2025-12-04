@@ -8,11 +8,12 @@ import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
 import { MediaService } from '../../services/media.service';
 import { ProductService } from '../../services/product.service';
+import { ImageSliderComponent } from '../shared/image-slider/image-slider.component';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, ImageSliderComponent],
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
 })
@@ -21,7 +22,7 @@ export class UserProfileComponent implements OnInit {
   sellerProducts: Product[] = [];
   cart: Cart = { userId: '', items: [], total: 0 };
   isLoading = false;
-  private productImages: Map<string, string> = new Map();
+  productImages: Map<string, string[]> = new Map();
 
   // Avatar management
   avatarUrl: string | null = null;
@@ -84,17 +85,21 @@ export class UserProfileComponent implements OnInit {
         this.mediaService.getMediaByProduct(product.id).subscribe({
           next: (media: any) => {
             if (media && media.length > 0) {
-              this.productImages.set(product.id!, media[0].imagePath);
+              // Convert all media to URLs
+              const imageUrls = media.map((m: any) => this.mediaService.getMediaFile(m.id));
+              this.productImages.set(product.id!, imageUrls);
             }
           },
-          error: (error: any) => console.error('Error loading media:', error),
+          error: () => {
+            // Silently ignore - product may not have images
+          },
         });
       }
     });
   }
 
-  getProductImage(productId: string): string | undefined {
-    return this.productImages.get(productId);
+  getProductImages(productId: string): string[] {
+    return this.productImages.get(productId) || [];
   }
 
   isSeller(): boolean {

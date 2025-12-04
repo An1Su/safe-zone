@@ -59,13 +59,12 @@
     <div *ngIf="!isLoading && sellerProducts.length > 0" class="products-grid">
       <div *ngFor="let product of sellerProducts" class="product-card">
         <div class="product-image">
-          <img
-            *ngIf="getProductImage(product.id!)"
-            [src]="getProductImage(product.id!)"
+          <app-image-slider
+            *ngIf="getProductImages(product.id!).length > 0"
+            [images]="getProductImages(product.id!)"
             [alt]="product.name"
-            class="product-img"
-          />
-          <div *ngIf="!getProductImage(product.id!)" class="no-image">No Image</div>
+          ></app-image-slider>
+          <div *ngIf="getProductImages(product.id!).length === 0" class="no-image">No Image</div>
         </div>
         <div class="product-info">
           <h3>{{ product.name }}</h3>
