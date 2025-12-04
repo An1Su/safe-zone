@@ -23,6 +23,13 @@ export class UserProfileComponent implements OnInit {
   isLoading = false;
   private productImages: Map<string, string> = new Map();
 
+  // Avatar management
+  avatarUrl: string | null = null;
+  isUploadingAvatar = false;
+  avatarError = '';
+  private allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  private maxFileSize = 2 * 1024 * 1024; // 2MB
+
   constructor(
     private authService: AuthService,
     private productService: ProductService,
@@ -45,6 +52,13 @@ export class UserProfileComponent implements OnInit {
 
     if (this.isSeller()) {
       this.loadSellerProducts();
+      this.loadAvatar();
+    }
+  }
+
+  loadAvatar(): void {
+    if (this.currentUser?.avatar) {
+      this.avatarUrl = this.mediaService.getAvatarFileUrl(this.currentUser.avatar);
     }
   }
 
@@ -110,5 +124,81 @@ export class UserProfileComponent implements OnInit {
     if (quantity > 0) {
       this.cartService.updateQuantity(productId, quantity);
     }
+  }
+
+  // Avatar management methods
+  onAvatarFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+
+    const file = input.files[0];
+    this.avatarError = '';
+
+    // Validate file type
+    if (!this.allowedTypes.includes(file.type)) {
+      this.avatarError = 'Invalid file type. Only JPG, PNG, GIF, and WebP are allowed.';
+      input.value = '';
+      return;
+    }
+
+    // Validate file size
+    if (file.size > this.maxFileSize) {
+      this.avatarError = 'File size exceeds 2MB limit.';
+      input.value = '';
+      return;
+    }
+
+    this.uploadAvatar(file);
+    input.value = '';
+  }
+
+  uploadAvatar(file: File): void {
+    this.isUploadingAvatar = true;
+    this.avatarError = '';
+
+    this.mediaService.uploadAvatar(file).subscribe({
+      next: (avatar) => {
+        this.avatarUrl = this.mediaService.getAvatarFileUrl(avatar.id!);
+        // Update user data (updates BehaviorSubject so navbar sees it)
+        this.authService.updateCurrentUser({ avatar: avatar.id });
+        if (this.currentUser) {
+          this.currentUser.avatar = avatar.id;
+        }
+        this.isUploadingAvatar = false;
+      },
+      error: (error) => {
+        console.error('Avatar upload failed:', error);
+        this.avatarError = error.error?.message || 'Failed to upload avatar';
+        this.isUploadingAvatar = false;
+      },
+    });
+  }
+
+  deleteAvatar(): void {
+    if (!confirm('Are you sure you want to delete your avatar?')) {
+      return;
+    }
+
+    this.isUploadingAvatar = true;
+    this.avatarError = '';
+
+    this.mediaService.deleteAvatar().subscribe({
+      next: () => {
+        this.avatarUrl = null;
+        // Update user data (updates BehaviorSubject so navbar sees it)
+        this.authService.updateCurrentUser({ avatar: undefined });
+        if (this.currentUser) {
+          this.currentUser.avatar = undefined;
+        }
+        this.isUploadingAvatar = false;
+      },
+      error: (error) => {
+        console.error('Avatar delete failed:', error);
+        this.avatarError = error.error?.message || 'Failed to delete avatar';
+        this.isUploadingAvatar = false;
+      },
+    });
   }
 }
