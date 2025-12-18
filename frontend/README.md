@@ -5,24 +5,28 @@ Modern Angular 18 frontend for the Buy-01 e-commerce platform with JWT authentic
 ## Features
 
 - **Authentication System**
+
   - Login/Register with JWT token management
   - HttpOnly cookies + localStorage for secure token storage
   - Automatic token validation with session expiry handling
   - Hard refresh logout to clear all cached state
 
 - **Product Browsing**
+
   - Homepage with featured products grid
   - Product detail pages with image slider
   - Seller information display
   - Cart button (functionality placeholder)
 
 - **Seller Dashboard**
+
   - Create/update/delete products
   - Upload product images (2MB limit)
   - View and manage own products
   - Media management with preview
 
 - **User Profile**
+
   - View/edit profile information
   - Avatar management
   - Account deletion with cascade
@@ -36,6 +40,7 @@ Modern Angular 18 frontend for the Buy-01 e-commerce platform with JWT authentic
 ## Architecture
 
 ### Standalone Components (Angular 18+)
+
 ```
 src/app/
 ├── components/
@@ -71,6 +76,7 @@ src/app/
 ## Setup
 
 ### Prerequisites
+
 - Node.js 18+ and npm
 - Backend services running (see [backend README](../backend/README.md))
 
@@ -85,24 +91,27 @@ npm start
 Accessible at `https://localhost:4200` (self-signed certificate - click "Advanced" → "Proceed")
 
 **Important:** For local development, update `src/environments/environments.ts`:
+
 ```typescript
 export const environment = {
   production: false,
-  apiUrl: 'https://localhost:8080',  // API Gateway URL
+  apiUrl: 'https://localhost:8080', // API Gateway URL
 };
 ```
 
 ### Docker Deployment
 
 When running with Docker Compose (recommended), use empty `apiUrl` for nginx proxy:
+
 ```typescript
 export const environment = {
   production: false,
-  apiUrl: '',  // Empty = relative URLs, proxied by nginx
+  apiUrl: '', // Empty = relative URLs, proxied by nginx
 };
 ```
 
 Then rebuild the frontend container:
+
 ```bash
 docker-compose build frontend
 docker-compose up -d frontend
@@ -110,19 +119,20 @@ docker-compose up -d frontend
 
 ## Routing
 
-| Route | Component | Access | Description |
-|-------|-----------|--------|-------------|
-| `/` | HomeComponent | Public | Homepage with products |
-| `/login` | LoginComponent | Public | User login |
-| `/register` | RegisterComponent | Public | User registration |
-| `/products` | ProductListComponent | Public | Product browsing |
-| `/products/:id` | ProductDetailComponent | Public | Product detail page |
-| `/profile` | UserProfileComponent | Auth | User profile management |
+| Route               | Component                | Access | Description               |
+| ------------------- | ------------------------ | ------ | ------------------------- |
+| `/`                 | HomeComponent            | Public | Homepage with products    |
+| `/login`            | LoginComponent           | Public | User login                |
+| `/register`         | RegisterComponent        | Public | User registration         |
+| `/products`         | ProductListComponent     | Public | Product browsing          |
+| `/products/:id`     | ProductDetailComponent   | Public | Product detail page       |
+| `/profile`          | UserProfileComponent     | Auth   | User profile management   |
 | `/seller/dashboard` | SellerDashboardComponent | Seller | Seller product management |
 
 ## Services
 
 ### AuthService
+
 - `login(credentials)` - Authenticate user, store JWT
 - `register(userData)` - Create new account
 - `logout()` - Clear tokens and force refresh
@@ -131,6 +141,7 @@ docker-compose up -d frontend
 - `isLoggedIn()` - Check authentication status
 
 ### ProductService
+
 - `getAllProducts()` - Fetch all products (public)
 - `getProductById(id)` - Fetch single product
 - `getMyProducts()` - Fetch current user's products (authenticated)
@@ -139,7 +150,8 @@ docker-compose up -d frontend
 - `deleteProduct(id)` - Delete product (owner)
 
 ### MediaService
-- `uploadMedia(productId, file)` - Upload image (max 2MB, image/*)
+
+- `uploadMedia(productId, file)` - Upload image (max 2MB, image/\*)
 - `getProductMedia(productId)` - Fetch product images
 - `getMediaUrl(mediaId)` - Get image URL
 - `deleteMedia(mediaId)` - Delete image (owner)
@@ -147,17 +159,21 @@ docker-compose up -d frontend
 ## Guards
 
 ### authGuard
+
 Protects routes requiring authentication. Redirects to `/login` if not authenticated.
 
 ### sellerGuard
+
 Restricts access to seller-only features. Redirects to `/` if user is not a seller.
 
 ### roleGuard
+
 Flexible role-based guard accepting allowed roles as parameter.
 
 ## Interceptors
 
 ### authInterceptor
+
 - Automatically attaches JWT token to outgoing requests
 - Handles 401 (Unauthorized) → redirect to login
 - Handles 403 (Forbidden) → show error message
@@ -166,14 +182,16 @@ Flexible role-based guard accepting allowed roles as parameter.
 ## Forms & Validation
 
 All forms use Angular Reactive Forms with validators:
+
 - **Login**: Email (required, email format), Password (required)
 - **Register**: Name (required), Email (required, unique), Password (required, min 6 chars), Role (required), Avatar (optional URL)
 - **Product**: Name (required), Description (required), Price (required, positive number), Quality (required, 0-100)
-- **Media Upload**: File (required, image/*, max 2MB)
+- **Media Upload**: File (required, image/\*, max 2MB)
 
 ## Styling
 
 SCSS with design system:
+
 - `src/styles/_variables.scss` - Colors, fonts, spacing
 - `src/styles/_mixins.scss` - Reusable style patterns
 - `src/styles/_buttons.scss` - Button styles
@@ -182,6 +200,7 @@ SCSS with design system:
 - `src/styles/_utilities.scss` - Helper classes
 
 **Responsive breakpoints:**
+
 - Mobile: < 768px
 - Tablet: 768px - 1024px
 - Desktop: > 1024px
@@ -189,6 +208,7 @@ SCSS with design system:
 ## nginx Configuration (Docker)
 
 The nginx server handles:
+
 - **Static files**: `.js`, `.css`, images served with caching
 - **API proxy**: `/auth`, `/users`, `/products`, `/media` → API Gateway
 - **Content negotiation**: `/products` route distinguishes JSON (API) vs HTML (Angular)
@@ -197,18 +217,23 @@ The nginx server handles:
 ## Development Notes
 
 ### Token Validation
+
 The app validates JWT tokens on initialization:
+
 - If expired/blacklisted: Shows alert, clears session, redirects to login
 - If valid: Loads user data and continues
 
 ### Logout Behavior
+
 Logout performs:
+
 1. Clears current user state immediately
 2. Calls backend `/auth/logout` to blacklist token
 3. Forces hard refresh with `window.location.href = '/'`
 4. Works even if backend is unreachable
 
 ### Image Upload
+
 - Frontend validation: 2MB max, `image/*` MIME type
 - Backend validation: Same rules enforced server-side
 - Preview before upload in seller dashboard
