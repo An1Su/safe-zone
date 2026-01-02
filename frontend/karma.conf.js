@@ -10,26 +10,22 @@ module.exports = function (config) {
       require('karma-chrome-launcher'),
       require('karma-jasmine-html-reporter'),
       require('karma-coverage'),
-      require('@angular-devkit/build-angular/plugins/karma')
     ],
     client: {
       jasmine: {},
-      clearContext: false
+      clearContext: false,
     },
     jasmineHtmlReporter: {
-      suppressAll: true
+      suppressAll: true,
     },
     coverageReporter: {
       dir: require('path').join(__dirname, './coverage'),
       subdir: '.',
-      reporters: [
-        { type: 'html' },
-        { type: 'text-summary' }
-      ]
+      reporters: [{ type: 'html' }, { type: 'text-summary' }],
     },
     reporters: ['progress', 'kjhtml'],
     browsers: ['ChromeHeadless'],
-    
+
     // Custom launcher for CI environments (Docker/Jenkins)
     customLaunchers: {
       ChromeHeadlessCI: {
@@ -39,13 +35,12 @@ module.exports = function (config) {
           '--disable-gpu',
           '--disable-translate',
           '--disable-extensions',
-          '--disable-dev-shm-usage'
-        ]
-      }
+          '--disable-dev-shm-usage',
+        ],
+      },
     },
-    
+
     restartOnFileChange: true,
-    singleRun: true
+    singleRun: true,
   });
 };
-
