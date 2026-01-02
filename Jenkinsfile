@@ -224,8 +224,8 @@ pipeline {
                 
                 dir('frontend') {
                     sh '''
-                        # Run tests with headless Chrome
-                        npm run test -- --watch=false --browsers=ChromeHeadless
+                        # Run tests with headless Chrome (CI-friendly with --no-sandbox)
+                        npm run test -- --watch=false --browsers=ChromeHeadlessCI
                     '''
                 }
             }
