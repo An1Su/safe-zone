@@ -24,7 +24,7 @@ keytool -genkeypair -alias api-gateway \
   -validity $VALIDITY_DAYS \
   -storepass $PASSWORD \
   -keypass $PASSWORD \
-  -dname "CN=localhost, OU=API Gateway, O=Buy-01, L=City, ST=State, C=US"
+  -dname "CN=localhost, OU=API Gateway, O=E-com, L=City, ST=State, C=US"
 
 # Generate PEM certificates for Angular dev server
 echo "Generating certificate for Frontend..."
@@ -33,7 +33,7 @@ openssl req -x509 -newkey rsa:2048 \
   -out frontend/ssl/localhost-cert.pem \
   -days $VALIDITY_DAYS \
   -nodes \
-  -subj "/CN=localhost/O=Buy-01/OU=Frontend"
+  -subj "/CN=localhost/O=E-com/OU=Frontend"
 
 echo ""
 echo "✅ SSL certificates generated successfully!"

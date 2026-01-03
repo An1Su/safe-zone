@@ -1,4 +1,4 @@
-# Buy-01 E-commerce Platform
+# E-commerce Platform
 
 Full-stack e-commerce platform built with Spring Boot microservices and Angular 18, featuring JWT authentication, role-based access control, and HTTPS end-to-end.
 
@@ -215,7 +215,7 @@ curl https://localhost:8080/products
 ## Project Structure
 
 ```
-buy-01/
+e-com/
 ├── backend/
 │   ├── api-gateway/         # Spring Cloud Gateway
 │   ├── services/

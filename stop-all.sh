@@ -1,7 +1,7 @@
 #!/bin/bash
 # filepath: stop-all.sh
 
-echo "Stopping Buy-01 Microservices..."
+echo "Stopping E-com Microservices..."
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'

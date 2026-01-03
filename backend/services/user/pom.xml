@@ -14,7 +14,7 @@
     <artifactId>user-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>user-service</name>
-    <description>User Service microservice for Buy-01 e-commerce platform</description>
+    <description>User Service microservice for e-commerce platform</description>
     <packaging>jar</packaging>
     
     <properties>

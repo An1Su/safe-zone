@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.toft</groupId>
-	<artifactId>buy-01</artifactId>
+	<artifactId>e-com</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>buy-01</name>
+	<name>e-com</name>
 	<description>E-commerce platform with Spring Boot microservices and Angular</description>
 	<url/>
 	<licenses>

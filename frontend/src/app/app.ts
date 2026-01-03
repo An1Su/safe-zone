@@ -15,7 +15,7 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 
     <footer class="footer">
       <div class="footer-content">
-        <p>&copy; 2024 Buy-01 Marketplace. All rights reserved.</p>
+        <p>&copy; 2026 e-com Marketplace. All rights reserved.</p>
       </div>
     </footer>
   `,

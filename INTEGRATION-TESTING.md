@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide covers the Spring Boot integration tests for the Buy-01 microservices platform. All tests use:
+This guide covers the Spring Boot integration tests for the E-com microservices platform. All tests use:
 - **JUnit 5** (@SpringBootTest)
 - **MockMvc** for HTTP endpoint testing
 - **Testcontainers** for isolated MongoDB instances

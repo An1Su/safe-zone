@@ -14,7 +14,7 @@
     <artifactId>shared-common</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>shared-common</name>
-    <description>Shared common module for Buy-01 e-commerce microservices</description>
+    <description>Shared common module for e-commerce microservices</description>
     <packaging>jar</packaging>
     
     <properties>

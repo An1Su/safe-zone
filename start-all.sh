@@ -1,7 +1,7 @@
 #!/bin/bash
 # filepath: start-all.sh
 
-echo "Starting Buy-01 Microservices..."
+echo "Starting E-com Microservices..."
 echo ""
 
 GREEN='\033[0;32m'

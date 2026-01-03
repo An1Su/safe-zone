@@ -16,7 +16,7 @@ WORKDIR /usr/share/nginx/html
 RUN rm -rf ./*
 
 # Copy built Angular app (Angular 18+ outputs to dist/[project-name]/browser)
-COPY --from=build /app/dist/buy-01/browser ./
+COPY --from=build /app/dist/e-com/browser ./
 
 # Copy SSL certificates
 COPY ssl/localhost-cert.pem /etc/nginx/ssl/localhost-cert.pem

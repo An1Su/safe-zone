@@ -14,7 +14,7 @@
     <artifactId>media-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>media-service</name>
-    <description>Media Service microservice for Buy-01 e-commerce platform</description>
+    <description>Media Service microservice for e-commerce platform</description>
     <packaging>jar</packaging>
     
     <properties>
