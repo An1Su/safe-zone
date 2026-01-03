@@ -1,6 +1,6 @@
 # Eureka Service Discovery Server
 
-This is the Netflix Eureka service discovery server for the Buy-01 e-commerce platform.
+This is the Netflix Eureka service discovery server for the E-com e-commerce platform.
 
 ## Purpose
 

@@ -1,6 +1,6 @@
 # Product Service
 
-A microservice for handling product management in the Buy-01 e-commerce platform.
+A microservice for handling product management in the e-commerce platform.
 
 ## Features
 

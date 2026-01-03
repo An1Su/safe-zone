@@ -1,7 +1,7 @@
 #!/bin/bash
 # filepath: build-all.sh
 
-echo "Building Buy-01 Microservices..."
+echo "Building E-com Microservices..."
 echo ""
 
 # Color codes for output

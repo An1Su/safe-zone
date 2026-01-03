@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# run-tests.sh - E2E workflow tests for Buy-01 microservices
+# run-tests.sh - E2E workflow tests for E-com microservices
 # REQUIRES: All services must be running (use ./start-all.sh first)
 
 set +e  # Don't exit on error - we need to test failures too
@@ -33,7 +33,7 @@ CONSUMER_TOKEN=""
 PRODUCT_ID=""
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}Buy-01 E2E Workflow Tests${NC}"
+echo -e "${BLUE}E-com E2E Workflow Tests${NC}"
 echo -e "${BLUE}========================================${NC}"
 
 # Function to test expected success

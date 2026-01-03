@@ -1,6 +1,6 @@
-# Contributing to Buy-01 E-commerce Platform
+# Contributing to E-commerce Platform
 
-This document outlines the development workflow and guidelines for contributing to the Buy-01 e-commerce project.
+This document outlines the development workflow and guidelines for contributing to the e-commerce project.
 
 ## Project Structure
 
@@ -22,7 +22,7 @@ The project is a microservices e-commerce platform consisting of:
 
 ### Getting Started
 
-1. Clone the repository: `git clone https://github.com/YOUR_USERNAME/buy-01.git`
+1. Clone the repository: `git clone https://github.com/Toft08/e-com.git`
 2. Create a feature branch: `git checkout -b feature/your-feature-name`
 3. Make your changes
 4. Commit and push: `git commit -m "your message" && git push`

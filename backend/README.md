@@ -1,4 +1,4 @@
-# Buy-01 Backend Services
+# E-commerce Backend Services
 
 Spring Boot microservices architecture with Eureka service discovery, API Gateway, and MongoDB persistence. Implements JWT authentication, role-based access control, and event-driven communication with Kafka.
 

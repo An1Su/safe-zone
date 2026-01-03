@@ -16,7 +16,7 @@
     <artifactId>eureka-server</artifactId>
     <version>1.0.0</version>
     <name>Eureka Discovery Server</name>
-    <description>Service Discovery Server for Buy-01 E-commerce Platform</description>
+    <description>Service Discovery Server for E-commerce Platform</description>
 
     <properties>
         <java.version>17</java.version>

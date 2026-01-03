@@ -1,6 +1,6 @@
 # Media Service
 
-Media Service microservice for Buy-01 e-commerce platform, responsible for file upload and management.
+Media Service microservice for e-commerce platform, responsible for file upload and management.
 
 ## Overview
 

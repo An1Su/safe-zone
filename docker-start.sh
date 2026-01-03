@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Starting Buy-01 E-commerce Platform..."
+echo "🚀 Starting E-commerce Platform..."
 echo ""
 
 # Build and start all services

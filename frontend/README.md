@@ -1,6 +1,6 @@
-# Buy-01 E-commerce Frontend
+# E-commerce Frontend
 
-Modern Angular 18 frontend for the Buy-01 e-commerce platform with JWT authentication, role-based access control, and responsive design.
+Modern Angular 18 frontend for the e-commerce platform with JWT authentication, role-based access control, and responsive design.
 
 ## Features
 

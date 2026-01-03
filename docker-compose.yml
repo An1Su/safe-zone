@@ -4,7 +4,7 @@ services:
   # -------------------
   kafka:
     image: apache/kafka:3.8.1
-    container_name: buyapp-kafka
+    container_name: ecom-kafka
     expose:
       - '9092'
     environment:
@@ -20,14 +20,14 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_NUM_PARTITIONS: 3
     networks:
-      - buy-01-network
+      - ecom-network
 
   # -------------------
   # MongoDB
   # -------------------
   mongodb:
     image: mongo:latest
-    container_name: buyapp-mongodb
+    container_name: ecom-mongodb
     ports:
       - '27017:27017'
     environment:
@@ -36,21 +36,9 @@ services:
     volumes:
       - mongodb_data:/data/db
     networks:
-      - buy-01-network
+      - ecom-network
     healthcheck:
-      test:
-        [
-          'CMD',
-          'mongosh',
-          '--eval',
-          "db.adminCommand('ping')",
-          '-u',
-          'admin',
-          '-p',
-          'password',
-          '--authenticationDatabase',
-          'admin',
-        ]
+      test: [ 'CMD', 'mongosh', '--eval', "db.adminCommand('ping')", '-u', 'admin', '-p', 'password', '--authenticationDatabase', 'admin' ]
       interval: 5s
       timeout: 2s
       retries: 10
@@ -60,28 +48,28 @@ services:
   # -------------------
   eureka-server:
     build: ./backend/services/eureka
-    container_name: buyapp-eureka-server
+    container_name: ecom-eureka-server
     ports:
       - '8761:8761'
     networks:
-      - buy-01-network
+      - ecom-network
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8761/actuator/health']
+      test: [ 'CMD', 'curl', '-f', 'http://localhost:8761/actuator/health' ]
       interval: 5s
       timeout: 2s
       retries: 10
 
   api-gateway:
     build: ./backend/api-gateway
-    container_name: buyapp-api-gateway
+    container_name: ecom-api-gateway
     environment:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8761/eureka/
     ports:
       - '8080:8080'
     networks:
-      - buy-01-network
+      - ecom-network
     healthcheck:
-      test: ['CMD', 'curl', '-k', '-f', 'https://localhost:8080/actuator/health']
+      test: [ 'CMD', 'curl', '-k', '-f', 'https://localhost:8080/actuator/health' ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -98,7 +86,7 @@ services:
 
   user-service:
     build: ./backend/services/user
-    container_name: buyapp-user-service
+    container_name: ecom-user-service
     environment:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8761/eureka/
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: true
@@ -111,9 +99,9 @@ services:
     expose:
       - '8081'
     networks:
-      - buy-01-network
+      - ecom-network
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8081/actuator/health']
+      test: [ 'CMD', 'curl', '-f', 'http://localhost:8081/actuator/health' ]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -126,7 +114,7 @@ services:
 
   product-service:
     build: ./backend/services/product
-    container_name: buyapp-product-service
+    container_name: ecom-product-service
     environment:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8761/eureka/
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: true
@@ -139,9 +127,9 @@ services:
     expose:
       - '8082'
     networks:
-      - buy-01-network
+      - ecom-network
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8082/actuator/health']
+      test: [ 'CMD', 'curl', '-f', 'http://localhost:8082/actuator/health' ]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -154,7 +142,7 @@ services:
 
   media-service:
     build: ./backend/services/media
-    container_name: buyapp-media-service
+    container_name: ecom-media-service
     environment:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8761/eureka/
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: true
@@ -167,11 +155,11 @@ services:
     expose:
       - '8083'
     networks:
-      - buy-01-network
+      - ecom-network
     volumes:
       - ./backend/services/media/uploads:/app/uploads
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8083/actuator/health']
+      test: [ 'CMD', 'curl', '-f', 'http://localhost:8083/actuator/health' ]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -190,11 +178,11 @@ services:
       context: ./frontend
       args:
         API_URL: https://api-gateway:8080
-    container_name: buyapp-frontend
+    container_name: ecom-frontend
     ports:
       - '4200:443'
     networks:
-      - buy-01-network
+      - ecom-network
     depends_on:
       api-gateway:
         condition: service_healthy
@@ -203,7 +191,8 @@ services:
 # Networks & Volumes
 # -------------------
 networks:
-  buy-01-network:
+  ecom-network:
+
 
 volumes:
   mongodb_data:

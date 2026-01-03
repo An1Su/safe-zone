@@ -1,6 +1,6 @@
 # User Service
 
-A microservice for handling user authentication and management in the Buy-01 e-commerce platform.
+A microservice for handling user authentication and management in the e-commerce platform.
 
 ## Features
 
