@@ -23,23 +23,24 @@ TEST_FAILED=0
 run_service_tests() {
     local service_name=$1
     local service_path=$2
-    
+
     echo -e "${YELLOW}Running tests for $service_name...${NC}"
-    cd "$service_path" || return 1
-    
-    if ../../mvnw test; then
+    cd "$WORKSPACE/backend/$service_path" || return 1
+
+    # Use mvnw from backend root
+    if "$WORKSPACE/backend/mvnw" test; then
         echo -e "${GREEN}✅ $service_name tests passed${NC}"
     else
         echo -e "${RED}❌ $service_name tests failed${NC}"
         TEST_FAILED=1
     fi
-    
+
     # Copy test reports to workspace
     if [ -d "target/surefire-reports" ]; then
         mkdir -p "$WORKSPACE/test-reports/backend/$service_name"
         cp -r target/surefire-reports/* "$WORKSPACE/test-reports/backend/$service_name/" 2>/dev/null || true
     fi
-    
+
     cd "$WORKSPACE/backend" || return 1
 }
 
