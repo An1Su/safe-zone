@@ -17,11 +17,12 @@ NC='\033[0m' # No Color
 TESTS_PASSED=0
 TESTS_FAILED=0
 
-# Base URLs
-USER_URL="http://localhost:8080/users"
-AUTH_URL="http://localhost:8080/auth"
-PRODUCT_URL="http://localhost:8080/products"
-MEDIA_URL="http://localhost:8080/media"
+# Base URLs - Use port 8081 in CI (Jenkins uses 8080), 8080 for local
+API_GATEWAY_PORT="${API_GATEWAY_PORT:-8080}"
+USER_URL="http://localhost:${API_GATEWAY_PORT}/users"
+AUTH_URL="http://localhost:${API_GATEWAY_PORT}/auth"
+PRODUCT_URL="http://localhost:${API_GATEWAY_PORT}/products"
+MEDIA_URL="http://localhost:${API_GATEWAY_PORT}/media"
 
 # Test data
 SELLER_EMAIL="seller-test-$(date +%s)@example.com"
@@ -41,7 +42,7 @@ test_success() {
     local test_name="$1"
     local response="$2"
     local http_code="$3"
-    
+
     if [[ $http_code -ge 200 && $http_code -lt 300 ]]; then
         echo -e "${GREEN}✓${NC} $test_name"
         ((TESTS_PASSED++))
@@ -59,7 +60,7 @@ test_failure() {
     local test_name="$1"
     local response="$2"
     local http_code="$3"
-    
+
     if [[ $http_code -ge 400 && $http_code -lt 500 ]]; then
         echo -e "${GREEN}✓${NC} $test_name"
         ((TESTS_PASSED++))
@@ -82,13 +83,13 @@ extract_response() {
 }
 
 # Check if services are running
-echo -e "\n${YELLOW}Checking if services are running...${NC}"
-if ! curl -s http://localhost:8080/actuator/health > /dev/null 2>&1; then
-    echo -e "${RED}❌ Services are not running!${NC}"
+echo -e "\n${YELLOW}Checking if services are running on port ${API_GATEWAY_PORT}...${NC}"
+if ! curl -s http://localhost:${API_GATEWAY_PORT}/actuator/health > /dev/null 2>&1; then
+    echo -e "${RED}❌ Services are not running on port ${API_GATEWAY_PORT}!${NC}"
     echo -e "${YELLOW}Please run: ./start-all.sh${NC}"
     exit 1
 fi
-echo -e "${GREEN}✓ Services are running${NC}"
+echo -e "${GREEN}✓ Services are running on port ${API_GATEWAY_PORT}${NC}"
 
 # Wait for services to be fully ready
 echo -e "\n${YELLOW}Waiting for services to be ready...${NC}"

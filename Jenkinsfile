@@ -20,8 +20,8 @@ pipeline {
         PATH = "${JAVA_HOME}/bin:${NODE_HOME ?: '/usr'}/bin:${PATH}"
 
         // Docker configuration
-        DOCKER_BUILDKIT = '1'
-        COMPOSE_DOCKER_CLI_BUILD = '1'
+        DOCKER_BUILDKIT = '0'
+        COMPOSE_DOCKER_CLI_BUILD = '0'
 
         // Notification configuration (set via Jenkins credentials or environment)
         EMAIL_ENABLED = "${env.EMAIL_ENABLED ?: 'true'}"
@@ -207,8 +207,9 @@ pipeline {
                     echo "Waiting for services to be healthy..."
                     sleep 30
 
-                    # Run integration tests
+                    # Run integration tests (API Gateway is on port 8081 in CI)
                     export WORKSPACE="${WORKSPACE}"
+                    export API_GATEWAY_PORT=8081
                     timeout 300 bash run-tests.sh || {
                         echo "Integration tests failed or timed out"
                         docker-compose -f docker-compose.yml -f docker-compose.ci.yml logs --tail=50
