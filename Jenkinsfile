@@ -62,6 +62,8 @@ pipeline {
                 sh '''
                     echo "Java version:"
                     java -version
+                    echo "NODE_HOME: ${NODE_HOME}"
+                    echo "PATH: ${PATH}"
                     echo "Node version:"
                     node --version
                     echo "npm version:"
@@ -111,7 +113,8 @@ pipeline {
                 }
                 sh '''
                     export WORKSPACE="${WORKSPACE}"
-                    export PATH="/usr/bin:${PATH}"
+                    export NODE_HOME="${NODE_HOME}"
+                    export PATH="${NODE_HOME ?: '/usr'}/bin:${PATH}"
                     bash jenkins/scripts/build-frontend.sh
                 '''
             }
@@ -152,7 +155,8 @@ pipeline {
                 }
                 sh '''
                     export WORKSPACE="${WORKSPACE}"
-                    export PATH="/usr/bin:${PATH}"
+                    export NODE_HOME="${NODE_HOME}"
+                    export PATH="${NODE_HOME ?: '/usr'}/bin:${PATH}"
                     bash jenkins/scripts/run-frontend-tests.sh
                 '''
             }
