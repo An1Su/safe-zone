@@ -84,17 +84,32 @@ extract_response() {
 }
 
 # Check if services are running (API Gateway uses HTTPS)
-echo -e "\n${YELLOW}Checking if services are running on port ${API_GATEWAY_PORT}...${NC}"
-if ! curl -k -s https://localhost:${API_GATEWAY_PORT}/actuator/health > /dev/null 2>&1; then
+# Wait up to 60 seconds for API Gateway to be ready
+echo -e "\n${YELLOW}Waiting for API Gateway to be ready on port ${API_GATEWAY_PORT}...${NC}"
+GATEWAY_READY=false
+for i in {1..30}; do
+    if curl -k -s https://localhost:${API_GATEWAY_PORT}/actuator/health > /dev/null 2>&1; then
+        echo -e "${GREEN}✓ API Gateway is ready!${NC}"
+        GATEWAY_READY=true
+        break
+    fi
+    if [ $i -eq 30 ]; then
+        echo -e "${RED}❌ API Gateway failed to start after 60 seconds on port ${API_GATEWAY_PORT}!${NC}"
+        echo -e "${YELLOW}Please check: docker-compose logs api-gateway${NC}"
+        exit 1
+    fi
+    echo -e "${YELLOW}Waiting... ($i/30)${NC}"
+    sleep 2
+done
+
+if [ "$GATEWAY_READY" = false ]; then
     echo -e "${RED}❌ Services are not running on port ${API_GATEWAY_PORT}!${NC}"
-    echo -e "${YELLOW}Please run: ./start-all.sh${NC}"
     exit 1
 fi
-echo -e "${GREEN}✓ Services are running on port ${API_GATEWAY_PORT}${NC}"
 
-# Wait for services to be fully ready
-echo -e "\n${YELLOW}Waiting for services to be ready...${NC}"
-sleep 3
+# Additional wait for services to be fully ready
+echo -e "\n${YELLOW}Waiting for services to be fully ready...${NC}"
+sleep 5
 
 echo -e "\n${BLUE}========================================${NC}"
 echo -e "${BLUE}Starting E2E Workflow Tests${NC}"

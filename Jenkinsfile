@@ -200,16 +200,16 @@ pipeline {
                     # Stop any existing containers first
                     docker-compose -f docker-compose.yml -f docker-compose.ci.yml down 2>/dev/null || true
 
-                    # Start services (API Gateway uses port 8081 to avoid Jenkins conflict)
+                    # Start services
                     docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d
 
-                    # Wait for services to be ready
-                    echo "Waiting for services to be healthy..."
+                    # Wait for services to start (run-tests.sh will wait for API Gateway to be ready)
+                    echo "Waiting for services to start..."
                     sleep 30
 
-                    # Run integration tests (API Gateway is on port 8081 in CI)
+                    # Run integration tests
                     export WORKSPACE="${WORKSPACE}"
-                    export API_GATEWAY_PORT=8081
+                    export API_GATEWAY_PORT=8080
                     timeout 300 bash run-tests.sh || {
                         echo "Integration tests failed or timed out"
                         docker-compose -f docker-compose.yml -f docker-compose.ci.yml logs --tail=50
@@ -265,7 +265,7 @@ pipeline {
 
                     # Check API Gateway
                     echo "Checking API Gateway health..."
-                    curl -k -f https://localhost:8081/actuator/health || {
+                    curl -k -f https://localhost:8080/actuator/health || {
                         echo "❌ API Gateway health check failed"
                         exit 1
                     }
