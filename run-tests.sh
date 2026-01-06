@@ -18,11 +18,12 @@ TESTS_PASSED=0
 TESTS_FAILED=0
 
 # Base URLs - Use port 8081 in CI (Jenkins uses 8080), 8080 for local
+# API Gateway uses HTTPS with self-signed certificates
 API_GATEWAY_PORT="${API_GATEWAY_PORT:-8080}"
-USER_URL="http://localhost:${API_GATEWAY_PORT}/users"
-AUTH_URL="http://localhost:${API_GATEWAY_PORT}/auth"
-PRODUCT_URL="http://localhost:${API_GATEWAY_PORT}/products"
-MEDIA_URL="http://localhost:${API_GATEWAY_PORT}/media"
+USER_URL="https://localhost:${API_GATEWAY_PORT}/users"
+AUTH_URL="https://localhost:${API_GATEWAY_PORT}/auth"
+PRODUCT_URL="https://localhost:${API_GATEWAY_PORT}/products"
+MEDIA_URL="https://localhost:${API_GATEWAY_PORT}/media"
 
 # Test data
 SELLER_EMAIL="seller-test-$(date +%s)@example.com"
@@ -82,9 +83,9 @@ extract_response() {
     response_body=$(echo "$full_response" | sed '$d')
 }
 
-# Check if services are running
+# Check if services are running (API Gateway uses HTTPS)
 echo -e "\n${YELLOW}Checking if services are running on port ${API_GATEWAY_PORT}...${NC}"
-if ! curl -s http://localhost:${API_GATEWAY_PORT}/actuator/health > /dev/null 2>&1; then
+if ! curl -k -s https://localhost:${API_GATEWAY_PORT}/actuator/health > /dev/null 2>&1; then
     echo -e "${RED}❌ Services are not running on port ${API_GATEWAY_PORT}!${NC}"
     echo -e "${YELLOW}Please run: ./start-all.sh${NC}"
     exit 1
@@ -101,7 +102,7 @@ echo -e "${BLUE}========================================${NC}"
 
 # TEST 1: Unregistered user tries to create product (should fail)
 echo -e "\n${CYAN}[1] Unregistered user tries to create product (should fail)${NC}"
-full_response=$(curl -s -w "\n%{http_code}" -X POST "$PRODUCT_URL" \
+full_response=$(curl -k -s -w "\n%{http_code}" -X POST "$PRODUCT_URL" \
     -H "Content-Type: application/json" \
     -d '{"name":"Unauthorized Product","description":"Should fail","price":99.99,"quality":5}')
 extract_response "$full_response"
@@ -109,7 +110,7 @@ test_failure "Unregistered user cannot create product" "$response_body" "$http_c
 
 # TEST 2: Register seller (should work)
 echo -e "\n${CYAN}[2] Register new seller (should work)${NC}"
-full_response=$(curl -s -w "\n%{http_code}" -X POST "$AUTH_URL/register" \
+full_response=$(curl -k -s -w "\n%{http_code}" -X POST "$AUTH_URL/register" \
     -H "Content-Type: application/json" \
     -d "{\"name\":\"Test Seller\",\"email\":\"$SELLER_EMAIL\",\"password\":\"$SELLER_PASSWORD\",\"role\":\"SELLER\"}")
 extract_response "$full_response"
@@ -119,7 +120,7 @@ fi
 
 # TEST 3: Seller creates product (should work)
 echo -e "\n${CYAN}[3] Seller creates product (should work)${NC}"
-full_response=$(curl -s -w "\n%{http_code}" -X POST "$PRODUCT_URL" \
+full_response=$(curl -k -s -w "\n%{http_code}" -X POST "$PRODUCT_URL" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $SELLER_TOKEN" \
     -d '{"name":"Test Product","description":"A test product","price":149.99,"quality":8}')
@@ -130,7 +131,7 @@ fi
 
 # TEST 4: Seller updates own product (should work)
 echo -e "\n${CYAN}[4] Seller updates own product (should work)${NC}"
-full_response=$(curl -s -w "\n%{http_code}" -X PUT "$PRODUCT_URL/$PRODUCT_ID" \
+full_response=$(curl -k -s -w "\n%{http_code}" -X PUT "$PRODUCT_URL/$PRODUCT_ID" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $SELLER_TOKEN" \
     -d '{"name":"Updated Product","description":"Updated description","price":199.99,"quality":9}')
@@ -139,7 +140,7 @@ test_success "Seller updates own product" "$response_body" "$http_code"
 
 # TEST 5: Register consumer (should work)
 echo -e "\n${CYAN}[5] Register new consumer (should work)${NC}"
-full_response=$(curl -s -w "\n%{http_code}" -X POST "$AUTH_URL/register" \
+full_response=$(curl -k -s -w "\n%{http_code}" -X POST "$AUTH_URL/register" \
     -H "Content-Type: application/json" \
     -d "{\"name\":\"Test Consumer\",\"email\":\"$CONSUMER_EMAIL\",\"password\":\"$CONSUMER_PASSWORD\",\"role\":\"CLIENT\"}")
 extract_response "$full_response"
@@ -149,13 +150,13 @@ fi
 
 # TEST 6: Consumer finds created product (should work)
 echo -e "\n${CYAN}[6] Consumer finds created product (should work)${NC}"
-full_response=$(curl -s -w "\n%{http_code}" -X GET "$PRODUCT_URL/$PRODUCT_ID")
+full_response=$(curl -k -s -w "\n%{http_code}" -X GET "$PRODUCT_URL/$PRODUCT_ID")
 extract_response "$full_response"
 test_success "Consumer can view product" "$response_body" "$http_code"
 
 # TEST 7: Consumer tries to update product (should fail)
 echo -e "\n${CYAN}[7] Consumer tries to update product (should fail)${NC}"
-full_response=$(curl -s -w "\n%{http_code}" -X PUT "$PRODUCT_URL/$PRODUCT_ID" \
+full_response=$(curl -k -s -w "\n%{http_code}" -X PUT "$PRODUCT_URL/$PRODUCT_ID" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $CONSUMER_TOKEN" \
     -d '{"name":"Hacked Product","description":"Should not work","price":1.00,"quality":1}')
@@ -164,14 +165,14 @@ test_failure "Consumer cannot update product" "$response_body" "$http_code"
 
 # TEST 8: Consumer tries to delete product (should fail)
 echo -e "\n${CYAN}[8] Consumer tries to delete product (should fail)${NC}"
-full_response=$(curl -s -w "\n%{http_code}" -X DELETE "$PRODUCT_URL/$PRODUCT_ID" \
+full_response=$(curl -k -s -w "\n%{http_code}" -X DELETE "$PRODUCT_URL/$PRODUCT_ID" \
     -H "Authorization: Bearer $CONSUMER_TOKEN")
 extract_response "$full_response"
 test_failure "Consumer cannot delete product" "$response_body" "$http_code"
 
 # TEST 9: Consumer tries to create product (should fail)
 echo -e "\n${CYAN}[9] Consumer tries to create product (should fail)${NC}"
-full_response=$(curl -s -w "\n%{http_code}" -X POST "$PRODUCT_URL" \
+full_response=$(curl -k -s -w "\n%{http_code}" -X POST "$PRODUCT_URL" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $CONSUMER_TOKEN" \
     -d '{"name":"Consumer Product","description":"Should not work","price":99.99,"quality":5}')
@@ -180,14 +181,14 @@ test_failure "Consumer cannot create product" "$response_body" "$http_code"
 
 # TEST 10: Delete consumer (should work)
 echo -e "\n${CYAN}[10] Delete consumer (should work)${NC}"
-full_response=$(curl -s -w "\n%{http_code}" -X DELETE "$USER_URL/me" \
+full_response=$(curl -k -s -w "\n%{http_code}" -X DELETE "$USER_URL/me" \
     -H "Authorization: Bearer $CONSUMER_TOKEN")
 extract_response "$full_response"
 test_success "Delete consumer" "$response_body" "$http_code"
 
 # TEST 11: Re-login with seller (should work)
 echo -e "\n${CYAN}[11] Re-login with seller (should work)${NC}"
-full_response=$(curl -s -w "\n%{http_code}" -X POST "$AUTH_URL/login" \
+full_response=$(curl -k -s -w "\n%{http_code}" -X POST "$AUTH_URL/login" \
     -H "Content-Type: application/json" \
     -d "{\"email\":\"$SELLER_EMAIL\",\"password\":\"$SELLER_PASSWORD\"}")
 extract_response "$full_response"
@@ -197,14 +198,14 @@ fi
 
 # TEST 12: Seller deletes the product (should work)
 echo -e "\n${CYAN}[12] Seller deletes the product (should work)${NC}"
-full_response=$(curl -s -w "\n%{http_code}" -X DELETE "$PRODUCT_URL/$PRODUCT_ID" \
+full_response=$(curl -k -s -w "\n%{http_code}" -X DELETE "$PRODUCT_URL/$PRODUCT_ID" \
     -H "Authorization: Bearer $SELLER_TOKEN")
 extract_response "$full_response"
 test_success "Seller deletes product" "$response_body" "$http_code"
 
 # TEST 13: Seller creates new product (should work)
 echo -e "\n${CYAN}[13] Seller creates new product (should work)${NC}"
-full_response=$(curl -s -w "\n%{http_code}" -X POST "$PRODUCT_URL" \
+full_response=$(curl -k -s -w "\n%{http_code}" -X POST "$PRODUCT_URL" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $SELLER_TOKEN" \
     -d '{"name":"Final Test Product","description":"For deletion test","price":299.99,"quality":10}')
@@ -215,7 +216,7 @@ fi
 
 # TEST 14: Delete seller (should work and cascade delete products)
 echo -e "\n${CYAN}[14] Delete seller (should cascade delete all products)${NC}"
-full_response=$(curl -s -w "\n%{http_code}" -X DELETE "$USER_URL/me" \
+full_response=$(curl -k -s -w "\n%{http_code}" -X DELETE "$USER_URL/me" \
     -H "Authorization: Bearer $SELLER_TOKEN")
 extract_response "$full_response"
 test_success "Delete seller" "$response_body" "$http_code"
@@ -223,7 +224,7 @@ test_success "Delete seller" "$response_body" "$http_code"
 # TEST 15: Verify product is deleted (should fail to find)
 echo -e "\n${CYAN}[15] Verify product was cascade deleted (should 404)${NC}"
 sleep 1  # Give cascade delete a moment
-full_response=$(curl -s -w "\n%{http_code}" -X GET "$PRODUCT_URL/$NEW_PRODUCT_ID")
+full_response=$(curl -k -s -w "\n%{http_code}" -X GET "$PRODUCT_URL/$NEW_PRODUCT_ID")
 extract_response "$full_response"
 test_failure "Product cascade deleted with seller" "$response_body" "$http_code"
 
