@@ -61,22 +61,39 @@ git --version
 
 ### Option 1: Docker (Recommended)
 
+**Using Docker Compose (includes Docker CLI):**
+
 ```bash
+cd jenkins
+docker-compose up -d
+cd ..
+```
+
+**Or using Docker directly:**
+
+```bash
+# Build custom Jenkins image with Docker CLI
+cd jenkins
+docker build -t jenkins-with-docker:lts .
+cd ..
+
 # Create Jenkins data directory
 mkdir -p ~/jenkins_home
 
 # Run Jenkins container
 docker run -d \
   --name jenkins \
-  -p 8080:8080 \
+  -p 8082:8080 \
   -p 50000:50000 \
   -v ~/jenkins_home:/var/jenkins_home \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  jenkins/jenkins:lts
+  jenkins-with-docker:lts
 
 # Get initial admin password
 docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 ```
+
+**Note:** The custom image includes Docker CLI, so you don't need to install it manually.
 
 ### Option 2: Native Installation
 
