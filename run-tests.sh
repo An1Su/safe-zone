@@ -43,7 +43,7 @@ test_success() {
     local test_name="$1"
     local response="$2"
     local http_code="$3"
-    
+
     if [[ $http_code -ge 200 && $http_code -lt 300 ]]; then
         echo -e "${GREEN}✓${NC} $test_name"
         ((TESTS_PASSED++))
@@ -61,7 +61,7 @@ test_failure() {
     local test_name="$1"
     local response="$2"
     local http_code="$3"
-    
+
     if [[ $http_code -ge 400 && $http_code -lt 500 ]]; then
         echo -e "${GREEN}✓${NC} $test_name"
         ((TESTS_PASSED++))
