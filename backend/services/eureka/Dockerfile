@@ -1,12 +1,11 @@
 # Build stage
 FROM maven:3.9-eclipse-temurin-17 AS builder
-WORKDIR /app
+WORKDIR /build
 
-# Copy pom and source
-COPY pom.xml .
-COPY src ./src
-
-# Build application
+# Copy and build service (eureka doesn't need shared)
+COPY services/eureka/pom.xml /build/service/pom.xml
+COPY services/eureka/src /build/service/src
+WORKDIR /build/service
 RUN mvn clean package -DskipTests -B
 
 # Runtime stage
@@ -16,6 +15,6 @@ WORKDIR /app
 # Install curl for healthcheck
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=builder /build/service/target/*.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
