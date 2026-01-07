@@ -1,18 +1,22 @@
 # Build stage
 FROM maven:3.9-eclipse-temurin-17 AS builder
-WORKDIR /app
+WORKDIR /build
 
-# Copy pom and source
-COPY pom.xml .
-COPY src ./src
+# Copy and build shared module
+COPY shared /build/shared
+WORKDIR /build/shared
+RUN mvn clean install -DskipTests -B
 
-# Build application
+# Build service
+WORKDIR /build/service
+COPY api-gateway/pom.xml .
+COPY api-gateway/src ./src
 RUN mvn clean package -DskipTests -B
 
 # Runtime stage
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=builder /build/service/target/*.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
