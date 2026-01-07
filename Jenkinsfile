@@ -150,73 +150,65 @@ pipeline {
                             # Create test reports directory
                             mkdir -p "${WORKSPACE}/test-reports/backend"
 
-                            # Run tests for each service
-                            echo "Running tests for User Service..."
-                            cd services/user || exit 1
-                            if ! ../../mvnw test; then
-                                echo "❌ User Service tests failed"
+                            # Track overall test status
+                            TEST_FAILED=0
+
+                            # Function to run tests for a service
+                            run_service_tests() {
+                                local service_name=$1
+                                local service_path=$2
+
+                                echo "=========================================="
+                                echo "Running tests for $service_name..."
+                                echo "=========================================="
+
+                                cd "$service_path" || {
+                                    echo "❌ Failed to navigate to $service_path"
+                                    TEST_FAILED=1
+                                    return 1
+                                }
+
+                                # Run tests (continue even if they fail)
+                                if ../../mvnw test; then
+                                    echo "✅ $service_name tests passed"
+                                else
+                                    echo "❌ $service_name tests failed (exit code: $?)"
+                                    TEST_FAILED=1
+                                fi
+
+                                # Always copy test reports (even if tests failed)
+                                if [ -d "target/surefire-reports" ]; then
+                                    mkdir -p "${WORKSPACE}/test-reports/backend/$(basename $service_path)"
+                                    cp -r target/surefire-reports/* "${WORKSPACE}/test-reports/backend/$(basename $service_path)/" 2>/dev/null || true
+                                    echo "Test reports copied for $service_name"
+                                else
+                                    echo "⚠️  No test reports found for $service_name"
+                                fi
+
+                                cd ../..
+                            }
+
+                            # Run tests for each service (continue even if one fails)
+                            run_service_tests "User Service" "services/user"
+                            run_service_tests "Product Service" "services/product"
+                            run_service_tests "Media Service" "services/media"
+                            run_service_tests "Eureka Server" "services/eureka"
+                            run_service_tests "API Gateway" "api-gateway"
+
+                            # Final summary
+                            echo "=========================================="
+                            if [ $TEST_FAILED -eq 0 ]; then
+                                echo "✅ All backend tests passed!"
+                            else
+                                echo "❌ Some backend tests failed. Check test reports for details."
+                            fi
+                            echo "=========================================="
+                            echo "Test reports available at: ${WORKSPACE}/test-reports/backend/"
+
+                            # Exit with error if any tests failed
+                            if [ $TEST_FAILED -eq 1 ]; then
                                 exit 1
                             fi
-                            # Copy test reports
-                            if [ -d "target/surefire-reports" ]; then
-                                mkdir -p "${WORKSPACE}/test-reports/backend/user"
-                                cp -r target/surefire-reports/* "${WORKSPACE}/test-reports/backend/user/" 2>/dev/null || true
-                            fi
-                            cd ../..
-
-                            echo "Running tests for Product Service..."
-                            cd services/product || exit 1
-                            if ! ../../mvnw test; then
-                                echo "❌ Product Service tests failed"
-                                exit 1
-                            fi
-                            # Copy test reports
-                            if [ -d "target/surefire-reports" ]; then
-                                mkdir -p "${WORKSPACE}/test-reports/backend/product"
-                                cp -r target/surefire-reports/* "${WORKSPACE}/test-reports/backend/product/" 2>/dev/null || true
-                            fi
-                            cd ../..
-
-                            echo "Running tests for Media Service..."
-                            cd services/media || exit 1
-                            if ! ../../mvnw test; then
-                                echo "❌ Media Service tests failed"
-                                exit 1
-                            fi
-                            # Copy test reports
-                            if [ -d "target/surefire-reports" ]; then
-                                mkdir -p "${WORKSPACE}/test-reports/backend/media"
-                                cp -r target/surefire-reports/* "${WORKSPACE}/test-reports/backend/media/" 2>/dev/null || true
-                            fi
-                            cd ../..
-
-                            echo "Running tests for Eureka Server..."
-                            cd services/eureka || exit 1
-                            if ! ../../mvnw test; then
-                                echo "❌ Eureka Server tests failed"
-                                exit 1
-                            fi
-                            # Copy test reports
-                            if [ -d "target/surefire-reports" ]; then
-                                mkdir -p "${WORKSPACE}/test-reports/backend/eureka"
-                                cp -r target/surefire-reports/* "${WORKSPACE}/test-reports/backend/eureka/" 2>/dev/null || true
-                            fi
-                            cd ../..
-
-                            echo "Running tests for API Gateway..."
-                            cd api-gateway || exit 1
-                            if ! ../mvnw test; then
-                                echo "❌ API Gateway tests failed"
-                                exit 1
-                            fi
-                            # Copy test reports
-                            if [ -d "target/surefire-reports" ]; then
-                                mkdir -p "${WORKSPACE}/test-reports/backend/api-gateway"
-                                cp -r target/surefire-reports/* "${WORKSPACE}/test-reports/backend/api-gateway/" 2>/dev/null || true
-                            fi
-                            cd ..
-
-                            echo "✅ All backend tests passed!"
                         '''
                     }
                     post {
