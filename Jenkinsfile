@@ -55,6 +55,18 @@ pipeline {
                     steps {
                         sh '''
                             cd frontend || exit 1
+
+                            # Set Chrome/Chromium binary path for headless testing
+                            if [ -f /usr/bin/google-chrome-stable ]; then
+                                export CHROME_BIN=/usr/bin/google-chrome-stable
+                            elif [ -f /usr/bin/google-chrome ]; then
+                                export CHROME_BIN=/usr/bin/google-chrome
+                            elif [ -f /usr/bin/chromium ]; then
+                                export CHROME_BIN=/usr/bin/chromium
+                            elif [ -f /usr/bin/chromium-browser ]; then
+                                export CHROME_BIN=/usr/bin/chromium-browser
+                            fi
+
                             npm ci || npm install
                             npm run test:ci
                         '''
