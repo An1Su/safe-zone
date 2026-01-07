@@ -58,11 +58,11 @@ pipeline {
 
                             docker run --rm \
                               -v ${WORKSPACE}/frontend:/src:ro \
-                              -w /test \
                               --cap-add=SYS_ADMIN \
                               zenika/alpine-chrome:with-node \
                               sh -c "
-                                cp -r /src/. /test/ && \
+                                cd /tmp && \
+                                cp -r /src/. . && \
                                 npm install --legacy-peer-deps && \
                                 CHROME_BIN=/usr/bin/chromium-browser npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
                               " || {
