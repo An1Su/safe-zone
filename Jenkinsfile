@@ -20,8 +20,8 @@ pipeline {
         PATH = "${JAVA_HOME}/bin:${NODE_HOME ?: '/usr'}/bin:${PATH}"
 
         // Docker configuration
-        DOCKER_BUILDKIT = '0'
-        COMPOSE_DOCKER_CLI_BUILD = '0'
+        DOCKER_BUILDKIT = '1'
+        COMPOSE_DOCKER_CLI_BUILD = '1'
 
         // Notification configuration (set via Jenkins credentials or environment)
         EMAIL_ENABLED = "${env.EMAIL_ENABLED ?: 'true'}"
@@ -75,90 +75,98 @@ pipeline {
             }
         }
 
-        stage('Backend Build') {
-            steps {
-                script {
-                    echo "=========================================="
-                    echo "Building Backend Services"
-                    echo "=========================================="
+        stage('Build') {
+            parallel {
+                stage('Backend Build') {
+                    steps {
+                        script {
+                            echo "=========================================="
+                            echo "Building Backend Services"
+                            echo "=========================================="
+                        }
+                        sh '''
+                            export WORKSPACE="${WORKSPACE}"
+                            if [ -z "${JAVA_HOME}" ] || [ ! -d "${JAVA_HOME}" ]; then
+                                echo "ERROR: JAVA_HOME is not set or invalid: ${JAVA_HOME}"
+                                echo "Please configure JDK-17 in Jenkins Tools configuration"
+                                exit 1
+                            fi
+                            export JAVA_HOME="${JAVA_HOME}"
+                            export PATH="${JAVA_HOME}/bin:${PATH}"
+                            bash jenkins/scripts/build-backend.sh
+                        '''
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: 'artifacts/backend/*.jar', allowEmptyArchive: true
+                        }
+                    }
                 }
-                sh '''
-                    export WORKSPACE="${WORKSPACE}"
-                    if [ -z "${JAVA_HOME}" ] || [ ! -d "${JAVA_HOME}" ]; then
-                        echo "ERROR: JAVA_HOME is not set or invalid: ${JAVA_HOME}"
-                        echo "Please configure JDK-17 in Jenkins Tools configuration"
-                        exit 1
-                    fi
-                    export JAVA_HOME="${JAVA_HOME}"
-                    export PATH="${JAVA_HOME}/bin:${PATH}"
-                    bash jenkins/scripts/build-backend.sh
-                '''
-            }
-            post {
-                success {
-                    archiveArtifacts artifacts: 'artifacts/backend/*.jar', allowEmptyArchive: true
+
+                stage('Frontend Build') {
+                    steps {
+                        script {
+                            echo "=========================================="
+                            echo "Building Frontend Application"
+                            echo "=========================================="
+                        }
+                        sh '''
+                            export WORKSPACE="${WORKSPACE}"
+                            bash jenkins/scripts/build-frontend.sh
+                        '''
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: 'artifacts/frontend/**/*', allowEmptyArchive: true
+                        }
+                    }
                 }
             }
         }
 
-        stage('Frontend Build') {
-            steps {
-                script {
-                    echo "=========================================="
-                    echo "Building Frontend Application"
-                    echo "=========================================="
+        stage('Tests') {
+            parallel {
+                stage('Backend Tests') {
+                    steps {
+                        script {
+                            echo "=========================================="
+                            echo "Running Backend Tests"
+                            echo "=========================================="
+                        }
+                        sh '''
+                            export WORKSPACE="${WORKSPACE}"
+                            export JAVA_HOME="${JAVA_HOME}"
+                            export PATH="${JAVA_HOME}/bin:${PATH}"
+                            bash jenkins/scripts/run-backend-tests.sh
+                        '''
+                    }
+                    post {
+                        always {
+                            junit 'test-reports/backend/**/*.xml'
+                        }
+                    }
                 }
-                sh '''
-                    export WORKSPACE="${WORKSPACE}"
-                    bash jenkins/scripts/build-frontend.sh
-                '''
-            }
-            post {
-                success {
-                    archiveArtifacts artifacts: 'artifacts/frontend/**/*', allowEmptyArchive: true
-                }
-            }
-        }
 
-        stage('Backend Tests') {
-            steps {
-                script {
-                    echo "=========================================="
-                    echo "Running Backend Tests"
-                    echo "=========================================="
-                }
-                sh '''
-                    export WORKSPACE="${WORKSPACE}"
-                    export JAVA_HOME="${JAVA_HOME}"
-                    export PATH="${JAVA_HOME}/bin:${PATH}"
-                    bash jenkins/scripts/run-backend-tests.sh
-                '''
-            }
-            post {
-                always {
-                    junit 'test-reports/backend/**/*.xml'
-                }
-            }
-        }
-
-        stage('Frontend Tests') {
-            steps {
-                script {
-                    echo "=========================================="
-                    echo "Running Frontend Tests"
-                    echo "=========================================="
-                }
-                sh '''
-                    export WORKSPACE="${WORKSPACE}"
-                    bash jenkins/scripts/run-frontend-tests.sh
-                '''
-            }
-            post {
-                always {
-                    // Publish frontend test results if available
-                    script {
-                        if (fileExists('test-reports/frontend')) {
-                            junit 'test-reports/frontend/**/*.xml'
+                stage('Frontend Tests') {
+                    steps {
+                        script {
+                            echo "=========================================="
+                            echo "Running Frontend Tests"
+                            echo "=========================================="
+                        }
+                        sh '''
+                            export WORKSPACE="${WORKSPACE}"
+                            bash jenkins/scripts/run-frontend-tests.sh
+                        '''
+                    }
+                    post {
+                        always {
+                            // Publish frontend test results if available
+                            script {
+                                if (fileExists('test-reports/frontend')) {
+                                    junit 'test-reports/frontend/**/*.xml'
+                                }
+                            }
                         }
                     }
                 }
