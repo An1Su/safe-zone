@@ -32,6 +32,15 @@ module.exports = function (config) {
     autoWatch: false,
     browsers: ['ChromeHeadless'],
     customLaunchers: {
+      ChromeHeadless: {
+        base: 'ChromeHeadless',
+        flags: [
+          '--no-sandbox',
+          '--disable-gpu',
+          '--disable-dev-shm-usage',
+          '--disable-setuid-sandbox',
+        ],
+      },
       ChromeHeadlessCI: {
         base: 'ChromeHeadless',
         flags: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
