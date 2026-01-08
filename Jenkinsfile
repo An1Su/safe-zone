@@ -34,14 +34,14 @@ pipeline {
                             cd backend || exit 1
 
                             # Build shared module first
-                            cd shared && ../mvnw clean install -DskipTests && cd ..
+                            cd shared && ../mvnw clean install -DskipTests -q && cd ..
 
                             # Run tests for each service (pipeline fails if any test fails)
-                            cd services/user && ../../mvnw test && cd ../..
-                            cd services/product && ../../mvnw test && cd ../..
-                            cd services/media && ../../mvnw test && cd ../..
-                            cd services/eureka && ../../mvnw test && cd ../..
-                            cd api-gateway && ../mvnw test
+                            cd services/user && ../../mvnw test -q && cd ../..
+                            cd services/product && ../../mvnw test -q && cd ../..
+                            cd services/media && ../../mvnw test -q && cd ../..
+                            cd services/eureka && ../../mvnw test -q && cd ../..
+                            cd api-gateway && ../mvnw test -q
                         '''
                     }
                     post {
