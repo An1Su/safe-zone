@@ -59,6 +59,7 @@ pipeline {
                             docker run --rm \
                               --volumes-from jenkins \
                               -w ${WORKSPACE}/frontend \
+                              -e WORKSPACE=${WORKSPACE} \
                               --tmpfs /tmp:rw,exec,nosuid,size=2g \
                               --cap-add=SYS_ADMIN \
                               node:22-slim \
@@ -76,7 +77,9 @@ pipeline {
                                 npm install --legacy-peer-deps --cache /tmp/.npm --no-save --no-package-lock && \
                                 CHROME_BIN=/usr/bin/chromium npm run test && \
                                 echo "Copying test results back to workspace..." && \
-                                cp -r test-results /var/jenkins_home/workspace/*/frontend/ 2>/dev/null || true
+                                mkdir -p ${WORKSPACE}/frontend/test-results && \
+                                cp -r test-results/* ${WORKSPACE}/frontend/test-results/ && \
+                                echo "Test results copied successfully"
                               ' || {
                                 EXIT_CODE=$?
                                 echo "Frontend tests failed with exit code: $EXIT_CODE"
