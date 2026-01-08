@@ -75,12 +75,24 @@ pipeline {
             }
         }
 
+        stage('Build Frontend') {
+            steps {
+                echo "Building frontend..."
+                dir('frontend') {
+                    sh '''
+                        npm ci --silent
+                        npm run build -- --configuration=production
+                    '''
+                }
+            }
+        }
+
         stage('Tests') {
             parallel {
                 stage('Backend Tests') {
                     steps {
                         echo "Running backend tests on pre-compiled code..."
-                        
+
                         dir('backend/services/user') {
                             sh '../../mvnw test -q'
                         }
@@ -106,35 +118,13 @@ pipeline {
 
                 stage('Frontend Tests') {
                     steps {
-                        sh '''
-                            echo "Running frontend tests in isolated Chrome container..."
-
-                            docker run --rm \
-                              --volumes-from jenkins \
-                              -w ${WORKSPACE}/frontend \
-                              --tmpfs /tmp:rw,exec,nosuid,size=2g \
-                              --cap-add=SYS_ADMIN \
-                              node:22-slim \
-                              bash -c '
-                                echo "Installing Chrome and dependencies..." && \
-                                apt-get update && \
-                                apt-get install -y chromium chromium-driver --no-install-recommends && \
-                                apt-get clean && \
-                                rm -rf /var/lib/apt/lists/* && \
-                                echo "Node version: $(node --version)" && \
-                                echo "Copying files to /tmp..." && \
-                                mkdir -p /tmp/test && \
-                                cp -r . /tmp/test/ && \
-                                cd /tmp/test && \
-                                npm install --legacy-peer-deps --cache /tmp/.npm --no-save --no-package-lock && \
-                                CHROME_BIN=/usr/bin/chromium npm run test
-                              ' || {
-                                EXIT_CODE=$?
-                                echo "Frontend tests failed with exit code: $EXIT_CODE"
-                                exit $EXIT_CODE
-                            }
-                            echo "✅ Frontend tests passed"
-                        '''
+                        echo "Running frontend tests..."
+                        dir('frontend') {
+                            sh '''
+                                export CHROME_BIN=/usr/bin/chromium
+                                npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox
+                            '''
+                        }
                     }
                 }
             }
