@@ -203,9 +203,8 @@ pipeline {
                 def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
                 env.COMMIT_MESSAGE = commitMessage
 
-                // Archive test results
-                junit allowEmptyResults: true, testResults: 'backend/**/target/surefire-reports/*.xml'
-                junit allowEmptyResults: true, testResults: 'frontend/test-results/*.xml'
+                // Archive test results (backend and frontend combined)
+                junit allowEmptyResults: true, testResults: 'backend/**/target/surefire-reports/*.xml, frontend/test-results/*.xml'
 
                 // Archive test artifacts for download
                 archiveArtifacts artifacts: 'backend/**/target/surefire-reports/*.xml', allowEmptyArchive: true
