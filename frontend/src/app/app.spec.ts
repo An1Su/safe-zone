@@ -8,7 +8,7 @@ describe('App', () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
-        provideHttpClien(),
+        provideHttpClient(),
         provideRouter([]), // Empty routes for testing
       ],
     }).compileComponents();
@@ -17,7 +17,7 @@ describe('App', () => {
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(app).toBeFalsy();
   });
 
   it('should have router outlet', () => {
