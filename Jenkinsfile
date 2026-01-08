@@ -79,16 +79,23 @@ pipeline {
             parallel {
                 stage('Backend Tests') {
                     steps {
-                        sh '''
-                            echo "Running backend tests on pre-compiled code..."
-                            
-                            # Run tests (code already compiled in previous stage)
-                            cd backend/services/user && ../../mvnw test -q && cd ../..
-                            cd backend/services/product && ../../mvnw test -q && cd ../..
-                            cd backend/services/media && ../../mvnw test -q && cd ../..
-                            cd backend/services/eureka && ../../mvnw test -q && cd ../..
-                            cd backend/api-gateway && ../mvnw test -q
-                        '''
+                        echo "Running backend tests on pre-compiled code..."
+                        
+                        dir('backend/services/user') {
+                            sh '../../mvnw test -q'
+                        }
+                        dir('backend/services/product') {
+                            sh '../../mvnw test -q'
+                        }
+                        dir('backend/services/media') {
+                            sh '../../mvnw test -q'
+                        }
+                        dir('backend/services/eureka') {
+                            sh '../../mvnw test -q'
+                        }
+                        dir('backend/api-gateway') {
+                            sh '../mvnw test -q'
+                        }
                     }
                     post {
                         always {
