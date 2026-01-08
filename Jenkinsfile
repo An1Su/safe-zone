@@ -44,11 +44,6 @@ pipeline {
                             cd api-gateway && ../mvnw test
                         '''
                     }
-                    post {
-                        always {
-                            junit 'backend/**/target/surefire-reports/*.xml'
-                        }
-                    }
                 }
 
                 stage('Frontend Tests') {
@@ -87,11 +82,6 @@ pipeline {
                             }
                             echo "✅ Frontend tests passed"
                         '''
-                    }
-                    post {
-                        always {
-                            junit 'frontend/test-results/junit.xml'
-                        }
                     }
                 }
             }
@@ -206,7 +196,30 @@ pipeline {
 
     post {
         always {
-            echo "Build completed: ${currentBuild.currentResult}"
+            script {
+                echo "Build completed: ${currentBuild.currentResult}"
+
+                // Archive test results
+                junit allowEmptyResults: true, testResults: 'backend/**/target/surefire-reports/*.xml'
+                junit allowEmptyResults: true, testResults: 'frontend/test-results/*.xml'
+
+                // Archive test artifacts for download
+                archiveArtifacts artifacts: 'backend/**/target/surefire-reports/*.xml', allowEmptyArchive: true
+                archiveArtifacts artifacts: 'frontend/test-results/*.xml', allowEmptyArchive: true
+
+                // Cleanup Docker resources
+                sh '''
+                    docker images --format "{{.Repository}}:{{.Tag}}" | grep -E "ecom-|e-commerce" | tail -n +6 | xargs -r docker rmi || true
+                    docker image prune -f || true
+                '''
+
+                // Cleanup workspace
+                if (env.WORKSPACE) {
+                    cleanWs notFailBuild: true
+                } else {
+                    echo "No workspace available; skipping cleanWs"
+                }
+            }
         }
         success {
             script {
