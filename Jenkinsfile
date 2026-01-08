@@ -199,6 +199,10 @@ pipeline {
             script {
                 echo "Build completed: ${currentBuild.currentResult}"
 
+                // Get commit message before cleaning workspace
+                def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                env.COMMIT_MESSAGE = commitMessage
+
                 // Archive test results
                 junit allowEmptyResults: true, testResults: 'backend/**/target/surefire-reports/*.xml'
                 junit allowEmptyResults: true, testResults: 'frontend/test-results/*.xml'
@@ -213,7 +217,7 @@ pipeline {
                     docker image prune -f || true
                 '''
 
-                // Cleanup workspace
+                // Cleanup workspace (done last, after getting commit message)
                 if (env.WORKSPACE) {
                     cleanWs notFailBuild: true
                 } else {
@@ -223,7 +227,6 @@ pipeline {
         }
         success {
             script {
-                def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
                 def emailRecipients = env.EMAIL_RECIPIENTS ?: 'anastasia.suhareva@gmail.com, toft.diederichs@gritlab.ax'
                 def recipientList = emailRecipients.split(',').collect { it.trim() }
                 emailext (
@@ -232,7 +235,7 @@ pipeline {
                         Build succeeded!
                         Project: ${env.JOB_NAME}
                         Build Number: #${env.BUILD_NUMBER}
-                        Commit: ${commitMessage}
+                        Commit: ${env.COMMIT_MESSAGE}
                         Build URL: ${env.BUILD_URL}
                     """,
                     to: recipientList.join(','),
@@ -242,7 +245,6 @@ pipeline {
         }
         failure {
             script {
-                def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
                 def emailRecipients = env.EMAIL_RECIPIENTS ?: 'anastasia.suhareva@gmail.com, toft.diederichs@gritlab.ax'
                 def recipientList = emailRecipients.split(',').collect { it.trim() }
                 emailext (
@@ -251,7 +253,7 @@ pipeline {
                         Build failed!
                         Project: ${env.JOB_NAME}
                         Build Number: #${env.BUILD_NUMBER}
-                        Commit: ${commitMessage}
+                        Commit: ${env.COMMIT_MESSAGE}
                         Build URL: ${env.BUILD_URL}
                         Please check the build logs for details.
                     """,
