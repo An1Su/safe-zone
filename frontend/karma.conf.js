@@ -29,7 +29,11 @@ module.exports = function (config) {
       outputDir: require('path').join(__dirname, './test-results'),
       outputFile: 'junit.xml',
       useBrowserName: false,
-      suite: 'Frontend Tests',
+      suite: 'frontend',
+      nameFormatter: undefined,
+      classNameFormatter: function (browser, result) {
+        return 'frontend.' + (result.suite[0] || 'tests');
+      },
     },
     reporters: ['progress', 'kjhtml', 'coverage', 'junit'],
     port: 9876,
