@@ -178,7 +178,7 @@ pipeline {
             post {
                 failure {
                     script {
-                        echo "❌ Deployment failed - Initiating rollback to previous working version"
+                        echo "❌ Initiating rollback to previous working version"
                         sh '''
                             # Stop failed deployment
                             docker-compose -f docker-compose.yml -f docker-compose.ci.yml down || true
@@ -210,7 +210,7 @@ pipeline {
                 }
                 success {
                     script {
-                        echo "✅ Deployment successful - saving deployment state"
+                        echo "✅ Saving deployment state"
                         sh '''
                             # Save successful deployment info
                             echo "BUILD_NUMBER=${BUILD_NUMBER}" > .deployment-state/last-successful.txt
