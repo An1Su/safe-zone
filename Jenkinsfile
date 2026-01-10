@@ -197,7 +197,7 @@ pipeline {
 
                 // Send email notification
                 def buildStatus = currentBuild.currentResult
-                def emailRecipients = env.EMAIL_RECIPIENTS ?: 'anastasia.suhareva@gmail.com, toft.diederichs@gritlab.ax'
+                def emailRecipients = env.EMAIL_RECIPIENTS ?: 'anastasia.suhareva@gmail.com'
                 def recipientList = emailRecipients.split(',').collect { it.trim() }
 
                 def statusEmoji = buildStatus == 'SUCCESS' ? '✅' : '❌'
