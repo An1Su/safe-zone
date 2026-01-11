@@ -6,7 +6,7 @@ SonarQube is used for continuous code quality inspection and security analysis o
 
 ---
 
-## 🚀 Quick Start (Existing Setup)
+## Quick Start (Existing Setup)
 
 ### 1. Start SonarQube
 
