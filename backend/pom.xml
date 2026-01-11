@@ -21,6 +21,11 @@
 	</properties>
 	<modules>
 		<module>shared</module>
+		<module>services/user</module>
+		<module>services/product</module>
+		<module>services/media</module>
+		<module>services/eureka</module>
+		<module>api-gateway</module>
 	</modules>
 	<dependencies>
 		<dependency>
