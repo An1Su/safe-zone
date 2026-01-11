@@ -49,12 +49,10 @@ pipeline {
                 stage('Frontend Tests') {
                     steps {
                         sh '''
-                            echo "⏭️  Frontend tests temporarily disabled due to Chrome timeout issues"
-                            echo "TODO: Fix Chrome Headless configuration and re-enable"
-                            # Commented out temporarily - Chrome Headless timeouts in Docker
-                            # cd frontend
-                            # npm ci
-                            # npm run test
+                            echo "🧪 Running frontend tests (without coverage for stability)..."
+                            cd frontend
+                            npm ci
+                            npm run test -- --code-coverage=false
                         '''
                     }
                 }
