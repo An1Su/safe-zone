@@ -40,7 +40,7 @@ uploads/
 # **/ssl/*.pem
 # **/ssl/*.key
 # frontend/ssl/
-backend/**/keystore.p12
+# backend/**/keystore.p12
 
 # Jenkins deployment state (for rollback)
 .deployment-state/
