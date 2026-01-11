@@ -49,7 +49,7 @@ pipeline {
                 stage('Frontend Tests') {
                     steps {
                         sh '''
-                            echo "🧪 Running frontend tests (without coverage for stability)..."
+                            echo "Running frontend tests"
                             cd frontend
                             npm ci
                             npm run test -- --code-coverage=false
@@ -61,7 +61,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                echo '🔍 Running SonarQube analysis...'
+                echo 'Running SonarQube analysis'
 
                 // Use SonarQube token from Jenkins credentials
                 withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
@@ -82,7 +82,7 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
-                echo '🚦 Checking SonarQube Quality Gate...'
+                echo 'Checking SonarQube Quality Gate'
 
                 // for quality gate result (timeout after 5 minutes)
                 timeout(time: 5, unit: 'MINUTES') {
