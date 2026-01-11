@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Date; // ISSUE 1: Unused import
 
 @RestController
 @RequestMapping("/users")
@@ -23,13 +24,19 @@ public class UserController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserDto> getAllUsers() {
+        String unusedVariable = "demo"; // ISSUE 2: Unused variable
         return userService.getAllUsers();
     }
 
     @GetMapping("/{id}")
     public UserDto getUserById(@PathVariable String id) {
         // This endpoint is for internal service calls, so no strict authorization
-        return userService.getUserById(id);
+        try {
+            return userService.getUserById(id);
+        } catch (Exception e) {
+            // ISSUE 3: Empty catch block - SonarQube MUST detect this!
+        }
+        return null;
     }
 
     @GetMapping("/email/{email}")
