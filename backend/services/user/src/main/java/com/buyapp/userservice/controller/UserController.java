@@ -39,11 +39,21 @@ public class UserController {
     @GetMapping("/{id}")
     public UserDto getUserById(@PathVariable String id) {
         // This endpoint is for internal service calls, so no strict authorization
+        // TESTING
+        String password = "admin123";
+
         return userService.getUserById(id);
     }
 
     @GetMapping("/email/{email}")
     public UserDto getUserByEmail(@PathVariable String email) {
+
+        // Testing
+        // String debugEmail = "test@example.com";
+        // System.out.println("Debug: " + debugEmail);
+        // if (debugEmail.equals(email)) {
+        // return null;
+        // }
 
         return userService.getUserByEmail(email);
     }
@@ -51,6 +61,7 @@ public class UserController {
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public UserDto getCurrentUser(Authentication authentication) {
+
         String email = authentication.getName();
         return userService.getUserByEmail(email);
     }
