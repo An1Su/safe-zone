@@ -9,6 +9,7 @@ pipeline {
     options {
         timeout(time: 30, unit: 'MINUTES')
         timestamps()
+        disableConcurrentBuilds()  // Only one build at a time!
     }
 
     environment {
