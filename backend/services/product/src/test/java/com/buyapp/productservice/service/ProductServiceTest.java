@@ -2,7 +2,6 @@ package com.buyapp.productservice.service;
 
 import com.buyapp.common.dto.ProductDto;
 import com.buyapp.common.dto.UserDto;
-import com.buyapp.common.exception.ForbiddenException;
 import com.buyapp.common.exception.ResourceNotFoundException;
 import com.buyapp.productservice.model.Product;
 import com.buyapp.productservice.repository.ProductRepository;
@@ -13,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Arrays;
@@ -22,7 +20,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -221,5 +218,134 @@ class ProductServiceTest {
 
         // Assert
         assertTrue(invalidProduct.getStock() < 0, "Stock validation should catch negative stock");
+    }
+
+    @Test
+    void checkStockAvailability_WhenSufficientStock_ShouldReturnTrue() {
+        // Arrange
+        Product product = new Product("1", "Test Product", "Description", 99.99, 10, "user1");
+        when(productRepository.findById("1")).thenReturn(Optional.of(product));
+
+        // Act
+        boolean result = productService.checkStockAvailability("1", 5);
+
+        // Assert
+        assertTrue(result, "Should return true when sufficient stock is available");
+        verify(productRepository, times(1)).findById("1");
+    }
+
+    @Test
+    void checkStockAvailability_WhenInsufficientStock_ShouldReturnFalse() {
+        // Arrange
+        Product product = new Product("1", "Test Product", "Description", 99.99, 3, "user1");
+        when(productRepository.findById("1")).thenReturn(Optional.of(product));
+
+        // Act
+        boolean result = productService.checkStockAvailability("1", 5);
+
+        // Assert
+        assertFalse(result, "Should return false when insufficient stock");
+        verify(productRepository, times(1)).findById("1");
+    }
+
+    @Test
+    void checkStockAvailability_WhenStockIsNull_ShouldReturnFalse() {
+        // Arrange
+        Product product = new Product("1", "Test Product", "Description", 99.99, null, "user1");
+        when(productRepository.findById("1")).thenReturn(Optional.of(product));
+
+        // Act
+        boolean result = productService.checkStockAvailability("1", 5);
+
+        // Assert
+        assertFalse(result, "Should return false when stock is null");
+    }
+
+    @Test
+    void reduceStock_WhenSufficientStock_ShouldReduceSuccessfully() {
+        // Arrange
+        Product product = new Product("1", "Test Product", "Description", 99.99, 10, "user1");
+        when(productRepository.findById("1")).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+
+        // Act
+        productService.reduceStock("1", 3);
+
+        // Assert
+        assertEquals(7, product.getStock(), "Stock should be reduced by 3");
+        verify(productRepository, times(1)).save(product);
+    }
+
+    @Test
+    void reduceStock_WhenInsufficientStock_ShouldThrowException() {
+        // Arrange
+        Product product = new Product("1", "Test Product", "Description", 99.99, 2, "user1");
+        when(productRepository.findById("1")).thenReturn(Optional.of(product));
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            productService.reduceStock("1", 5);
+        });
+
+        assertTrue(exception.getMessage().contains("Insufficient stock"),
+                "Exception message should mention insufficient stock");
+        assertTrue(exception.getMessage().contains("Test Product"),
+                "Exception message should include product name");
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    void reduceStock_WhenStockIsNull_ShouldThrowException() {
+        // Arrange
+        Product product = new Product("1", "Test Product", "Description", 99.99, null, "user1");
+        when(productRepository.findById("1")).thenReturn(Optional.of(product));
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            productService.reduceStock("1", 5);
+        });
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    void restoreStock_WhenStockExists_ShouldIncreaseStock() {
+        // Arrange
+        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "user1");
+        when(productRepository.findById("1")).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+
+        // Act
+        productService.restoreStock("1", 3);
+
+        // Assert
+        assertEquals(8, product.getStock(), "Stock should be increased by 3");
+        verify(productRepository, times(1)).save(product);
+    }
+
+    @Test
+    void restoreStock_WhenStockIsNull_ShouldSetToQuantity() {
+        // Arrange
+        Product product = new Product("1", "Test Product", "Description", 99.99, null, "user1");
+        when(productRepository.findById("1")).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+
+        // Act
+        productService.restoreStock("1", 3);
+
+        // Assert
+        assertEquals(3, product.getStock(), "Stock should be set to 3 when initially null");
+        verify(productRepository, times(1)).save(product);
+    }
+
+    @Test
+    void restoreStock_WhenProductNotFound_ShouldThrowException() {
+        // Arrange
+        when(productRepository.findById("999")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> {
+            productService.restoreStock("999", 5);
+        });
+        verify(productRepository, never()).save(any(Product.class));
     }
 }
