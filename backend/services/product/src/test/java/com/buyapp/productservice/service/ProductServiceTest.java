@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -24,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import com.buyapp.common.dto.ProductDto;
 import com.buyapp.common.dto.UserDto;
@@ -41,6 +44,18 @@ class ProductServiceTest {
     private WebClient.Builder webClientBuilder;
 
     @Mock
+    private WebClient webClient;
+
+    @Mock
+    private WebClient.RequestHeadersUriSpec<?> requestHeadersUriSpec;
+
+    @Mock
+    private WebClient.RequestHeadersSpec<?> requestHeadersSpec;
+
+    @Mock
+    private WebClient.ResponseSpec responseSpec;
+
+    @Mock
     private ProductEventProducer productEventProducer;
 
     @Mock
@@ -52,6 +67,7 @@ class ProductServiceTest {
     private Product testProduct;
     private ProductDto testProductDto;
     private UserDto testUser;
+    private UserDto testUserDto;
 
     @BeforeEach
     void setUp() {
@@ -74,6 +90,12 @@ class ProductServiceTest {
         testUser.setEmail("seller@example.com");
         testUser.setName("seller");
         testUser.setRole("seller");
+
+        testUserDto = new UserDto();
+        testUserDto.setId("user1");
+        testUserDto.setEmail("test@example.com");
+        testUserDto.setName("Test User");
+        testUserDto.setRole("seller");
     }
 
     @Test
@@ -501,6 +523,68 @@ class ProductServiceTest {
 
         // Assert
         assertEquals(110, product.getStock(), "Stock should be increased by 100");
+        verify(productRepository, times(1)).save(product);
+    }
+
+    @Test
+    void toEntity_WithNullStock_ShouldDefaultToZero() {
+        // Arrange
+        ProductDto dto = new ProductDto();
+        dto.setName("Test Product");
+        dto.setDescription("Test Description");
+        dto.setPrice(99.99);
+        dto.setStock(null); // Explicitly set to null
+
+        Product product = new Product("1", dto.getName(), dto.getDescription(), dto.getPrice(), 0, "user1");
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+
+        // Act - We need to test through a method that uses toEntity
+        // Since toEntity is private, we test it indirectly through createProduct
+        when(authentication.getName()).thenReturn("test@example.com");
+        doReturn(webClient).when(webClientBuilder).build();
+        doReturn(requestHeadersUriSpec).when(webClient).get();
+        doReturn(requestHeadersSpec).when(requestHeadersUriSpec).uri(anyString(), any(Object[].class));
+        doReturn(responseSpec).when(requestHeadersSpec).retrieve();
+        doReturn(Mono.just(testUserDto)).when(responseSpec).bodyToMono(UserDto.class);
+
+        ProductDto result = productService.createProduct(dto, authentication);
+
+        // Assert
+        assertNotNull(result);
+        verify(productRepository, times(1)).save(any(Product.class));
+    }
+
+    @Test
+    void toDto_WhenUserServiceReturnsNull_ShouldSetUnknownUser() {
+        // Arrange
+        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "unknownUserId");
+        when(productRepository.findById("1")).thenReturn(Optional.of(product));
+        doReturn(webClient).when(webClientBuilder).build();
+        doReturn(requestHeadersUriSpec).when(webClient).get();
+        doReturn(requestHeadersSpec).when(requestHeadersUriSpec).uri(anyString(), any(Object[].class));
+        doReturn(responseSpec).when(requestHeadersSpec).retrieve();
+        doReturn(Mono.empty()).when(responseSpec).bodyToMono(UserDto.class);
+
+        // Act
+        ProductDto result = productService.getProductById("1");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("Unknown User", result.getUser(), "Should set 'Unknown User' when user service returns null");
+    }
+
+    @Test
+    void reduceStock_EdgeCase_ExactStockAmount() {
+        // Arrange
+        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "user1");
+        when(productRepository.findById("1")).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+
+        // Act
+        productService.reduceStock("1", 5);
+
+        // Assert
+        assertEquals(0, product.getStock(), "Stock should be exactly 0");
         verify(productRepository, times(1)).save(product);
     }
 }
