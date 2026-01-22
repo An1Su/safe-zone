@@ -51,7 +51,7 @@ pipeline {
                     echo "Running frontend tests"
                     cd frontend
                     npm ci
-                    npm run test -- --code-coverage=true
+                    npm run test -- --watch=false --browsers=ChromeHeadlessCI
                 '''
             }
         }
