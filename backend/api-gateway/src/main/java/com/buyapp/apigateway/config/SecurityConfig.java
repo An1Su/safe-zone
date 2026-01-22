@@ -1,6 +1,7 @@
 package com.buyapp.apigateway.config;
 
-import com.buyapp.apigateway.filter.JwtRequestFilter;
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,14 +15,13 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import com.buyapp.apigateway.filter.JwtRequestFilter;
 
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private JwtRequestFilter jwtRequestFilter;
+    private final JwtRequestFilter jwtRequestFilter;
 
     @Value("${cors.allowed-origins}")
     private String allowedOrigins;
@@ -34,6 +34,11 @@ public class SecurityConfig {
 
     @Value("${cors.allow-credentials}")
     private boolean allowCredentials;
+
+    @Autowired
+    public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
+        this.jwtRequestFilter = jwtRequestFilter;
+    }
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {

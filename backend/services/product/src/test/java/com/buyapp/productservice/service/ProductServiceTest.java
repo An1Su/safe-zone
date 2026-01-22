@@ -159,47 +159,11 @@ class ProductServiceTest {
     }
 
     @Test
-    void createProduct_ShouldSaveProductWithUserId() {
-        // Arrange
-        lenient().when(authentication.getName()).thenReturn("seller@example.com");
-        lenient().when(productRepository.save(any(Product.class))).thenReturn(testProduct);
-
-        // Note: This test assumes getUserByEmail is mocked or stubbed appropriately
-        // In a real scenario, you might need to mock the WebClient call
-
-        // Act (this may need adjustment based on actual implementation)
-        // ProductDto result = productService.createProduct(testProductDto,
-        // authentication);
-
-        // Assert
-        // verify(productRepository, times(1)).save(any(Product.class));
-        // verify(productEventProducer, times(1)).sendProductEvent(any());
-    }
-
-    @Test
-    void deleteProduct_WhenProductExists_ShouldDeleteProduct() {
-        // Arrange
-        lenient().when(productRepository.findById("1")).thenReturn(Optional.of(testProduct));
-        lenient().doNothing().when(productRepository).delete(testProduct);
-
-        // This test assumes the delete method checks permissions
-        // You may need to adjust based on actual implementation
-    }
-
-    @Test
-    void updateProduct_ShouldUpdateProductFields() {
-        // Arrange
-        Product existingProduct = new Product("1", "Old Name", "Description", 50.0, 5, "user1");
-
-        ProductDto updateDto = new ProductDto();
-        updateDto.setName("New Name");
-        updateDto.setPrice(100.0);
-
-        lenient().when(productRepository.findById("1")).thenReturn(Optional.of(existingProduct));
-        lenient().when(authentication.getName()).thenReturn("seller@example.com");
-
-        // This assumes canModifyProduct returns true
-        // Actual test would need to mock that behavior
+    void productRepository_ShouldBeMocked() {
+        // Arrange & Assert
+        assertNotNull(productRepository, "ProductRepository should be mocked");
+        assertNotNull(productEventProducer, "ProductEventProducer should be mocked");
+        assertNotNull(webClientBuilder, "WebClient.Builder should be mocked");
     }
 
     @Test
@@ -478,6 +442,23 @@ class ProductServiceTest {
         assertEquals(99.99, dto.getPrice());
         assertEquals(10, dto.getStock());
         assertEquals("user@example.com", dto.getUser());
+    }
+
+    @Test
+    void toDto_ShouldConvertProductToDto() {
+        // Arrange
+        Product product = new Product("1", "Test Product", "Test Desc", 99.99, 10, "user1");
+        when(productRepository.findById("1")).thenReturn(Optional.of(product));
+
+        // Act
+        ProductDto result = productService.getProductById("1");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(product.getName(), result.getName());
+        assertEquals(product.getDescription(), result.getDescription());
+        assertEquals(product.getPrice(), result.getPrice());
+        assertEquals(product.getStock(), result.getStock());
     }
 
     @Test
