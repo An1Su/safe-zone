@@ -1,10 +1,21 @@
 package com.buyapp.productservice.service;
 
-import com.buyapp.common.dto.ProductDto;
-import com.buyapp.common.dto.UserDto;
-import com.buyapp.common.exception.ResourceNotFoundException;
-import com.buyapp.productservice.model.Product;
-import com.buyapp.productservice.repository.ProductRepository;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,13 +25,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import com.buyapp.common.dto.ProductDto;
+import com.buyapp.common.dto.UserDto;
+import com.buyapp.common.exception.ResourceNotFoundException;
+import com.buyapp.productservice.model.Product;
+import com.buyapp.productservice.repository.ProductRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -159,7 +168,8 @@ class ProductServiceTest {
         // In a real scenario, you might need to mock the WebClient call
 
         // Act (this may need adjustment based on actual implementation)
-        // ProductDto result = productService.createProduct(testProductDto, authentication);
+        // ProductDto result = productService.createProduct(testProductDto,
+        // authentication);
 
         // Assert
         // verify(productRepository, times(1)).save(any(Product.class));
