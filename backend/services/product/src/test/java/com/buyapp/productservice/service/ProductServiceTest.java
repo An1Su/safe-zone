@@ -358,4 +358,168 @@ class ProductServiceTest {
         });
         verify(productRepository, never()).save(any(Product.class));
     }
+
+    @Test
+    void getProductsByUserId_ShouldReturnUserProducts() {
+        // Arrange
+        Product product1 = new Product("1", "Product 1", "Desc 1", 99.99, 10, "user1");
+        Product product2 = new Product("2", "Product 2", "Desc 2", 149.99, 5, "user1");
+        List<Product> products = Arrays.asList(product1, product2);
+        when(productRepository.findByUserId("user1")).thenReturn(products);
+
+        // Act
+        List<ProductDto> result = productService.getProductsByUserId("user1");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(productRepository, times(1)).findByUserId("user1");
+    }
+
+    @Test
+    void getProductsByUserId_WhenNoProducts_ShouldReturnEmptyList() {
+        // Arrange
+        when(productRepository.findByUserId("user999")).thenReturn(Arrays.asList());
+
+        // Act
+        List<ProductDto> result = productService.getProductsByUserId("user999");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void deleteProductsByUserId_ShouldCallRepository() {
+        // Arrange
+        lenient().doNothing().when(productRepository).deleteByUserId("user1");
+
+        // Act
+        productService.deleteProductsByUserId("user1");
+
+        // Assert
+        verify(productRepository, times(1)).deleteByUserId("user1");
+    }
+
+    @Test
+    void productModel_ConstructorShouldSetAllFields() {
+        // Arrange & Act
+        Product product = new Product("1", "Test Product", "Description", 99.99, 10, "user1");
+
+        // Assert
+        assertEquals("1", product.getId());
+        assertEquals("Test Product", product.getName());
+        assertEquals("Description", product.getDescription());
+        assertEquals(99.99, product.getPrice());
+        assertEquals(10, product.getStock());
+        assertEquals("user1", product.getUserId());
+    }
+
+    @Test
+    void productModel_SettersShouldUpdateFields() {
+        // Arrange
+        Product product = new Product();
+
+        // Act
+        product.setName("Updated Name");
+        product.setDescription("Updated Description");
+        product.setPrice(199.99);
+        product.setStock(20);
+        product.setUserId("user2");
+
+        // Assert
+        assertEquals("Updated Name", product.getName());
+        assertEquals("Updated Description", product.getDescription());
+        assertEquals(199.99, product.getPrice());
+        assertEquals(20, product.getStock());
+        assertEquals("user2", product.getUserId());
+    }
+
+    @Test
+    void productModel_DefaultConstructorShouldWork() {
+        // Act
+        Product product = new Product();
+
+        // Assert
+        assertNotNull(product);
+    }
+
+    @Test
+    void productDto_SettersAndGettersShouldWork() {
+        // Arrange
+        ProductDto dto = new ProductDto();
+
+        // Act
+        dto.setId("1");
+        dto.setName("Test Product");
+        dto.setDescription("Test Description");
+        dto.setPrice(99.99);
+        dto.setStock(10);
+        dto.setUser("user@example.com");
+
+        // Assert
+        assertEquals("1", dto.getId());
+        assertEquals("Test Product", dto.getName());
+        assertEquals("Test Description", dto.getDescription());
+        assertEquals(99.99, dto.getPrice());
+        assertEquals(10, dto.getStock());
+        assertEquals("user@example.com", dto.getUser());
+    }
+
+    @Test
+    void productDto_ConstructorShouldSetAllFields() {
+        // Act
+        ProductDto dto = new ProductDto("1", "Product", "Description", 99.99, 10, "user@example.com");
+
+        // Assert
+        assertEquals("1", dto.getId());
+        assertEquals("Product", dto.getName());
+        assertEquals("Description", dto.getDescription());
+        assertEquals(99.99, dto.getPrice());
+        assertEquals(10, dto.getStock());
+        assertEquals("user@example.com", dto.getUser());
+    }
+
+    @Test
+    void checkStockAvailability_WhenExactStock_ShouldReturnTrue() {
+        // Arrange
+        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "user1");
+        when(productRepository.findById("1")).thenReturn(Optional.of(product));
+
+        // Act
+        boolean result = productService.checkStockAvailability("1", 5);
+
+        // Assert
+        assertTrue(result, "Should return true when requested quantity equals available stock");
+    }
+
+    @Test
+    void reduceStock_WhenReducingToZero_ShouldWork() {
+        // Arrange
+        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "user1");
+        when(productRepository.findById("1")).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+
+        // Act
+        productService.reduceStock("1", 5);
+
+        // Assert
+        assertEquals(0, product.getStock(), "Stock should be reduced to zero");
+        verify(productRepository, times(1)).save(product);
+    }
+
+    @Test
+    void restoreStock_WithLargeQuantity_ShouldWork() {
+        // Arrange
+        Product product = new Product("1", "Test Product", "Description", 99.99, 10, "user1");
+        when(productRepository.findById("1")).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+
+        // Act
+        productService.restoreStock("1", 100);
+
+        // Assert
+        assertEquals(110, product.getStock(), "Stock should be increased by 100");
+        verify(productRepository, times(1)).save(product);
+    }
 }
