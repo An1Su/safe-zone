@@ -17,7 +17,7 @@ describe('ProductService', () => {
       name: 'Product 1',
       description: 'Description 1',
       price: 99.99,
-      quality: 10,
+      stock: 10,
       user: 'seller@example.com',
     },
     {
@@ -25,7 +25,7 @@ describe('ProductService', () => {
       name: 'Product 2',
       description: 'Description 2',
       price: 149.99,
-      quality: 5,
+      stock: 5,
       user: 'seller@example.com',
     },
   ];
@@ -126,7 +126,7 @@ describe('ProductService', () => {
         name: 'New Product',
         description: 'New Description',
         price: 199.99,
-        quality: 20,
+        stock: 20,
         user: 'seller@example.com',
       };
 
@@ -185,21 +185,21 @@ describe('ProductService', () => {
         name: 'Product',
         description: 'Test',
         price: -10.0,
-        quality: 5,
+        stock: 5,
       };
 
       expect(invalidProduct.price < 0).toBe(true);
     });
 
-    it('should verify quality is non-negative', () => {
+    it('should verify stock is non-negative', () => {
       const invalidProduct: Product = {
         name: 'Product',
         description: 'Test',
         price: 10.0,
-        quality: -5,
+        stock: -5,
       };
 
-      expect(invalidProduct.quality < 0).toBe(true);
+      expect(invalidProduct.stock < 0).toBe(true);
     });
   });
 });

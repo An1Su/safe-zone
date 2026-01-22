@@ -53,7 +53,7 @@ class ProductServiceTest {
         testProduct.setName("Test Product");
         testProduct.setDescription("Test Description");
         testProduct.setPrice(99.99);
-        testProduct.setQuality(10);
+        testProduct.setStock(10);
         testProduct.setUserId("user1");
 
         testProductDto = new ProductDto();
@@ -61,7 +61,7 @@ class ProductServiceTest {
         testProductDto.setName("Test Product");
         testProductDto.setDescription("Test Description");
         testProductDto.setPrice(99.99);
-        testProductDto.setQuality(10);
+        testProductDto.setStock(10);
 
         testUser = new UserDto();
         testUser.setId("user1");
@@ -203,7 +203,7 @@ class ProductServiceTest {
         invalidProduct.setPrice(-10.0); // Invalid price
         invalidProduct.setDescription("Test");
         invalidProduct.setPrice(-10.0); // Invalid price
-        invalidProduct.setQuality(5);
+        invalidProduct.setStock(5);
 
         // Assert - this would typically be validated at controller/validation layer
         // but we're testing service logic awareness
@@ -211,15 +211,15 @@ class ProductServiceTest {
     }
 
     @Test
-    void verifyProductValidation_QualityShouldBeValid() {
+    void verifyProductValidation_StockShouldBeValid() {
         // Arrange
         ProductDto invalidProduct = new ProductDto();
         invalidProduct.setName("Product");
         invalidProduct.setDescription("Test");
         invalidProduct.setPrice(10.0);
-        invalidProduct.setQuality(-5); // Invalid quality
+        invalidProduct.setStock(-5); // Invalid stock
 
         // Assert
-        assertTrue(invalidProduct.getQuality() < 0, "Quality validation should catch negative quality");
+        assertTrue(invalidProduct.getStock() < 0, "Stock validation should catch negative stock");
     }
 }

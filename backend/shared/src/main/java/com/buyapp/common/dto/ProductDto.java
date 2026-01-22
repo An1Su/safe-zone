@@ -1,6 +1,5 @@
 package com.buyapp.common.dto;
 
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -20,9 +19,8 @@ public class ProductDto {
     @Positive(message = "Product price must be positive")
     private Double price;
 
-    @Min(value = 0, message = "Quality must be between 0 and 100")
-    @Max(value = 100, message = "Quality must be between 0 and 100")
-    private Integer quality;
+    @Min(value = 0, message = "Stock cannot be negative")
+    private Integer stock;
 
     private String user; // Email of the owner
 
@@ -30,12 +28,12 @@ public class ProductDto {
     public ProductDto() {
     }
 
-    public ProductDto(String id, String name, String description, Double price, Integer quality, String user) {
+    public ProductDto(String id, String name, String description, Double price, Integer stock, String user) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
-        this.quality = quality;
+        this.stock = stock;
         this.user = user;
     }
 
@@ -72,12 +70,12 @@ public class ProductDto {
         this.price = price;
     }
 
-    public Integer getQuality() {
-        return quality;
+    public Integer getStock() {
+        return stock;
     }
 
-    public void setQuality(Integer quality) {
-        this.quality = quality;
+    public void setStock(Integer stock) {
+        this.stock = stock;
     }
 
     public String getUser() {
