@@ -1,6 +1,8 @@
 package com.buyapp.apigateway.config;
 
-import com.buyapp.apigateway.filter.JwtRequestFilter;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.buyapp.apigateway.filter.JwtRequestFilter;
 
 @ExtendWith(MockitoExtension.class)
 class SecurityConfigTest {
@@ -45,7 +47,7 @@ class SecurityConfigTest {
 
         // Assert
         assertNotNull(corsSource, "CorsConfigurationSource should not be null");
-        
+
         // Verify the configuration is a UrlBasedCorsConfigurationSource
         assertTrue(corsSource instanceof org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource,
                 "CorsConfigurationSource should be of type UrlBasedCorsConfigurationSource");
@@ -70,4 +72,3 @@ class SecurityConfigTest {
         }
     }
 }
-
