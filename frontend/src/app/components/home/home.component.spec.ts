@@ -27,7 +27,7 @@ describe('HomeComponent', () => {
       name: 'Test Product 1',
       description: 'Description 1',
       price: 99.99,
-      quality: 10,
+      stock: 10,
       user: 'seller@example.com',
     },
     {
@@ -35,7 +35,7 @@ describe('HomeComponent', () => {
       name: 'Test Product 2',
       description: 'Description 2',
       price: 149.99,
-      quality: 5,
+      stock: 5,
       user: 'seller@example.com',
     },
   ];

@@ -71,7 +71,7 @@
           <p class="description">{{ product.description | slice : 0 : 60 }}...</p>
           <div class="product-meta">
             <span class="price">${{ product.price | number : '1.2-2' }}</span>
-            <span class="quality">Quality: {{ product.quality }}/5</span>
+            <span class="stock">Stock: {{ product.stock }}</span>
           </div>
           <div class="product-actions">
             <a
