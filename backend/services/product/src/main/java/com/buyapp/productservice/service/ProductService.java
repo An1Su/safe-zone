@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -82,7 +81,9 @@ public class ProductService {
         existing.setName(productDto.getName());
         existing.setDescription(productDto.getDescription());
         existing.setPrice(productDto.getPrice());
-        existing.setQuality(productDto.getQuality());
+        if (productDto.getStock() != null) {
+            existing.setStock(productDto.getStock());
+        }
 
         Product updated = productRepository.save(existing);
 
@@ -151,6 +152,28 @@ public class ProductService {
         productRepository.deleteByUserId(userId);
     }
 
+    public boolean checkStockAvailability(String productId, Integer requestedQuantity) {
+        Product product = getProductEntityById(productId);
+        return product.getStock() != null && product.getStock() >= requestedQuantity;
+    }
+
+    public void reduceStock(String productId, Integer quantity) {
+        Product product = getProductEntityById(productId);
+        if (product.getStock() == null || product.getStock() < quantity) {
+            throw new IllegalArgumentException(
+                    "Insufficient stock for product: " + product.getName() + 
+                    ". Available: " + product.getStock() + ", Requested: " + quantity);
+        }
+        product.setStock(product.getStock() - quantity);
+        productRepository.save(product);
+    }
+
+    public void restoreStock(String productId, Integer quantity) {
+        Product product = getProductEntityById(productId);
+        product.setStock((product.getStock() != null ? product.getStock() : 0) + quantity);
+        productRepository.save(product);
+    }
+
     private boolean canModifyProduct(Product product, Authentication authentication) {
         String currentUserEmail = authentication.getName();
         boolean isAdmin = authentication.getAuthorities().stream()
@@ -201,7 +224,7 @@ public class ProductService {
         dto.setName(product.getName());
         dto.setDescription(product.getDescription());
         dto.setPrice(product.getPrice());
-        dto.setQuality(product.getQuality());
+        dto.setStock(product.getStock());
 
         // Convert userId to email for display via User Service call
         UserDto user = getUserById(product.getUserId());
@@ -215,7 +238,7 @@ public class ProductService {
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
-        product.setQuality(dto.getQuality());
+        product.setStock(dto.getStock() != null ? dto.getStock() : 0);
         // Note: userId should be set separately in service methods, not from DTO
         return product;
     }

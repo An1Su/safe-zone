@@ -12,7 +12,7 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  quality: number;
+  stock: number;
   user?: string; // Owner email
 }
 
