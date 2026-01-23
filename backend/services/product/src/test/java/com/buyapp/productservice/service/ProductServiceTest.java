@@ -226,7 +226,7 @@ class ProductServiceTest {
 
     @Test
     void updateProduct_ShouldUpdateProductFields() {
-        // Arrange
+
         Product existingProduct = new Product("1", "Old Name", "Description", 50.0, 5, "user1");
 
         ProductDto updateDto = new ProductDto();
