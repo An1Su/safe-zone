@@ -5,12 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,12 +25,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
+import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
+import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 
 import com.buyapp.common.dto.ProductDto;
 import com.buyapp.common.dto.UserDto;
 import com.buyapp.common.exception.ResourceNotFoundException;
 import com.buyapp.productservice.model.Product;
 import com.buyapp.productservice.repository.ProductRepository;
+
+import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -159,19 +167,61 @@ class ProductServiceTest {
     @Test
     void createProduct_ShouldSaveProductWithUserId() {
         // Arrange
-        lenient().when(authentication.getName()).thenReturn("seller@example.com");
-        lenient().when(productRepository.save(any(Product.class))).thenReturn(testProduct);
+        when(authentication.getName()).thenReturn("seller@example.com");
+        when(productRepository.save(any(Product.class))).thenReturn(testProduct);
 
+        // Mock WebClient chain for getUserByEmail
+        WebClient webClient = mock(WebClient.class);
+        RequestHeadersUriSpec requestHeadersUriSpec = mock(RequestHeadersUriSpec.class);
+        RequestHeadersSpec requestHeadersSpec = mock(RequestHeadersSpec.class);
+        ResponseSpec responseSpec = mock(ResponseSpec.class);
+
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(anyString(), anyString())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UserDto.class)).thenReturn(Mono.just(testUser));
+
+        // Act
+        ProductDto result = productService.createProduct(testProductDto, authentication);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(testProduct.getName(), result.getName());
+        assertEquals(testProduct.getPrice(), result.getPrice());
+        verify(productRepository, times(1)).save(any(Product.class));
+        verify(productEventProducer, times(1)).sendProductEvent(any());
     }
 
     @Test
     void deleteProduct_WhenProductExists_ShouldDeleteProduct() {
         // Arrange
-        lenient().when(productRepository.findById("1")).thenReturn(Optional.of(testProduct));
-        lenient().doNothing().when(productRepository).delete(testProduct);
+        when(productRepository.findById("1")).thenReturn(Optional.of(testProduct));
+        when(authentication.getName()).thenReturn("seller@example.com");
+        Collection<? extends org.springframework.security.core.GrantedAuthority> authorities = Arrays
+                .asList(new SimpleGrantedAuthority("ROLE_SELLER"));
+        doReturn(authorities).when(authentication).getAuthorities();
 
-        // This test assumes the delete method checks permissions
-        // You may need to adjust based on actual implementation
+        // Mock WebClient chain for getUserByEmail (for permission check) and
+        // getUserById (for event)
+        WebClient webClient = mock(WebClient.class);
+        RequestHeadersUriSpec requestHeadersUriSpec = mock(RequestHeadersUriSpec.class);
+        RequestHeadersSpec requestHeadersSpec = mock(RequestHeadersSpec.class);
+        ResponseSpec responseSpec = mock(ResponseSpec.class);
+
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(anyString(), anyString())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UserDto.class)).thenReturn(Mono.just(testUser));
+
+        // Act
+        productService.deleteProduct("1", authentication);
+
+        // Assert
+        verify(productRepository, times(1)).findById("1");
+        verify(productRepository, times(1)).deleteById("1");
+        verify(productEventProducer, times(1)).sendProductEvent(any());
     }
 
     @Test
@@ -181,13 +231,42 @@ class ProductServiceTest {
 
         ProductDto updateDto = new ProductDto();
         updateDto.setName("New Name");
+        updateDto.setDescription("New Description");
         updateDto.setPrice(100.0);
+        updateDto.setQuality(8);
 
-        lenient().when(productRepository.findById("1")).thenReturn(Optional.of(existingProduct));
-        lenient().when(authentication.getName()).thenReturn("seller@example.com");
+        when(productRepository.findById("1")).thenReturn(Optional.of(existingProduct));
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(authentication.getName()).thenReturn("seller@example.com");
+        Collection<? extends org.springframework.security.core.GrantedAuthority> authorities = Arrays
+                .asList(new SimpleGrantedAuthority("ROLE_SELLER"));
+        doReturn(authorities).when(authentication).getAuthorities();
 
-        // This assumes canModifyProduct returns true
-        // Actual test would need to mock that behavior
+        // Mock WebClient chain for getUserByEmail (for permission check) and
+        // getUserById (for event)
+        WebClient webClient = mock(WebClient.class);
+        RequestHeadersUriSpec requestHeadersUriSpec = mock(RequestHeadersUriSpec.class);
+        RequestHeadersSpec requestHeadersSpec = mock(RequestHeadersSpec.class);
+        ResponseSpec responseSpec = mock(ResponseSpec.class);
+
+        when(webClientBuilder.build()).thenReturn(webClient);
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(anyString(), anyString())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(UserDto.class)).thenReturn(Mono.just(testUser));
+
+        // Act
+        ProductDto result = productService.updateProduct("1", updateDto, authentication);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("New Name", result.getName());
+        assertEquals("New Description", result.getDescription());
+        assertEquals(100.0, result.getPrice());
+        assertEquals(8, result.getQuality());
+        verify(productRepository, times(1)).findById("1");
+        verify(productRepository, times(1)).save(any(Product.class));
+        verify(productEventProducer, times(1)).sendProductEvent(any());
     }
 
     @Test
