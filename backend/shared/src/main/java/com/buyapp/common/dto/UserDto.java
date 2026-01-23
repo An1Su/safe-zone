@@ -65,6 +65,12 @@ public class UserDto {
         this.role = role;
     }
 
+    // String debugEmail = "test@example.com";
+    // System.out.println("Debug: " + debugEmail);
+    // if (debugEmail.equals(email)) {
+    // return null;
+    // }
+
     public String getAvatar() {
         return avatar;
     }
