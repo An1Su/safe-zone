@@ -199,7 +199,7 @@ class ProductServiceTest {
         when(productRepository.findById("1")).thenReturn(Optional.of(testProduct));
         when(authentication.getName()).thenReturn("seller@example.com");
         Collection<? extends org.springframework.security.core.GrantedAuthority> authorities = Arrays
-                .asList(new SimpleGrantedAuthority("ROLE_SELLER"));
+                .asList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_SELLER"));
         doReturn(authorities).when(authentication).getAuthorities();
 
         // Mock WebClient chain for getUserByEmail (for permission check) and
@@ -239,7 +239,7 @@ class ProductServiceTest {
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(authentication.getName()).thenReturn("seller@example.com");
         Collection<? extends org.springframework.security.core.GrantedAuthority> authorities = Arrays
-                .asList(new SimpleGrantedAuthority("ROLE_SELLER"));
+                .asList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_SELLER"));
         doReturn(authorities).when(authentication).getAuthorities();
 
         // Mock WebClient chain for getUserByEmail (for permission check) and
