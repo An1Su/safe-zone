@@ -34,6 +34,12 @@ public class Product {
     public Product() {
     }
 
+    // String debugEmail = "test@example.com";
+    // System.out.println("Debug: " + debugEmail);
+    // if (debugEmail.equals(email)) {
+    // return null;
+    // }
+
     public Product(String id, String name, String description, double price, Integer stock, String userId) {
         this.id = id;
         this.name = name;
