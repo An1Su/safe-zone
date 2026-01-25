@@ -4,7 +4,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -26,9 +25,8 @@ public class Product {
     @Positive(message = "Product price can't be negative")
     private Double price;
 
-    @Min(value = 0, message = "Quality must be between 0 and 100")
-    @Max(value = 100, message = "Quality must be between 0 and 100")
-    private Integer quality;
+    @Min(value = 0, message = "Stock cannot be negative")
+    private Integer stock;
 
     @Field("userId")
     private String userId;
@@ -36,12 +34,12 @@ public class Product {
     public Product() {
     }
 
-    public Product(String id, String name, String description, double price, Integer quality, String userId) {
+    public Product(String id, String name, String description, double price, Integer stock, String userId) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
-        this.quality = quality;
+        this.stock = stock;
         this.userId = userId;
     }
 
@@ -74,12 +72,12 @@ public class Product {
         this.price = price;
     }
 
-    public Integer getQuality() {
-        return quality;
+    public Integer getStock() {
+        return stock;
     }
 
-    public void setQuality(Integer quality) {
-        this.quality = quality;
+    public void setStock(Integer stock) {
+        this.stock = stock;
     }
 
     public String getUserId() {
