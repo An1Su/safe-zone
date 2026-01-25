@@ -51,7 +51,8 @@ pipeline {
                     echo "Running frontend tests"
                     cd frontend
                     npm ci
-                    npm run test -- --code-coverage=false
+                    # Disable coverage for now - tests hang with coverage enabled
+                    npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage=false
                 '''
             }
         }

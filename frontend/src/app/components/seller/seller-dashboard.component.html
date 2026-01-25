@@ -69,15 +69,14 @@
           </div>
 
           <div class="form-group">
-            <label for="quality">Quality (%)</label>
+            <label for="stock">Stock</label>
             <input
-              id="quality"
+              id="stock"
               type="number"
-              [(ngModel)]="newProduct.quality"
-              name="quality"
-              placeholder="0-100"
+              [(ngModel)]="newProduct.stock"
+              name="stock"
+              placeholder="Available quantity"
               min="0"
-              max="100"
               required
             />
           </div>
@@ -205,15 +204,14 @@
         </div>
 
         <div class="form-group">
-          <label for="edit-quality">Quality (%)</label>
+          <label for="edit-stock">Stock</label>
           <input
-            id="edit-quality"
+            id="edit-stock"
             type="number"
-            [(ngModel)]="editProduct.quality"
-            name="edit-quality"
-            placeholder="0-100"
+            [(ngModel)]="editProduct.stock"
+            name="edit-stock"
+            placeholder="Available quantity"
             min="0"
-            max="100"
             required
           />
         </div>
@@ -263,7 +261,7 @@
         <p class="card-description">{{ product.description }}</p>
         <div class="card-meta">
           <div class="card-price">${{ product.price }}</div>
-          <div class="card-quality">{{ product.quality }}%</div>
+          <div class="card-stock">Stock: {{ product.stock }}</div>
         </div>
       </div>
 

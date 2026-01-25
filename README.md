@@ -163,7 +163,7 @@ See detailed instructions in:
   "name": "string",
   "description": "string",
   "price": "number",
-  "quality": "number (0-100)",
+  "stock": "number",
   "userId": "string (User._id)",
   "user": "string (User.name)"
 }
@@ -223,7 +223,7 @@ TOKEN=$(curl -X POST https://localhost:8080/auth/login \
 curl -X POST https://localhost:8080/products \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"name":"Product","description":"Test","price":19.99,"quality":90}'
+  -d '{"name":"Product","description":"Test","price":19.99,"stock":100}'
 
 # View all products (no auth)
 curl https://localhost:8080/products

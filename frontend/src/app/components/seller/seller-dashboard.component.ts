@@ -43,14 +43,14 @@ export class SellerDashboardComponent implements OnInit {
     name: '',
     description: '',
     price: 0,
-    quality: 0,
+    stock: 0,
   };
 
   editProduct: Product = {
     name: '',
     description: '',
     price: 0,
-    quality: 0,
+    stock: 0,
   };
 
   constructor(
@@ -242,8 +242,7 @@ export class SellerDashboardComponent implements OnInit {
       !this.newProduct.name ||
       !this.newProduct.description ||
       this.newProduct.price <= 0 ||
-      this.newProduct.quality < 0 ||
-      this.newProduct.quality > 100
+      this.newProduct.stock < 0
     ) {
       this.formError = 'Please fill in all fields correctly.';
       return;
@@ -385,8 +384,7 @@ export class SellerDashboardComponent implements OnInit {
       !this.editProduct.name ||
       !this.editProduct.description ||
       this.editProduct.price <= 0 ||
-      this.editProduct.quality < 0 ||
-      this.editProduct.quality > 100
+      this.editProduct.stock < 0
     ) {
       this.formError = 'Please fill in all fields correctly.';
       return;
@@ -445,7 +443,7 @@ export class SellerDashboardComponent implements OnInit {
       name: '',
       description: '',
       price: 0,
-      quality: 0,
+      stock: 0,
     };
     this.formError = '';
     this.creationStep = 1;
@@ -458,7 +456,7 @@ export class SellerDashboardComponent implements OnInit {
       name: '',
       description: '',
       price: 0,
-      quality: 0,
+      stock: 0,
     };
     this.editingProductId = null;
     this.formError = '';
