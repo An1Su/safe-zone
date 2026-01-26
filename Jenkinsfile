@@ -36,6 +36,7 @@ pipeline {
                     cd shared && ../mvnw clean install -DskipTests && cd ..
 
                     # Run tests for each service (pipeline fails if any test fails)
+                    # JaCoCo reports are generated automatically via test phase
                     cd services/user && ../../mvnw test && cd ../..
                     cd services/product && ../../mvnw test && cd ../..
                     cd services/media && ../../mvnw test && cd ../..
@@ -65,10 +66,11 @@ pipeline {
                 // Use SonarQube token from Jenkins credentials
                 withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
                     // Build the project first to ensure all classes are compiled
+                    // Don't run 'clean' here - it would delete coverage reports from test stage
                     sh '''
                         cd backend
                         # Build all modules to ensure classes are compiled for SonarQube
-                        ./mvnw clean install -DskipTests
+                        ./mvnw install -DskipTests
                     '''
                     // Analyze all backend services with explicit source paths
                     sh '''
