@@ -1,22 +1,30 @@
 <nav class="navbar">
   <div class="navbar-container">
+    <!-- Logo -->
     <a routerLink="/" class="navbar-logo">
-      <span class="logo-icon">🛒</span>
-      E-commerce
+      <span class="logo-glam">GLAM</span>
+      <span class="logo-beauty">Beauty</span>
     </a>
 
+    <!-- Navigation Links - Keep original routes -->
     <div class="navbar-menu">
-      <a routerLink="/" class="nav-link">Home</a>
-      <a routerLink="/products" class="nav-link">Products</a>
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">Home</a>
+      <a routerLink="/products" routerLinkActive="active" class="nav-link">Products</a>
+    </div>
 
+    <!-- Right Side Actions -->
+    <div class="navbar-actions">
+      <!-- Auth Buttons (not logged in) -->
       <div *ngIf="!isLoggedIn()" class="nav-auth">
         <a routerLink="/login" class="nav-link">Sign In</a>
-        <a routerLink="/register" class="nav-link nav-register">Sign Up</a>
+        <a routerLink="/register" class="btn-signup">Sign Up</a>
       </div>
 
+      <!-- User Menu (logged in) -->
       <div *ngIf="isLoggedIn() && currentUser" class="nav-user">
-        <a routerLink="/seller/dashboard" class="nav-link" *ngIf="isSeller()"> Manage Products </a>
+        <a routerLink="/seller/dashboard" class="nav-link" *ngIf="isSeller()">Manage Products</a>
 
+        <!-- User Dropdown -->
         <div class="user-dropdown">
           <button class="user-menu-toggle" (click)="toggleDropdown()">
             <span class="user-avatar" *ngIf="avatarUrl">
@@ -24,10 +32,18 @@
             </span>
             <span class="user-avatar-placeholder" *ngIf="!avatarUrl">{{ getInitials() }}</span>
             <span class="user-greeting">Hello, {{ currentUser.name }}</span>
-            <span class="dropdown-icon" [class.open]="dropdownOpen">▼</span>
+            <span class="dropdown-arrow" [class.open]="dropdownOpen">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </span>
           </button>
 
           <div class="dropdown-menu" *ngIf="dropdownOpen">
+            <div class="dropdown-header">
+              <span class="greeting">Hello, {{ currentUser.name }}</span>
+            </div>
+            <div class="dropdown-divider"></div>
             <a routerLink="/profile" class="dropdown-item" (click)="closeDropdown()">
               👤 My Profile
             </a>
