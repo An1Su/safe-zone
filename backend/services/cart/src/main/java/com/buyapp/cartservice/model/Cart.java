@@ -8,11 +8,18 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.Valid;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "carts")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Cart {
 
     @Id
@@ -33,10 +40,6 @@ public class Cart {
     @Field("updatedAt")
     private LocalDateTime updatedAt;
 
-    public Cart() {
-        this.items = new ArrayList<>();
-    }
-
     public Cart(String userId) {
         this.userId = userId;
         this.items = new ArrayList<>();
@@ -44,45 +47,8 @@ public class Cart {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters and setters
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public List<CartItem> getItems() {
-        return items;
-    }
-
     public void setItems(List<CartItem> items) {
         this.items = items != null ? items : new ArrayList<>();
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     // Helper methods
@@ -124,4 +90,3 @@ public class Cart {
         return items == null || items.isEmpty();
     }
 }
-

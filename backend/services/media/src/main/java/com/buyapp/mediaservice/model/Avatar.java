@@ -5,8 +5,14 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Document(collection = "avatars")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Avatar {
     @Id
     private String id;
@@ -21,62 +27,4 @@ public class Avatar {
     private String fileName;
     private String contentType;
     private Long fileSize;
-
-    public Avatar() {
-    }
-
-    public Avatar(String id, String imagePath, String userId, String fileName, String contentType, Long fileSize) {
-        this.id = id;
-        this.imagePath = imagePath;
-        this.userId = userId;
-        this.fileName = fileName;
-        this.contentType = contentType;
-        this.fileSize = fileSize;
-    }
-
-    // Getters and Setters
-    public String getId() {
-        return id;
-    }
-
-    public String getImagePath() {
-        return imagePath;
-    }
-
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
-    public Long getFileSize() {
-        return fileSize;
-    }
-
-    public void setFileSize(Long fileSize) {
-        this.fileSize = fileSize;
-    }
 }
-

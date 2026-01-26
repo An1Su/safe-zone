@@ -2,8 +2,12 @@ package com.buyapp.common.event;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
 public class ProductEvent implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     public enum EventType {
         PRODUCT_CREATED,
@@ -37,66 +41,5 @@ public class ProductEvent implements Serializable {
         this.sellerId = sellerId;
         this.sellerEmail = sellerEmail;
         this.timestamp = LocalDateTime.now();
-    }
-
-    // Getters and Setters
-    public EventType getEventType() {
-        return eventType;
-    }
-
-    public void setEventType(EventType eventType) {
-        this.eventType = eventType;
-    }
-
-    public String getProductId() {
-        return productId;
-    }
-
-    public void setProductId(String productId) {
-        this.productId = productId;
-    }
-
-    public String getProductName() {
-        return productName;
-    }
-
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-
-    public String getSellerId() {
-        return sellerId;
-    }
-
-    public void setSellerId(String sellerId) {
-        this.sellerId = sellerId;
-    }
-
-    public String getSellerEmail() {
-        return sellerEmail;
-    }
-
-    public void setSellerEmail(String sellerEmail) {
-        this.sellerEmail = sellerEmail;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    @Override
-    public String toString() {
-        return "ProductEvent{" +
-                "eventType='" + eventType + '\'' +
-                ", productId='" + productId + '\'' +
-                ", productName='" + productName + '\'' +
-                ", sellerId='" + sellerId + '\'' +
-                ", sellerEmail='" + sellerEmail + '\'' +
-                ", timestamp=" + timestamp +
-                '}';
     }
 }

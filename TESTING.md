@@ -128,7 +128,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Toft08/e-com.git'
+                git branch: 'main', url: 'https://github.com/An1Su/safe-zone.git'
             }
         }
 

@@ -22,7 +22,7 @@ The project is a microservices e-commerce platform consisting of:
 
 ### Getting Started
 
-1. Clone the repository: `git clone https://github.com/Toft08/e-com.git`
+1. Clone the repository: `git clone https://github.com/An1Su/safe-zone.git`
 2. Create a feature branch: `git checkout -b feature/your-feature-name`
 3. Make your changes
 4. Commit and push: `git commit -m "your message" && git push`
