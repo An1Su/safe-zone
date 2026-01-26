@@ -44,6 +44,12 @@ spring:
                   args:
                     maxSize: 2MB
 
+            # Cart Service routes
+            - id: cart-service
+              uri: lb://cart-service
+              predicates:
+                - Path=/cart/**
+
 server:
   port: 8080
   ssl:

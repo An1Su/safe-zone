@@ -25,6 +25,7 @@ public class CartService {
     private WebClient.Builder webClientBuilder;
 
     private static final String PRODUCT_SERVICE_URL = "http://product-service";
+    private static final String CART_NOT_FOUND_MESSAGE = "Cart not found for user: ";
 
     /**
      * Get user's cart or create a new one if it doesn't exist
@@ -109,7 +110,7 @@ public class CartService {
         }
 
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException(CART_NOT_FOUND_MESSAGE + userId));
 
         CartItem item = cart.findItemByProductId(productId);
         if (item == null) {
@@ -142,7 +143,7 @@ public class CartService {
      */
     public CartDto removeItem(String userId, String productId) {
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException(CART_NOT_FOUND_MESSAGE + userId));
 
         cart.removeItem(productId);
         cart.setUpdatedAt(LocalDateTime.now());
@@ -156,7 +157,7 @@ public class CartService {
      */
     public void clearCart(String userId) {
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException(CART_NOT_FOUND_MESSAGE + userId));
 
         cart.setItems(new java.util.ArrayList<>());
         cart.setUpdatedAt(LocalDateTime.now());

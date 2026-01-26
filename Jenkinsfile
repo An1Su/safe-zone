@@ -39,6 +39,7 @@ pipeline {
                     cd services/user && ../../mvnw test && cd ../..
                     cd services/product && ../../mvnw test && cd ../..
                     cd services/media && ../../mvnw test && cd ../..
+                    cd services/cart && ../../mvnw test && cd ../..
                     cd services/eureka && ../../mvnw test && cd ../..
                     cd api-gateway && ../mvnw test
                 '''
@@ -63,7 +64,13 @@ pipeline {
 
                 // Use SonarQube token from Jenkins credentials
                 withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
-                    // Analyze all backend services AND frontend with explicit source paths
+                    // Build the project first to ensure all classes are compiled
+                    sh '''
+                        cd backend
+                        # Build all modules to ensure classes are compiled for SonarQube
+                        ./mvnw clean install -DskipTests
+                    '''
+                    // Analyze all backend services with explicit source paths
                     sh '''
                         cd backend
                         ./mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
@@ -72,7 +79,7 @@ pipeline {
                             -Dsonar.host.url=http://host.docker.internal:9000 \
                             -Dsonar.token=${SONAR_TOKEN} \
                             -Dsonar.java.source=17 \
-                            -Dsonar.coverage.jacoco.xmlReportPaths=services/user/target/site/jacoco/jacoco.xml,services/product/target/site/jacoco/jacoco.xml,services/media/target/site/jacoco/jacoco.xml
+                            -Dsonar.coverage.jacoco.xmlReportPaths=services/user/target/site/jacoco/jacoco.xml,services/product/target/site/jacoco/jacoco.xml,services/media/target/site/jacoco/jacoco.xml,services/cart/target/site/jacoco/jacoco.xml
                     '''
                 }
             }
