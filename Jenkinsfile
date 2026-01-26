@@ -13,9 +13,9 @@ pipeline {
     }
 
     environment {
-        JAVA_HOME = tool name: 'JDK-17', type: 'jdk'
-        NODE_HOME = tool name: 'NodeJS-20', type: 'nodejs'
-        PATH = "${JAVA_HOME}/bin:${NODE_HOME ?: '/usr'}/bin:${PATH}"
+        // Maven and Node.js are installed in the Docker image
+        // Chrome is available at /usr/bin/chromium
+        CHROME_BIN = '/usr/bin/chromium'
         DOCKER_BUILDKIT = '1'
     }
 
