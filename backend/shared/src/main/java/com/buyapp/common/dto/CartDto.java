@@ -27,6 +27,7 @@ public class CartDto {
          * Default constructor required for JSON deserialization (Jackson, Spring)
          */
         public CartItemDto() {
+            // Empty constructor required for JSON deserialization frameworks
         }
 
         public String getProductId() {
