@@ -3,7 +3,6 @@ package com.buyapp.common.event;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 public class ProductEvent implements Serializable {

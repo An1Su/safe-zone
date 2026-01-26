@@ -79,7 +79,9 @@ pipeline {
                             -Dsonar.host.url=http://host.docker.internal:9000 \
                             -Dsonar.token=${SONAR_TOKEN} \
                             -Dsonar.java.source=17 \
-                            -Dsonar.coverage.jacoco.xmlReportPaths=services/user/target/site/jacoco/jacoco.xml,services/product/target/site/jacoco/jacoco.xml,services/media/target/site/jacoco/jacoco.xml,services/cart/target/site/jacoco/jacoco.xml
+                            -Dsonar.coverage.jacoco.xmlReportPaths=services/user/target/site/jacoco/jacoco.xml,services/product/target/site/jacoco/jacoco.xml,services/media/target/site/jacoco/jacoco.xml,services/cart/target/site/jacoco/jacoco.xml \
+                            -Dsonar.coverage.exclusions=**/dto/**/*.java,**/model/**/*.java,**/event/**/*.java,**/exception/**/*.java,**/security/**/*.java \
+                            -Dsonar.java.libraries=**/target/classes/**/*.class
                     '''
                 }
             }
