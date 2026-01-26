@@ -18,4 +18,10 @@ public class BlacklistedToken {
 
     private String token;
     private Date expiryDate;
+
+    // Custom constructor without id (MongoDB will auto-generate it)
+    public BlacklistedToken(String token, Date expiryDate) {
+        this.token = token;
+        this.expiryDate = expiryDate;
+    }
 }
