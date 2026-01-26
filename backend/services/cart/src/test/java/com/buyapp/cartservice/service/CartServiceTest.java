@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,6 +24,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.buyapp.cartservice.model.Cart;
@@ -36,6 +39,7 @@ import com.buyapp.common.exception.ResourceNotFoundException;
 import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class CartServiceTest {
 
     @Mock
@@ -83,11 +87,11 @@ class CartServiceTest {
         testCart.setUpdatedAt(LocalDateTime.now());
         testCart.addItem(testCartItem);
 
-        // Setup WebClient mocking chain
-        doReturn(webClient).when(webClientBuilder).build();
-        doReturn(requestHeadersUriSpec).when(webClient).get();
-        doReturn(requestHeadersSpec).when(requestHeadersUriSpec).uri(anyString(), anyString());
-        doReturn(responseSpec).when(requestHeadersSpec).retrieve();
+        // Setup WebClient mocking chain (lenient - not all tests use WebClient)
+        lenient().doReturn(webClient).when(webClientBuilder).build();
+        lenient().doReturn(requestHeadersUriSpec).when(webClient).get();
+        lenient().doReturn(requestHeadersSpec).when(requestHeadersUriSpec).uri(anyString(), anyString());
+        lenient().doReturn(responseSpec).when(requestHeadersSpec).retrieve();
     }
 
     @Test
@@ -160,7 +164,7 @@ class CartServiceTest {
     @Test
     void addItem_ShouldThrowExceptionWhenInsufficientStock() {
         testProductDto.setStock(1);
-        when(cartRepository.findByUserId(testUserId)).thenReturn(Optional.of(testCart));
+        lenient().when(cartRepository.findByUserId(testUserId)).thenReturn(Optional.of(testCart));
         when(responseSpec.bodyToMono(ProductDto.class)).thenReturn(Mono.just(testProductDto));
 
         CartItemDto itemDto = new CartItemDto();

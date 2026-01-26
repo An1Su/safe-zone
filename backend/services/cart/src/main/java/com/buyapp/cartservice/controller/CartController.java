@@ -1,13 +1,24 @@
 package com.buyapp.cartservice.controller;
 
-import com.buyapp.cartservice.service.CartService;
-import com.buyapp.common.dto.CartDto;
-import com.buyapp.common.dto.CartDto.CartItemDto;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.buyapp.cartservice.service.CartService;
+import com.buyapp.common.dto.CartDto;
+import com.buyapp.common.dto.CartDto.CartItemDto;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/cart")
@@ -29,7 +40,8 @@ public class CartController {
      * Add item to cart
      */
     @PostMapping("/items")
-    public ResponseEntity<CartDto> addItem(@Valid @RequestBody CartItemDto itemDto, @RequestHeader("X-User-Email") String userId) {
+    public ResponseEntity<CartDto> addItem(@Valid @RequestBody CartItemDto itemDto,
+            @RequestHeader("X-User-Email") String userId) {
         CartDto cart = cartService.addItem(userId, itemDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(cart);
     }
@@ -50,7 +62,8 @@ public class CartController {
      * Remove item from cart
      */
     @DeleteMapping("/items/{productId}")
-    public ResponseEntity<CartDto> removeItem(@PathVariable String productId, @RequestHeader("X-User-Email") String userId) {
+    public ResponseEntity<CartDto> removeItem(@PathVariable String productId,
+            @RequestHeader("X-User-Email") String userId) {
         CartDto cart = cartService.removeItem(userId, productId);
         return ResponseEntity.ok(cart);
     }
@@ -64,4 +77,3 @@ public class CartController {
         return ResponseEntity.noContent().build();
     }
 }
-

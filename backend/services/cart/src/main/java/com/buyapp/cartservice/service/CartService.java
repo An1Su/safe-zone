@@ -1,5 +1,13 @@
 package com.buyapp.cartservice.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
 import com.buyapp.cartservice.model.Cart;
 import com.buyapp.cartservice.model.CartItem;
 import com.buyapp.cartservice.repository.CartRepository;
@@ -7,13 +15,6 @@ import com.buyapp.common.dto.CartDto;
 import com.buyapp.common.dto.CartDto.CartItemDto;
 import com.buyapp.common.dto.ProductDto;
 import com.buyapp.common.exception.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CartService {
@@ -49,7 +50,7 @@ public class CartService {
     public CartDto addItem(String userId, CartItemDto itemDto) {
         // Validate product exists and stock availability
         ProductDto product = getProductById(itemDto.getProductId());
-        
+
         if (product == null) {
             throw new ResourceNotFoundException("Product not found with id: " + itemDto.getProductId());
         }
@@ -58,8 +59,8 @@ public class CartService {
         if (product.getStock() == null || product.getStock() < itemDto.getQuantity()) {
             throw new IllegalArgumentException(
                     "Insufficient stock for product: " + product.getName() +
-                    ". Available: " + (product.getStock() != null ? product.getStock() : 0) +
-                    ", Requested: " + itemDto.getQuantity());
+                            ". Available: " + (product.getStock() != null ? product.getStock() : 0) +
+                            ", Requested: " + itemDto.getQuantity());
         }
 
         // Get or create cart
@@ -72,15 +73,15 @@ public class CartService {
 
         // Check if item already exists in cart
         CartItem existingItem = cart.findItemByProductId(itemDto.getProductId());
-        
+
         if (existingItem != null) {
             // Update quantity (validate total quantity doesn't exceed stock)
             int newQuantity = existingItem.getQuantity() + itemDto.getQuantity();
             if (product.getStock() < newQuantity) {
                 throw new IllegalArgumentException(
                         "Insufficient stock for product: " + product.getName() +
-                        ". Available: " + product.getStock() +
-                        ", Total requested (existing + new): " + newQuantity);
+                                ". Available: " + product.getStock() +
+                                ", Total requested (existing + new): " + newQuantity);
             }
             existingItem.setQuantity(newQuantity);
         } else {
@@ -89,14 +90,13 @@ public class CartService {
                     itemDto.getProductId(),
                     product.getName(),
                     itemDto.getQuantity(),
-                    product.getPrice()
-            );
+                    product.getPrice());
             cart.addItem(newItem);
         }
 
         cart.setUpdatedAt(LocalDateTime.now());
         Cart savedCart = cartRepository.save(cart);
-        
+
         return toDto(savedCart, false); // No need to validate again, we just validated
     }
 
@@ -126,14 +126,14 @@ public class CartService {
         if (product.getStock() == null || product.getStock() < quantity) {
             throw new IllegalArgumentException(
                     "Insufficient stock for product: " + product.getName() +
-                    ". Available: " + (product.getStock() != null ? product.getStock() : 0) +
-                    ", Requested: " + quantity);
+                            ". Available: " + (product.getStock() != null ? product.getStock() : 0) +
+                            ", Requested: " + quantity);
         }
 
         item.setQuantity(quantity);
         item.setPrice(product.getPrice()); // Update price in case it changed
         cart.setUpdatedAt(LocalDateTime.now());
-        
+
         Cart savedCart = cartRepository.save(cart);
         return toDto(savedCart, false);
     }
@@ -147,7 +147,7 @@ public class CartService {
 
         cart.removeItem(productId);
         cart.setUpdatedAt(LocalDateTime.now());
-        
+
         Cart savedCart = cartRepository.save(cart);
         return toDto(savedCart, false);
     }
@@ -182,7 +182,9 @@ public class CartService {
 
     /**
      * Convert Cart entity to CartDto
-     * @param validateAvailability if true, checks product availability for each item
+     * 
+     * @param validateAvailability if true, checks product availability for each
+     *                             item
      */
     private CartDto toDto(Cart cart, boolean validateAvailability) {
         CartDto dto = new CartDto();
@@ -217,4 +219,3 @@ public class CartService {
         return dto;
     }
 }
-
