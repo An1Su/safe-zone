@@ -23,6 +23,9 @@ public class CartDto {
         private Double price;
         private Boolean available;
 
+        /**
+         * Default constructor required for JSON deserialization (Jackson, Spring)
+         */
         public CartItemDto() {
         }
 

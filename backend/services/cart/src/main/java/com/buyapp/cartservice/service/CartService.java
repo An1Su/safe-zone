@@ -2,9 +2,7 @@ package com.buyapp.cartservice.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -19,14 +17,16 @@ import com.buyapp.common.exception.ResourceNotFoundException;
 @Service
 public class CartService {
 
-    @Autowired
-    private CartRepository cartRepository;
-
-    @Autowired
-    private WebClient.Builder webClientBuilder;
+    private final CartRepository cartRepository;
+    private final WebClient.Builder webClientBuilder;
 
     private static final String PRODUCT_SERVICE_URL = "http://product-service";
     private static final String CART_NOT_FOUND_MESSAGE = "Cart not found for user: ";
+
+    public CartService(CartRepository cartRepository, WebClient.Builder webClientBuilder) {
+        this.cartRepository = cartRepository;
+        this.webClientBuilder = webClientBuilder;
+    }
 
     /**
      * Get user's cart or create a new one if it doesn't exist
@@ -213,7 +213,7 @@ public class CartService {
 
                     return itemDto;
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         dto.setItems(itemDtos);
         return dto;

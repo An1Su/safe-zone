@@ -1,13 +1,12 @@
 package com.buyapp.cartservice.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -300,7 +299,7 @@ class CartServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.getItems().size());
-        assertTrue(Boolean.TRUE.equals(result.getItems().get(0).getAvailable())); // Stock (10) >= quantity (2)
+        assertEquals(true, result.getItems().get(0).getAvailable()); // Stock (10) >= quantity (2)
     }
 
     @Test
@@ -313,6 +312,6 @@ class CartServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.getItems().size());
-        assertFalse(Boolean.TRUE.equals(result.getItems().get(0).getAvailable()));
+        assertNotEquals(true, result.getItems().get(0).getAvailable());
     }
 }

@@ -1,6 +1,5 @@
 package com.buyapp.cartservice.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,8 +23,11 @@ import jakarta.validation.Valid;
 @RequestMapping("/cart")
 public class CartController {
 
-    @Autowired
-    private CartService cartService;
+    private final CartService cartService;
+
+    public CartController(CartService cartService) {
+        this.cartService = cartService;
+    }
 
     /**
      * Get user's cart
