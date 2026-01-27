@@ -141,7 +141,13 @@ pipeline {
         }
 
         stage('Deploy') {
-            // Deploy from any branch (not just main)
+            // Only deploy main branch or branches with "frontend" in the name
+            when {
+                anyOf {
+                    branch 'main'
+                    expression { env.BRANCH_NAME?.contains('frontend') }
+                }
+            }
             steps {
                 script {
                     // Save current running images for rollback
