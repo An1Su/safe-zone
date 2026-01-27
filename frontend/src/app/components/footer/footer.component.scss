@@ -1,0 +1,151 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.footer {
+  background: $text-primary;
+  color: #ffffff;
+  padding-top: $spacing-3xl;
+}
+
+.footer-container {
+  @include container();
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: $spacing-xl;
+
+  @media (max-width: $breakpoint-desktop) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (max-width: $breakpoint-mobile) {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
+
+// Brand Section
+.footer-brand {
+  .brand-logo {
+    margin-bottom: $spacing-md;
+  }
+
+  .logo-glam {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: $primary-color;
+    font-style: italic;
+  }
+
+  .logo-beauty {
+    font-size: 1.75rem;
+    font-weight: 300;
+    color: #ffffff;
+    margin-left: $spacing-xs;
+  }
+
+  .brand-tagline {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: $spacing-lg;
+    max-width: 300px;
+
+    @media (max-width: $breakpoint-mobile) {
+      max-width: 100%;
+    }
+  }
+}
+
+// Social Links
+.social-links {
+  display: flex;
+  gap: $spacing-sm;
+
+  @media (max-width: $breakpoint-mobile) {
+    justify-content: center;
+  }
+}
+
+.social-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: $primary-color;
+    transform: translateY(-2px);
+  }
+}
+
+// Footer Sections
+.footer-section {
+  h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: $spacing-lg;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    margin-bottom: $spacing-sm;
+  }
+
+  a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: #ffffff;
+    }
+  }
+}
+
+// Bottom Bar
+.footer-bottom {
+  margin-top: $spacing-3xl;
+  padding: $spacing-lg 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  .bottom-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    @media (max-width: $breakpoint-tablet) {
+      flex-direction: column;
+      gap: $spacing-sm;
+      text-align: center;
+    }
+  }
+
+  .copyright {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  .made-with {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    margin: 0;
+
+    .heart {
+      color: $primary-color;
+    }
+  }
+}
+

@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './components/navbar/navbar.component';
+import { FooterComponent } from './components/footer/footer.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent],
   template: `
     <app-navbar></app-navbar>
 
@@ -13,29 +14,12 @@ import { NavbarComponent } from './components/navbar/navbar.component';
       <router-outlet></router-outlet>
     </main>
 
-    <footer class="footer">
-      <div class="footer-content">
-        <p>&copy; 2026 e-com Marketplace. All rights reserved.</p>
-      </div>
-    </footer>
+    <app-footer></app-footer>
   `,
   styles: [
     `
       .main-content {
         min-height: calc(100vh - 140px);
-      }
-
-      .footer {
-        background-color: #333;
-        color: white;
-        padding: 20px 0;
-        text-align: center;
-      }
-
-      .footer-content {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
       }
     `,
   ],
