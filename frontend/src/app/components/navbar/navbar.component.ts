@@ -80,6 +80,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return this.authService.isSeller();
   }
 
+  isBuyer(): boolean {
+    return this.isLoggedIn() && !this.isSeller();
+  }
+
   toggleDropdown(): void {
     this.dropdownOpen = !this.dropdownOpen;
   }

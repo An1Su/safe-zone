@@ -32,64 +32,83 @@
     <button class="btn btn-primary" (click)="continueShopping()">Browse Products</button>
   </div>
 
-  <!-- Cart Content -->
+  <!-- Cart Content - Two Column Layout -->
   <div class="cart-content" *ngIf="cartItems.length > 0">
-    <!-- Cart Actions Bar -->
-    <div class="cart-actions-bar">
-      <label class="select-all-checkbox">
-        <input
-          type="checkbox"
-          [checked]="allSelected"
-          (change)="selectAll()"
-        />
-        <span>Select all</span>
-      </label>
-      <button
-        class="btn btn-sm btn-outline remove-selected-btn"
-        [disabled]="selectedItems.size === 0"
-        (click)="removeSelected()"
-      >
-        🗑️ Remove selected ({{ selectedItems.size }})
-      </button>
-    </div>
-
-    <!-- Cart Items List -->
-    <div class="cart-items">
-      <div
-        class="cart-item"
-        *ngFor="let item of cartItems"
-        [class.has-error]="getValidationError(item.productId)"
-      >
-        <!-- Selection Checkbox -->
-        <div class="item-select">
-          <input
-            type="checkbox"
-            [checked]="isItemSelected(item.productId)"
-            (change)="toggleItemSelection(item.productId)"
-          />
-        </div>
-
-        <!-- Product Image -->
-        <div class="item-image">
-          <img
-            *ngIf="getProductImage(item.productId)"
-            [src]="getProductImage(item.productId)"
-            [alt]="item.productName"
-          />
-          <div class="placeholder-image" *ngIf="!getProductImage(item.productId)">
-            📦
+    <!-- Left Section - Product List -->
+    <div class="cart-products-section">
+      <!-- Cart Items List -->
+      <div class="cart-items">
+        <div
+          class="cart-item"
+          *ngFor="let item of cartItems"
+          [class.has-error]="getValidationError(item.productId)"
+        >
+          <!-- Selection Checkbox -->
+          <div class="item-select">
+            <input
+              type="checkbox"
+              [checked]="isItemSelected(item.productId)"
+              (change)="toggleItemSelection(item.productId)"
+            />
           </div>
-        </div>
 
-        <!-- Product Info -->
-        <div class="item-details">
-          <a [routerLink]="['/products', item.productId]" class="item-name">
-            {{ item.productName }}
-          </a>
-          <div class="item-price">${{ item.price | number:'1.2-2' }}</div>
+          <!-- Product Image -->
+          <div class="item-image">
+            <img
+              *ngIf="getProductImage(item.productId)"
+              [src]="getProductImage(item.productId)"
+              [alt]="item.productName"
+            />
+            <div class="placeholder-image" *ngIf="!getProductImage(item.productId)">
+              📦
+            </div>
+          </div>
 
-          <!-- Validation Error for this item -->
-          <div class="item-error" *ngIf="getValidationError(item.productId) as error">
+          <!-- Quantity Controls -->
+          <div class="item-quantity">
+            <button
+              class="qty-btn"
+              (click)="updateQuantity(item.productId, -1)"
+              [disabled]="item.quantity <= 1"
+            >
+              −
+            </button>
+            <input
+              type="number"
+              [value]="item.quantity"
+              min="1"
+              (change)="setQuantity(item.productId, $event)"
+              class="qty-input"
+            />
+            <button
+              class="qty-btn"
+              (click)="updateQuantity(item.productId, 1)"
+            >
+              +
+            </button>
+          </div>
+
+          <!-- Unit Price -->
+          <div class="item-unit-price">
+            ${{ item.price | number:'1.2-2' }}
+          </div>
+
+          <!-- Item Total -->
+          <div class="item-total">
+            ${{ (item.price * item.quantity) | number:'1.2-2' }}
+          </div>
+
+          <!-- Remove Button -->
+          <button
+            class="item-remove"
+            (click)="removeItem(item.productId)"
+            title="Remove item"
+          >
+            ×
+          </button>
+
+          <!-- Validation Error (shown below item if exists) -->
+          <div class="item-error-row" *ngIf="getValidationError(item.productId) as error">
             <ng-container [ngSwitch]="error.issue">
               <span *ngSwitchCase="'out_of_stock'" class="error-text">
                 ❌ This product is out of stock
@@ -119,49 +138,30 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Quantity Controls -->
-        <div class="item-quantity">
-          <button
-            class="qty-btn"
-            (click)="updateQuantity(item.productId, -1)"
-            [disabled]="item.quantity <= 1"
-          >
-            −
-          </button>
+      <!-- Select All & Remove Selected - Below Products -->
+      <div class="cart-actions-bar">
+        <label class="select-all-checkbox">
           <input
-            type="number"
-            [value]="item.quantity"
-            min="1"
-            (change)="setQuantity(item.productId, $event)"
-            class="qty-input"
+            type="checkbox"
+            [checked]="allSelected"
+            (change)="selectAll()"
           />
-          <button
-            class="qty-btn"
-            (click)="updateQuantity(item.productId, 1)"
-          >
-            +
-          </button>
-        </div>
-
-        <!-- Item Total -->
-        <div class="item-total">
-          ${{ (item.price * item.quantity) | number:'1.2-2' }}
-        </div>
-
-        <!-- Remove Button -->
+          <span>Select all</span>
+        </label>
         <button
-          class="item-remove"
-          (click)="removeItem(item.productId)"
-          title="Remove item"
+          class="btn btn-outline remove-selected-btn"
+          [disabled]="selectedItems.size === 0"
+          (click)="removeSelected()"
         >
-          ×
+          🗑️ Remove selected ({{ selectedItems.size }})
         </button>
       </div>
     </div>
 
-    <!-- Cart Summary -->
-    <div class="cart-summary">
+    <!-- Right Section - Order Summary -->
+    <div class="cart-summary-section">
       <div class="summary-card">
         <h3>Order Summary</h3>
         <div class="summary-row">
@@ -200,4 +200,3 @@
     </div>
   </div>
 </div>
-
