@@ -1,6 +1,8 @@
-/* Global Styles for E-commerce Application */
+/* ============================================
+   GLAM Beauty - Global Styles
+   ============================================ */
 
-/* Import SCSS Partials */
+/* Import SCSS Partials - @use must come first */
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 @use 'styles/buttons';
@@ -8,8 +10,19 @@
 @use 'styles/cards';
 @use 'styles/utilities';
 
-* {
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap');
+
+/* Reset & Base */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,
@@ -17,9 +30,11 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: $font-sans;
   line-height: 1.6;
   color: $text-primary;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -27,18 +42,38 @@ body {
 }
 
 /* Typography */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   margin: 0 0 1rem 0;
   font-weight: 600;
+  line-height: 1.2;
+  color: $text-primary;
+}
+
+h1 {
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 2.25rem;
+}
+
+h3 {
+  font-size: 1.5rem;
 }
 
 p {
   margin: 0 0 1rem 0;
+}
+
+a {
+  color: $primary-color;
+  text-decoration: none;
+  transition: color $transition-normal;
+
+  &:hover {
+    color: $primary-dark;
+  }
 }
 
 /* Form Elements */
@@ -54,10 +89,10 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 0 0 3px rgba($primary-color, 0.15);
 }
 
-/* Button Styles */
+/* Button Base */
 button {
   cursor: pointer;
   border: none;
@@ -70,18 +105,22 @@ button:disabled {
   opacity: 0.6;
 }
 
-/* Scrollbar Styles */
+/* Custom Scrollbar */
 * {
   @include custom-scrollbar();
 }
 
 /* Animation Classes */
 .fade-in {
-  animation: fadeIn 0.5s ease-in;
+  animation: fadeIn 0.6s ease-out forwards;
 }
 
 .slide-up {
-  animation: slideUp 0.3s ease-out;
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+.scale-in {
+  animation: scaleIn 0.4s ease-out forwards;
 }
 
 @keyframes fadeIn {
@@ -96,7 +135,7 @@ button:disabled {
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -104,47 +143,55 @@ button:disabled {
   }
 }
 
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Staggered Animation Delays */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+
 /* Utility Classes */
-.text-center {
-  text-align: center;
-}
-.text-left {
-  text-align: left;
-}
-.text-right {
-  text-align: right;
-}
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
 
-.mb-1 {
-  margin-bottom: $spacing-sm;
-}
-.mb-2 {
-  margin-bottom: $spacing-md;
-}
-.mb-3 {
-  margin-bottom: $spacing-lg;
-}
-.mb-4 {
-  margin-bottom: $spacing-xl;
-}
+.text-primary { color: $primary-color; }
+.text-gold { color: $accent-gold; }
+.text-muted { color: $text-muted; }
 
-.mt-1 {
-  margin-top: $spacing-sm;
-}
-.mt-2 {
-  margin-top: $spacing-md;
-}
-.mt-3 {
-  margin-top: $spacing-lg;
-}
-.mt-4 {
-  margin-top: $spacing-xl;
-}
+.mb-1 { margin-bottom: $spacing-sm; }
+.mb-2 { margin-bottom: $spacing-md; }
+.mb-3 { margin-bottom: $spacing-lg; }
+.mb-4 { margin-bottom: $spacing-xl; }
+
+.mt-1 { margin-top: $spacing-sm; }
+.mt-2 { margin-top: $spacing-md; }
+.mt-3 { margin-top: $spacing-lg; }
+.mt-4 { margin-top: $spacing-xl; }
 
 /* Responsive Utilities */
 @media (max-width: $breakpoint-tablet) {
   .hide-mobile {
     display: none !important;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.75rem;
   }
 }
 
@@ -152,4 +199,19 @@ button:disabled {
   .hide-desktop {
     display: none !important;
   }
+}
+
+/* Container */
+.container {
+  max-width: $container-max-width;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: linear-gradient(135deg, $primary-color 0%, $accent-gold 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

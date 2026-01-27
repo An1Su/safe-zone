@@ -2,81 +2,161 @@
 
 .navbar {
   background-color: $bg-card;
-  box-shadow: $shadow-sm;
   position: sticky;
   top: 0;
   z-index: $z-sticky;
+  border-bottom: 1px solid rgba($border-color, 0.5);
 }
 
 .navbar-container {
   max-width: $container-max-width;
   margin: 0 auto;
-  padding: 0 $spacing-lg;
+  padding: 0 $spacing-xl;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 70px;
+  height: 72px;
 }
 
+// Logo
 .navbar-logo {
   display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: $primary-color;
+  align-items: baseline;
+  gap: 6px;
   text-decoration: none;
-  transition: color $transition-normal;
+  transition: opacity $transition-normal;
 
   &:hover {
-    color: $primary-dark;
-  }
-
-  .logo-icon {
-    font-size: 1.75rem;
+    opacity: 0.85;
   }
 }
 
+.logo-glam {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: $primary-color;
+  letter-spacing: -0.5px;
+}
+
+.logo-beauty {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: $text-primary;
+}
+
+// Navigation Menu
 .navbar-menu {
   display: flex;
   align-items: center;
-  gap: $spacing-lg;
+  gap: $spacing-xl;
 }
 
 .nav-link {
   color: $text-primary;
   text-decoration: none;
   font-weight: 500;
+  font-size: 0.95rem;
+  padding: $spacing-sm 0;
+  position: relative;
   transition: color $transition-normal;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: $primary-color;
+    transition: width $transition-normal;
+  }
+
+  &:hover,
+  &.active {
+    color: $primary-color;
+
+    &::after {
+      width: 100%;
+    }
+  }
+}
+
+// Actions (right side)
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: $radius-circle;
+  color: $text-primary;
   cursor: pointer;
+  transition: all $transition-normal;
+  position: relative;
 
   &:hover {
+    background-color: rgba($primary-color, 0.08);
     color: $primary-color;
   }
 }
 
+.cart-btn {
+  .cart-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 18px;
+    height: 18px;
+    background-color: $accent-gold;
+    color: $text-primary;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: $radius-circle;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Auth Buttons
 .nav-auth {
   display: flex;
   gap: $spacing-md;
   align-items: center;
+  margin-left: $spacing-md;
 }
 
-.nav-register {
+.btn-signup {
   background-color: $primary-color;
   color: white;
-  padding: $spacing-sm $spacing-md;
-  border-radius: $radius-pill;
+  padding: $spacing-sm $spacing-lg;
+  border-radius: $radius-md;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all $transition-normal;
 
   &:hover {
     background-color: $primary-dark;
     color: white;
+    transform: translateY(-1px);
+    box-shadow: $shadow-primary;
   }
 }
 
+// User Menu
 .nav-user {
   display: flex;
   align-items: center;
-  gap: $spacing-lg;
+  gap: $spacing-md;
 }
 
 .user-dropdown {
@@ -85,36 +165,26 @@
 
 .user-menu-toggle {
   background: none;
-  border: 1px solid transparent;
+  border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: $spacing-sm;
-  font-family: inherit;
-  font-size: 0.875rem;
-  color: $text-primary;
-  padding: $spacing-sm $spacing-md;
+  padding: $spacing-xs;
   border-radius: $radius-pill;
   transition: all $transition-normal;
 
   &:hover {
     background-color: rgba($primary-color, 0.08);
-    border-color: rgba($primary-color, 0.2);
-  }
-
-  &:focus {
-    outline: none;
-    border-color: $primary-color;
-    box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
   }
 }
 
 .user-avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: $radius-circle;
   overflow: hidden;
-  flex-shrink: 0;
+  border: 2px solid $primary-color;
 }
 
 .avatar-img {
@@ -124,26 +194,22 @@
 }
 
 .user-avatar-placeholder {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: $radius-circle;
   background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  flex-shrink: 0;
 }
 
-.user-greeting {
-  font-weight: 600;
-  color: $primary-color;
-}
-
-.dropdown-icon {
-  font-size: 0.625rem;
+.dropdown-arrow {
+  display: flex;
+  align-items: center;
+  color: $text-muted;
   transition: transform $transition-normal;
 
   &.open {
@@ -151,40 +217,41 @@
   }
 }
 
+// Dropdown Menu
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 8px);
   right: 0;
   background-color: $bg-card;
-  border: none;
   border-radius: $radius-lg;
   box-shadow: $shadow-xl;
   min-width: 220px;
   z-index: $z-dropdown;
   overflow: hidden;
-  animation: dropdownFadeIn 0.2s ease-out;
-
-  // Subtle top accent line matching primary color
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, $primary-color, $primary-dark);
-  }
+  animation: dropdownSlide 0.2s ease-out;
+  border: 1px solid rgba($border-color, 0.5);
 }
 
-@keyframes dropdownFadeIn {
+@keyframes dropdownSlide {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-8px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
+}
+
+.dropdown-header {
+  padding: $spacing-md $spacing-lg;
+  background: linear-gradient(135deg, rgba($primary-color, 0.05) 0%, rgba($accent-gold, 0.05) 100%);
+}
+
+.greeting {
+  font-weight: 600;
+  color: $text-primary;
+  font-size: 0.9rem;
 }
 
 .dropdown-item {
@@ -197,72 +264,79 @@
   color: $text-primary;
   background: none;
   border: none;
-  border-left: 3px solid transparent;
   cursor: pointer;
   text-decoration: none;
   transition: all $transition-fast;
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 500;
 
-  &:hover {
-    background-color: rgba($primary-color, 0.08);
-    border-left-color: $primary-color;
-    color: $primary-color;
+  svg {
+    color: $text-muted;
+    transition: color $transition-fast;
   }
 
-  &:first-child {
-    padding-top: $spacing-lg;
+  &:hover {
+    background-color: rgba($primary-color, 0.06);
+    color: $primary-color;
+
+    svg {
+      color: $primary-color;
+    }
   }
 
   &.logout {
     color: $danger-color;
-    margin-top: $spacing-xs;
+
+    svg {
+      color: $danger-color;
+    }
 
     &:hover {
-      background-color: rgba($danger-color, 0.08);
-      border-left-color: $danger-color;
+      background-color: rgba($danger-color, 0.06);
     }
   }
 }
 
 .dropdown-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, $border-color, transparent);
-  margin: $spacing-sm $spacing-md;
+  background-color: $border-color;
+  margin: $spacing-xs 0;
 }
 
 .coming-soon-badge {
   font-size: 0.625rem;
   font-weight: 600;
   text-transform: uppercase;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, $accent-gold, $accent-gold-dark);
   color: white;
   padding: 2px 6px;
   border-radius: $radius-pill;
   margin-left: auto;
 }
 
+// Mobile Responsive
 @media (max-width: $breakpoint-tablet) {
   .navbar-container {
-    flex-wrap: wrap;
-    height: auto;
-    padding: $spacing-md $spacing-lg;
+    padding: 0 $spacing-md;
+    height: 64px;
   }
 
   .navbar-menu {
-    gap: $spacing-md;
-    flex-basis: 100%;
-    margin-top: $spacing-md;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .user-greeting {
     display: none;
   }
 
-  .user-menu-toggle {
-    padding: $spacing-sm;
+  .logo-glam,
+  .logo-beauty {
+    font-size: 1.25rem;
+  }
+
+  .nav-auth .nav-link {
+    display: none;
+  }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
   }
 }
