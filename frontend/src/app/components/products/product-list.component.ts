@@ -71,15 +71,21 @@ export class ProductListComponent implements OnInit {
   }
 
   addToCart(product: Product): void {
+    // Get product image for cart display
+    const media = this.productMedia.get(product.id!);
+    const imageUrl = media && media.length > 0 ? this.mediaService.getMediaFile(media[0].id!) : undefined;
+
     const cartItem: CartItem = {
       productId: product.id!,
       productName: product.name,
+      sellerId: product.user || '', // seller email/id
       price: product.price,
       quantity: 1,
+      stock: product.stock,
+      image: imageUrl,
     };
 
     this.cartService.addToCart(cartItem);
-    // Show coming soon message
-    alert(`"${product.name}" added to cart!\n\n🚧 Note: Full shopping cart functionality is coming soon in a future update.`);
+    alert(`"${product.name}" added to cart! 🛒`);
   }
 }

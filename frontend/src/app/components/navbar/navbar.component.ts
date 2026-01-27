@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { User } from '../../models/ecommerce.model';
 import { AuthService } from '../../services/auth.service';
+import { CartService } from '../../services/cart.service';
 import { MediaService } from '../../services/media.service';
 
 @Component({
@@ -12,14 +14,18 @@ import { MediaService } from '../../services/media.service';
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   dropdownOpen = false;
   avatarUrl: string | null = null;
+  cartItemCount = 0;
+
+  private cartSubscription?: Subscription;
 
   constructor(
     private readonly authService: AuthService,
     private readonly mediaService: MediaService,
+    private readonly cartService: CartService,
     private readonly router: Router,
     private readonly elementRef: ElementRef
   ) {}
@@ -37,6 +43,15 @@ export class NavbarComponent implements OnInit {
       this.currentUser = user;
       this.loadAvatar();
     });
+
+    // Subscribe to cart changes for badge count
+    this.cartSubscription = this.cartService.cart$.subscribe((cart) => {
+      this.cartItemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.cartSubscription?.unsubscribe();
   }
 
   private loadAvatar(): void {

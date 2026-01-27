@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { CartItem } from '../../models/cart.model';
 import { Media, Product } from '../../models/ecommerce.model';
+import { CartService } from '../../services/cart.service';
 import { MediaService } from '../../services/media.service';
 import { ProductService } from '../../services/product.service';
 import { ImageSliderComponent } from '../shared/image-slider/image-slider.component';
@@ -22,7 +24,8 @@ export class ProductDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private productService: ProductService,
-    private mediaService: MediaService
+    private mediaService: MediaService,
+    private cartService: CartService
   ) {}
 
   ngOnInit(): void {
@@ -65,6 +68,23 @@ export class ProductDetailComponent implements OnInit {
   }
 
   addToCart(): void {
-    alert('Shopping cart functionality is coming soon!');
+    if (!this.product) return;
+
+    // Get product image for cart display
+    const imageUrl =
+      this.productMedia.length > 0 ? this.mediaService.getMediaFile(this.productMedia[0].id!) : undefined;
+
+    const cartItem: CartItem = {
+      productId: this.product.id!,
+      productName: this.product.name,
+      sellerId: this.product.user || '', // seller email/id
+      price: this.product.price,
+      quantity: 1,
+      stock: this.product.stock,
+      image: imageUrl,
+    };
+
+    this.cartService.addToCart(cartItem);
+    alert(`"${this.product.name}" added to cart! 🛒`);
   }
 }
