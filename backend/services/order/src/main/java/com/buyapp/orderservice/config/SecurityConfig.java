@@ -29,8 +29,9 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable) // CORS handled by Gateway
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/**").permitAll() // Health checks
-                        .anyRequest().authenticated()) // All cart/order endpoints require auth
+                        // All endpoints permitted - Gateway already authenticated and added X-User-Email header
+                        .requestMatchers("/cart/**", "/orders/**", "/actuator/**").permitAll()
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
