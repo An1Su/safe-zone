@@ -29,6 +29,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/products", "/products/{id}", "/actuator/**").permitAll() // Public endpoints
                         .requestMatchers("/products/user/{userId}").permitAll() // Internal service calls
+                        .requestMatchers("/products/{id}/seller-id", "/products/{id}/reduce-stock", "/products/{id}/restore-stock").permitAll() // Internal Order Service calls
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
