@@ -30,7 +30,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // All endpoints permitted - Gateway already authenticated and added X-User-Email header
-                        .requestMatchers("/cart/**", "/orders/**", "/actuator/**").permitAll()
+                        // Include both exact paths and wildcard paths
+                        .requestMatchers("/cart", "/cart/**", "/orders", "/orders/**", "/actuator/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
