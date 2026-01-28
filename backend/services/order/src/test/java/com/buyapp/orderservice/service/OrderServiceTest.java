@@ -432,7 +432,7 @@ class OrderServiceTest {
 
         // Assert
         assertNotNull(result);
-        verify(orderRepository, times(2)).save(any(Order.class)); // Original + new order
+        verify(orderRepository, times(1)).save(any(Order.class)); // Only the new order is saved
     }
 
     @Test
