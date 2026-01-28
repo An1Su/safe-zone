@@ -1,4 +1,4 @@
-export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+export type OrderStatus = 'PENDING' | 'READY_FOR_DELIVERY' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
 
 export interface ShippingAddress {
   fullName: string;
@@ -26,10 +26,8 @@ export interface Order {
   updatedAt?: Date;
 }
 
-export interface CreateOrderRequest {
-  items: OrderItem[];
-  shippingAddress: ShippingAddress;
-}
+// Backend creates order from cart, so we only need shipping address
+export type CreateOrderRequest = ShippingAddress;
 
 export interface OrderStats {
   totalSpent: number;
@@ -38,3 +36,9 @@ export interface OrderStats {
   mostPurchasedProducts?: { productId: string; productName: string; quantity: number }[];
 }
 
+export interface OrderSearchParams {
+  q?: string; // Search query (order ID, product name, buyer email)
+  status?: OrderStatus; // Filter by status
+  dateFrom?: string; // Filter from date (ISO format)
+  dateTo?: string; // Filter to date (ISO format)
+}

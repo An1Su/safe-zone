@@ -47,7 +47,7 @@ export class OrderConfirmationComponent implements OnInit {
   getStatusClass(status: string): string {
     const statusClasses: Record<string, string> = {
       PENDING: 'status-pending',
-      CONFIRMED: 'status-confirmed',
+      READY_FOR_DELIVERY: 'status-ready-for-delivery',
       SHIPPED: 'status-shipped',
       DELIVERED: 'status-delivered',
       CANCELLED: 'status-cancelled',

@@ -120,14 +120,22 @@ export class UserProfileComponent implements OnInit {
   }
 
   removeFromCart(productId: string): void {
-    this.cartService.removeFromCart(productId);
+    this.cartService.removeFromCart(productId).subscribe({
+      error: (err) => {
+        console.error('Failed to remove from cart:', err);
+      },
+    });
   }
 
   updateQuantity(productId: string, event: Event): void {
     const target = event.target as HTMLInputElement;
     const quantity = parseInt(target.value, 10);
     if (quantity > 0) {
-      this.cartService.updateQuantity(productId, quantity);
+      this.cartService.updateQuantity(productId, quantity).subscribe({
+        error: (err) => {
+          console.error('Failed to update quantity:', err);
+        },
+      });
     }
   }
 

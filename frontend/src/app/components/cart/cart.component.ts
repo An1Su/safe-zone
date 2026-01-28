@@ -28,21 +28,31 @@ export class CartComponent implements OnInit, OnDestroy {
   private cartSubscription?: Subscription;
 
   constructor(
-    private cartService: CartService,
-    private productService: ProductService,
-    private mediaService: MediaService,
-    private authService: AuthService,
-    private router: Router
+    private readonly cartService: CartService,
+    private readonly productService: ProductService,
+    private readonly mediaService: MediaService,
+    private readonly authService: AuthService,
+    private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
+    // Subscribe to cart changes
     this.cartSubscription = this.cartService.cart$.subscribe((cart) => {
       this.cartItems = cart.items;
       this.loadProductImages();
+      // Re-validate after cart changes
+      this.validateCart();
     });
 
-    // Validate stock on load
-    this.validateCart();
+    // Load cart from backend if user is logged in
+    if (this.isLoggedIn) {
+      this.cartService.loadCart().subscribe({
+        error: (err) => {
+          console.error('Failed to load cart:', err);
+          // Cart will remain empty if load fails
+        },
+      });
+    }
   }
 
   ngOnDestroy(): void {
@@ -97,7 +107,7 @@ export class CartComponent implements OnInit, OnDestroy {
     this.validationErrors.clear();
 
     const productRequests = this.cartItems.map((item) =>
-      this.productService.getProductById(item.productId)
+      this.productService.getProductById(item.productId),
     );
 
     forkJoin(productRequests).subscribe({
@@ -149,19 +159,31 @@ export class CartComponent implements OnInit, OnDestroy {
     if (item) {
       const newQuantity = item.quantity + delta;
       if (newQuantity > 0) {
-        this.cartService.updateQuantity(productId, newQuantity);
-        // Re-validate after quantity change
-        this.validateCart();
+        this.cartService.updateQuantity(productId, newQuantity).subscribe({
+          next: () => {
+            // Re-validate after quantity change
+            this.validateCart();
+          },
+          error: (err) => {
+            console.error('Failed to update quantity:', err);
+            // Re-validate to show current state
+            this.validateCart();
+          },
+        });
       }
     }
   }
 
   setQuantity(productId: string, event: Event): void {
     const input = event.target as HTMLInputElement;
-    const quantity = parseInt(input.value, 10);
-    if (!isNaN(quantity) && quantity > 0) {
-      this.cartService.updateQuantity(productId, quantity);
-      this.validateCart();
+    const quantity = Number.parseInt(input.value, 10);
+    if (!Number.isNaN(quantity) && quantity > 0) {
+      this.cartService.updateQuantity(productId, quantity).subscribe({
+        error: (err) => {
+          console.error('Failed to update quantity:', err);
+          this.validateCart();
+        },
+      });
     }
   }
 
@@ -192,8 +214,13 @@ export class CartComponent implements OnInit, OnDestroy {
   removeSelected(): void {
     if (this.selectedItems.size === 0) return;
 
-    this.selectedItems.forEach((productId) => {
-      this.cartService.removeFromCart(productId);
+    const productIds = Array.from(this.selectedItems);
+    productIds.forEach((productId) => {
+      this.cartService.removeFromCart(productId).subscribe({
+        error: (err) => {
+          console.error(`Failed to remove item ${productId}:`, err);
+        },
+      });
       this.validationErrors.delete(productId);
     });
 
@@ -202,7 +229,11 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   removeItem(productId: string): void {
-    this.cartService.removeFromCart(productId);
+    this.cartService.removeFromCart(productId).subscribe({
+      error: (err) => {
+        console.error('Failed to remove item:', err);
+      },
+    });
     this.selectedItems.delete(productId);
     this.validationErrors.delete(productId);
     this.hasValidationIssues = this.validationErrors.size > 0;
@@ -211,14 +242,22 @@ export class CartComponent implements OnInit, OnDestroy {
   adjustToAvailableStock(productId: string): void {
     const error = this.validationErrors.get(productId);
     if (error && error.issue === 'insufficient_stock') {
-      this.cartService.updateQuantity(productId, error.currentStock);
+      this.cartService.updateQuantity(productId, error.currentStock).subscribe({
+        error: (err) => {
+          console.error('Failed to adjust quantity:', err);
+        },
+      });
       this.validationErrors.delete(productId);
       this.hasValidationIssues = this.validationErrors.size > 0;
     }
   }
 
   clearCart(): void {
-    this.cartService.clearCart();
+    this.cartService.clearCart().subscribe({
+      error: (err) => {
+        console.error('Failed to clear cart:', err);
+      },
+    });
     this.selectedItems.clear();
     this.validationErrors.clear();
     this.hasValidationIssues = false;
@@ -239,4 +278,3 @@ export class CartComponent implements OnInit, OnDestroy {
     this.router.navigate(['/products']);
   }
 }
-

@@ -24,7 +24,7 @@ export class ProductListComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private cartService: CartService,
-    private mediaService: MediaService
+    private mediaService: MediaService,
   ) {}
 
   ngOnInit(): void {
@@ -73,7 +73,8 @@ export class ProductListComponent implements OnInit {
   addToCart(product: Product): void {
     // Get product image for cart display
     const media = this.productMedia.get(product.id!);
-    const imageUrl = media && media.length > 0 ? this.mediaService.getMediaFile(media[0].id!) : undefined;
+    const imageUrl =
+      media && media.length > 0 ? this.mediaService.getMediaFile(media[0].id!) : undefined;
 
     const cartItem: CartItem = {
       productId: product.id!,
@@ -85,7 +86,14 @@ export class ProductListComponent implements OnInit {
       image: imageUrl,
     };
 
-    this.cartService.addToCart(cartItem);
-    alert(`"${product.name}" added to cart! 🛒`);
+    this.cartService.addToCart(cartItem).subscribe({
+      next: () => {
+        alert(`"${product.name}" added to cart! 🛒`);
+      },
+      error: (err) => {
+        console.error('Failed to add to cart:', err);
+        alert(`Failed to add "${product.name}" to cart. Please try again.`);
+      },
+    });
   }
 }

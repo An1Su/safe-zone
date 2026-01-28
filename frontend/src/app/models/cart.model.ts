@@ -6,6 +6,7 @@ export interface CartItem {
   price: number;
   quantity: number;
   stock: number; // Available stock at time of adding to cart
+  available?: boolean; // Whether item is currently available (from backend)
   image?: string;
 }
 
