@@ -99,7 +99,7 @@ services:
         condition: service_healthy
       media-service:
         condition: service_healthy
-      cart-service:
+      order-service:
         condition: service_healthy
 
   user-service:
@@ -194,11 +194,11 @@ services:
       mongodb:
         condition: service_healthy
 
-  cart-service:
+  order-service:
     build:
       context: ./backend
-      dockerfile: ./services/cart/Dockerfile
-    container_name: ecom-cart-service
+      dockerfile: ./services/order/Dockerfile
+    container_name: ecom-order-service
     environment:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8761/eureka/
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: true
@@ -208,11 +208,11 @@ services:
       SPRING_DATA_MONGODB_PASSWORD: password
       SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE: admin
     expose:
-      - '8084'
+      - '8085'
     networks:
       - ecom-network
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8084/actuator/health']
+      test: ['CMD', 'curl', '-f', 'http://localhost:8085/actuator/health']
       interval: 10s
       timeout: 3s
       retries: 5
@@ -223,6 +223,8 @@ services:
       mongodb:
         condition: service_healthy
       product-service:
+        condition: service_healthy
+      user-service:
         condition: service_healthy
 
   # -------------------

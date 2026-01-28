@@ -174,6 +174,11 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    public String getProductSellerId(String productId) {
+        Product product = getProductEntityById(productId);
+        return product.getUserId();
+    }
+
     private boolean canModifyProduct(Product product, Authentication authentication) {
         String currentUserEmail = authentication.getName();
         boolean isAdmin = authentication.getAuthorities().stream()

@@ -25,7 +25,7 @@
 		<module>services/user</module>
 		<module>services/product</module>
 		<module>services/media</module>
-		<module>services/cart</module>
+		<module>services/order</module>
 		<module>services/eureka</module>
 		<module>api-gateway</module>
 	</modules>

@@ -66,4 +66,21 @@ public class ProductController {
     public void deleteProductsByUserId(@PathVariable String userId) {
         productService.deleteProductsByUserId(userId);
     }
+
+    // Internal endpoints for stock management (called by Order Service)
+    @PostMapping("/{id}/reduce-stock")
+    public void reduceStock(@PathVariable String id, @RequestParam Integer quantity) {
+        productService.reduceStock(id, quantity);
+    }
+
+    @PostMapping("/{id}/restore-stock")
+    public void restoreStock(@PathVariable String id, @RequestParam Integer quantity) {
+        productService.restoreStock(id, quantity);
+    }
+
+    // Internal endpoint to get product's userId (called by Order Service)
+    @GetMapping("/{id}/seller-id")
+    public String getProductSellerId(@PathVariable String id) {
+        return productService.getProductSellerId(id);
+    }
 }
