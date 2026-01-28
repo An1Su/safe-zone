@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -81,6 +82,7 @@ class OrderServiceTest {
     private UserDto testUserDto;
     private ShippingAddressDto testShippingAddress;
 
+    @SuppressWarnings("unchecked")
     @BeforeEach
     void setUp() {
         // Setup test cart
@@ -109,13 +111,14 @@ class OrderServiceTest {
         // Setup shipping address
         testShippingAddress = createShippingAddress();
 
-        // Setup WebClient mocks
-        lenient().when(webClientBuilder.build()).thenReturn(webClient);
-        lenient().when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        lenient().when(webClient.post()).thenReturn(requestBodyUriSpec);
-        lenient().when(requestHeadersUriSpec.uri(anyString(), any(Object.class))).thenReturn(requestHeadersSpec);
-        lenient().when(requestBodyUriSpec.uri(anyString(), any(Object.class))).thenReturn(requestHeadersSpec);
-        lenient().when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        // Setup WebClient mocks (use doReturn to avoid generic type capture issues)
+        // Using @MockitoSettings(strictness = Strictness.LENIENT) so lenient() not needed
+        doReturn(webClient).when(webClientBuilder).build();
+        doReturn(requestHeadersUriSpec).when(webClient).get();
+        doReturn(requestBodyUriSpec).when(webClient).post();
+        doReturn(requestHeadersSpec).when(requestHeadersUriSpec).uri(anyString(), any(Object.class));
+        doReturn(requestHeadersSpec).when(requestBodyUriSpec).uri(anyString(), any(Object.class));
+        doReturn(responseSpec).when(requestHeadersSpec).retrieve();
     }
 
     private ShippingAddressDto createShippingAddress() {
