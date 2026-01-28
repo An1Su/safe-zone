@@ -25,7 +25,7 @@ export class ProductDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private productService: ProductService,
     private mediaService: MediaService,
-    private cartService: CartService
+    private cartService: CartService,
   ) {}
 
   ngOnInit(): void {
@@ -72,7 +72,9 @@ export class ProductDetailComponent implements OnInit {
 
     // Get product image for cart display
     const imageUrl =
-      this.productMedia.length > 0 ? this.mediaService.getMediaFile(this.productMedia[0].id!) : undefined;
+      this.productMedia.length > 0
+        ? this.mediaService.getMediaFile(this.productMedia[0].id!)
+        : undefined;
 
     const cartItem: CartItem = {
       productId: this.product.id!,
@@ -84,7 +86,14 @@ export class ProductDetailComponent implements OnInit {
       image: imageUrl,
     };
 
-    this.cartService.addToCart(cartItem);
-    alert(`"${this.product.name}" added to cart! 🛒`);
+    this.cartService.addToCart(cartItem).subscribe({
+      next: () => {
+        alert(`"${this.product!.name}" added to cart! 🛒`);
+      },
+      error: (err) => {
+        console.error('Failed to add to cart:', err);
+        alert(`Failed to add "${this.product!.name}" to cart. Please try again.`);
+      },
+    });
   }
 }

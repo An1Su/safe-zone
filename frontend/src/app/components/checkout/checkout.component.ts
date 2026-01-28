@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CartItem } from '../../models/cart.model';
-import { CreateOrderRequest, OrderItem, ShippingAddress } from '../../models/order.model';
+import { ShippingAddress } from '../../models/order.model';
 import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
 import { MediaService } from '../../services/media.service';
@@ -27,12 +27,12 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   private cartSubscription?: Subscription;
 
   constructor(
-    private fb: FormBuilder,
-    private cartService: CartService,
-    private orderService: OrderService,
-    private authService: AuthService,
-    private mediaService: MediaService,
-    private router: Router
+    private readonly fb: FormBuilder,
+    private readonly cartService: CartService,
+    private readonly orderService: OrderService,
+    private readonly authService: AuthService,
+    private readonly mediaService: MediaService,
+    private readonly router: Router,
   ) {
     this.shippingForm = this.fb.group({
       fullName: ['', [Validators.required, Validators.minLength(2)]],
@@ -48,6 +48,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       this.router.navigate(['/login'], { queryParams: { returnUrl: '/checkout' } });
       return;
     }
+
+    // Load cart from backend
+    this.cartService.loadCart().subscribe({
+      error: (err) => {
+        console.error('Failed to load cart:', err);
+      },
+    });
 
     this.cartSubscription = this.cartService.cart$.subscribe((cart) => {
       this.cartItems = cart.items;
@@ -125,31 +132,28 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       phone: this.shippingForm.value.phone,
     };
 
-    const orderItems: OrderItem[] = this.cartItems.map((item) => ({
-      productId: item.productId,
-      productName: item.productName,
-      sellerId: item.sellerId,
-      price: item.price,
-      quantity: item.quantity,
-    }));
-
-    const orderRequest: CreateOrderRequest = {
-      items: orderItems,
-      shippingAddress,
-    };
-
-    this.orderService.createOrder(orderRequest).subscribe({
+    // Backend creates order from cart automatically, so we only send shipping address
+    this.orderService.createOrder(shippingAddress).subscribe({
       next: (order) => {
         // Clear the cart after successful order
-        this.cartService.clearCart();
-        // Navigate to confirmation page with order ID
-        this.router.navigate(['/order-confirmation', order.id]);
+        this.cartService.clearCart().subscribe({
+          next: () => {
+            // Navigate to confirmation page with order ID
+            this.router.navigate(['/order-confirmation', order.id]);
+          },
+          error: (err) => {
+            console.error('Failed to clear cart:', err);
+            // Still navigate even if cart clear fails
+            this.router.navigate(['/order-confirmation', order.id]);
+          },
+        });
       },
       error: (error) => {
         this.isSubmitting = false;
         if (error.status === 400) {
           this.errorMessage =
-            error.error?.message || 'Some products are no longer available. Please review your cart.';
+            error.error?.message ||
+            'Some products are no longer available. Please review your cart.';
         } else if (error.status === 401) {
           this.router.navigate(['/login'], { queryParams: { returnUrl: '/checkout' } });
         } else {
@@ -163,4 +167,3 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.router.navigate(['/cart']);
   }
 }
-
