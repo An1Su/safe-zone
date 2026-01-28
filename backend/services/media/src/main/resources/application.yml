@@ -7,8 +7,8 @@ spring:
       database: media_service_db
       host: localhost
       port: 27017
-      username: admin
-      password: password
+      username: ${SPRING_DATA_MONGODB_USERNAME:admin}
+      password: ${SPRING_DATA_MONGODB_PASSWORD:password}
       authentication-database: admin
 
   cloud:
@@ -68,5 +68,5 @@ management:
 application:
   security:
     jwt:
-      secret-key: D341j5kfy5b3uFW/Xcw0KvP4/gfwho2UzAXAI6fGpUc=
+      secret-key: ${JWT_SECRET_KEY:D341j5kfy5b3uFW/Xcw0KvP4/gfwho2UzAXAI6fGpUc=}
       expiration: 86400000

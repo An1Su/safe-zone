@@ -358,7 +358,7 @@ public class OrderService {
         try {
             return webClientBuilder.build()
                     .get()
-                    .uri(PRODUCT_SERVICE_URL + "/api/products/{id}", productId)
+                    .uri(PRODUCT_SERVICE_URL + "/products/{id}", productId)
                     .retrieve()
                     .bodyToMono(ProductDto.class)
                     .block();
@@ -409,7 +409,7 @@ public class OrderService {
         try {
             webClientBuilder.build()
                     .post()
-                    .uri(PRODUCT_SERVICE_URL + "/api/products/{id}/" + endpoint + "?quantity={quantity}",
+                    .uri(PRODUCT_SERVICE_URL + "/products/{id}/" + endpoint + "?quantity={quantity}",
                             productId, quantity)
                     .retrieve()
                     .bodyToMono(Void.class)
@@ -423,7 +423,7 @@ public class OrderService {
         try {
             return webClientBuilder.build()
                     .get()
-                    .uri(PRODUCT_SERVICE_URL + "/api/products/{id}/seller-id", productId)
+                    .uri(PRODUCT_SERVICE_URL + "/products/{id}/seller-id", productId)
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
@@ -443,7 +443,7 @@ public class OrderService {
         try {
             com.buyapp.common.dto.UserDto user = webClientBuilder.build()
                     .get()
-                    .uri(USER_SERVICE_URL + "/api/users/email/{email}", email)
+                    .uri(USER_SERVICE_URL + "/users/email/{email}", email)
                     .retrieve()
                     .bodyToMono(com.buyapp.common.dto.UserDto.class)
                     .block();
