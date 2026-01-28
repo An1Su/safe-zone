@@ -1,7 +1,10 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './components/auth/login.component';
 import { RegisterComponent } from './components/auth/register.component';
+import { CartComponent } from './components/cart/cart.component';
+import { CheckoutComponent } from './components/checkout/checkout.component';
 import { HomeComponent } from './components/home/home.component';
+import { OrderConfirmationComponent } from './components/order-confirmation/order-confirmation.component';
 import { ProductDetailComponent } from './components/products/product-detail.component';
 import { ProductListComponent } from './components/products/product-list.component';
 import { UserProfileComponent } from './components/profile/user-profile.component';
@@ -16,6 +19,21 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'products', component: ProductListComponent },
   { path: 'products/:id', component: ProductDetailComponent },
+
+  // Cart - accessible to everyone (shows login prompt if not authenticated)
+  { path: 'cart', component: CartComponent },
+
+  // Checkout & Orders - require authentication
+  {
+    path: 'checkout',
+    component: CheckoutComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'order-confirmation/:id',
+    component: OrderConfirmationComponent,
+    canActivate: [authGuard],
+  },
 
   // Protected routes - require authentication
   {

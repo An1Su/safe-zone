@@ -126,9 +126,7 @@ pipeline {
         }
 
         stage('Build') {
-            when {
-                branch 'main'
-            }
+            // Build from any branch (not just main)
             steps {
                 sh '''
                     # Generate SSL certificates if needed
@@ -143,8 +141,12 @@ pipeline {
         }
 
         stage('Deploy') {
+            // Only deploy main branch or branches with "frontend" in the name
             when {
-                branch 'main'
+                anyOf {
+                    branch 'main'
+                    expression { env.BRANCH_NAME?.contains('frontend') }
+                }
             }
             steps {
                 script {

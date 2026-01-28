@@ -11,6 +11,8 @@ describe('CartService', () => {
     price: 99.99,
     quantity: 2,
     image: 'image1.jpg',
+    sellerId: 'seller-1',
+    stock: 10,
   };
 
   const mockCartItem2: CartItem = {
@@ -19,6 +21,8 @@ describe('CartService', () => {
     price: 149.99,
     quantity: 1,
     image: 'image2.jpg',
+    sellerId: 'seller-2',
+    stock: 5,
   };
 
   beforeEach(() => {

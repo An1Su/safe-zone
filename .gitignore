@@ -48,3 +48,4 @@ uploads/
 # Test results
 **/test-results/
 **/target/surefire-reports/
+frontend/proxy.conf.json

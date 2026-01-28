@@ -25,7 +25,14 @@
 
       <p class="seller">Sold by: {{ product.user }}</p>
 
-      <button class="btn btn-primary btn-add-to-cart" (click)="addToCart()">🛒 Add to Cart</button>
+      <button
+        class="btn btn-primary btn-add-to-cart"
+        (click)="addToCart()"
+        [disabled]="product.stock === 0"
+      >
+        <span *ngIf="product.stock > 0">🛒 Add to Cart</span>
+        <span *ngIf="product.stock === 0">❌ Out of Stock</span>
+      </button>
     </div>
   </div>
 </div>

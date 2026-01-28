@@ -1,0 +1,164 @@
+<div class="checkout-container">
+  <button class="back-link" (click)="goBack()">
+    ← Back to Cart
+  </button>
+
+  <h1>Checkout</h1>
+
+  <div class="checkout-content">
+    <!-- Shipping Form -->
+    <div class="checkout-form-section">
+      <div class="section-card">
+        <h2>📍 Shipping Address</h2>
+
+        <form [formGroup]="shippingForm" (ngSubmit)="onSubmit()" class="shipping-form">
+          <div class="form-group">
+            <label for="fullName">Full Name *</label>
+            <input
+              type="text"
+              id="fullName"
+              formControlName="fullName"
+              placeholder="Enter your full name"
+              [class.error]="fullName?.invalid && fullName?.touched"
+            />
+            <div class="form-error" *ngIf="fullName?.invalid && fullName?.touched">
+              <span *ngIf="fullName?.errors?.['required']">Full name is required</span>
+              <span *ngIf="fullName?.errors?.['minlength']">Name must be at least 2 characters</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="address">Address *</label>
+            <input
+              type="text"
+              id="address"
+              formControlName="address"
+              placeholder="Street address, building, apartment"
+              [class.error]="address?.invalid && address?.touched"
+            />
+            <div class="form-error" *ngIf="address?.invalid && address?.touched">
+              <span *ngIf="address?.errors?.['required']">Address is required</span>
+              <span *ngIf="address?.errors?.['minlength']">Address must be at least 5 characters</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">City *</label>
+              <input
+                type="text"
+                id="city"
+                formControlName="city"
+                placeholder="City"
+                [class.error]="city?.invalid && city?.touched"
+              />
+              <div class="form-error" *ngIf="city?.invalid && city?.touched">
+                <span *ngIf="city?.errors?.['required']">City is required</span>
+                <span *ngIf="city?.errors?.['minlength']">City must be at least 2 characters</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="phone">Phone Number *</label>
+              <input
+                type="tel"
+                id="phone"
+                formControlName="phone"
+                placeholder="+1 234 567 8900"
+                [class.error]="phone?.invalid && phone?.touched"
+              />
+              <div class="form-error" *ngIf="phone?.invalid && phone?.touched">
+                <span *ngIf="phone?.errors?.['required']">Phone number is required</span>
+                <span *ngIf="phone?.errors?.['pattern']">Please enter a valid phone number</span>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="section-card payment-section">
+        <h2>💳 Payment Method</h2>
+        <div class="payment-option selected">
+          <div class="payment-radio">
+            <input type="radio" checked disabled />
+          </div>
+          <div class="payment-info">
+            <strong>Pay on Delivery</strong>
+            <p>Pay with cash or card when your order arrives</p>
+          </div>
+          <div class="payment-icon">🚚</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="checkout-summary-section">
+      <div class="summary-card">
+        <h2>📦 Order Summary</h2>
+
+        <div class="order-items">
+          <div class="order-item" *ngFor="let item of cartItems">
+            <div class="item-image">
+              <img
+                *ngIf="getProductImage(item.productId)"
+                [src]="getProductImage(item.productId)"
+                [alt]="item.productName"
+              />
+              <div class="placeholder-image" *ngIf="!getProductImage(item.productId)">📦</div>
+              <span class="item-quantity-badge">{{ item.quantity }}</span>
+            </div>
+            <div class="item-info">
+              <span class="item-name">{{ item.productName }}</span>
+              <span class="item-price">${{ item.price | number:'1.2-2' }} each</span>
+            </div>
+            <div class="item-total">
+              ${{ (item.price * item.quantity) | number:'1.2-2' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>${{ cartTotal | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span class="free-shipping">FREE</span>
+        </div>
+        <div class="summary-row">
+          <span>Payment</span>
+          <span class="payment-label">Pay on Delivery</span>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-row total">
+          <span>Total</span>
+          <span>${{ cartTotal | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="error-message" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary btn-place-order"
+          [disabled]="shippingForm.invalid || isSubmitting"
+          (click)="onSubmit()"
+        >
+          <span *ngIf="isSubmitting">Placing Order...</span>
+          <span *ngIf="!isSubmitting">🎉 Place Order</span>
+        </button>
+
+        <p class="order-note">
+          By placing your order, you agree to our terms of service.
+          You will pay when your order is delivered.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+

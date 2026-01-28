@@ -1,0 +1,293 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.checkout-container {
+  @include container();
+  padding-top: $spacing-xl;
+  padding-bottom: $spacing-3xl;
+  min-height: calc(100vh - 200px);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  background: none;
+  border: none;
+  color: $text-secondary;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: $spacing-lg;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $primary-color;
+  }
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: $text-primary;
+  margin: 0 0 $spacing-xl 0;
+}
+
+.checkout-content {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: $spacing-xl;
+
+  @media (max-width: $breakpoint-desktop) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Sections
+.section-card {
+  @include card-base();
+  padding: $spacing-xl;
+  margin-bottom: $spacing-xl;
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $text-primary;
+    margin: 0 0 $spacing-lg 0;
+  }
+}
+
+// Shipping Form
+.shipping-form {
+  .form-group {
+    margin-bottom: $spacing-lg;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-lg;
+
+    @media (max-width: $breakpoint-mobile) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  label {
+    display: block;
+    font-weight: 500;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+  }
+
+  input {
+    @include form-input();
+  }
+
+  .form-error {
+    color: $danger-color;
+    font-size: 0.85rem;
+    margin-top: $spacing-xs;
+  }
+}
+
+// Payment Section
+.payment-section {
+  margin-bottom: 0;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-lg;
+  border: 2px solid $border-color;
+  border-radius: $radius-lg;
+  transition: all $transition-normal;
+
+  &.selected {
+    border-color: $primary-color;
+    background: rgba($primary-color, 0.03);
+  }
+}
+
+.payment-radio {
+  input[type='radio'] {
+    width: 20px;
+    height: 20px;
+    accent-color: $primary-color;
+  }
+}
+
+.payment-info {
+  flex: 1;
+
+  strong {
+    display: block;
+    color: $text-primary;
+    margin-bottom: $spacing-xs;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: $text-secondary;
+  }
+}
+
+.payment-icon {
+  font-size: 2rem;
+}
+
+// Order Summary
+.summary-card {
+  @include card-base();
+  padding: $spacing-xl;
+  position: sticky;
+  top: 100px;
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $text-primary;
+    margin: 0 0 $spacing-lg 0;
+  }
+}
+
+.order-items {
+  max-height: 300px;
+  overflow-y: auto;
+  @include custom-scrollbar();
+}
+
+.order-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-sm 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid $border-color;
+    margin-bottom: $spacing-sm;
+  }
+}
+
+.item-image {
+  width: 60px;
+  height: 60px;
+  border-radius: $radius-md;
+  overflow: hidden;
+  background: $bg-light;
+  position: relative;
+  @include flex-center();
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .placeholder-image {
+    font-size: 1.5rem;
+    opacity: 0.5;
+  }
+}
+
+.item-quantity-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  background: $primary-color;
+  color: white;
+  border-radius: $radius-circle;
+  font-size: 0.75rem;
+  font-weight: 700;
+  @include flex-center();
+}
+
+.item-info {
+  flex: 1;
+  min-width: 0;
+
+  .item-name {
+    display: block;
+    font-weight: 500;
+    color: $text-primary;
+    @include text-truncate();
+  }
+
+  .item-price {
+    display: block;
+    font-size: 0.85rem;
+    color: $text-muted;
+  }
+}
+
+.item-total {
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.summary-divider {
+  height: 1px;
+  background: $border-color;
+  margin: $spacing-lg 0;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm 0;
+  font-size: 0.95rem;
+
+  &.total {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $text-primary;
+
+    span:last-child {
+      color: $primary-color;
+    }
+  }
+}
+
+.free-shipping {
+  color: $success-color;
+  font-weight: 600;
+}
+
+.payment-label {
+  color: $accent-gold-dark;
+  font-weight: 500;
+}
+
+.btn-place-order {
+  width: 100%;
+  padding: $spacing-md;
+  margin-top: $spacing-lg;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.order-note {
+  margin: $spacing-lg 0 0 0;
+  font-size: 0.85rem;
+  color: $text-muted;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.error-message {
+  margin-top: $spacing-md;
+  padding: $spacing-md;
+  background: rgba($danger-color, 0.1);
+  border-left: 4px solid $danger-color;
+  border-radius: $radius-md;
+  color: $danger-color;
+  font-size: 0.9rem;
+}
+

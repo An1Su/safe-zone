@@ -1,0 +1,132 @@
+<div class="confirmation-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">Loading order details...</div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="error-icon">❌</div>
+    <h2>Something went wrong</h2>
+    <p>{{ error }}</p>
+    <a routerLink="/products" class="btn btn-primary">Continue Shopping</a>
+  </div>
+
+  <!-- Success Content -->
+  <div *ngIf="order && !loading" class="confirmation-content">
+    <!-- Success Header -->
+    <div class="success-header">
+      <div class="success-icon-wrapper">
+        <div class="success-icon">✓</div>
+        <div class="confetti confetti-1">🎉</div>
+        <div class="confetti confetti-2">✨</div>
+        <div class="confetti confetti-3">🎊</div>
+      </div>
+      <h1>Thank You for Your Order!</h1>
+      <p class="order-number">Order #{{ order.id ? order.id.slice(-8).toUpperCase() : '' }}</p>
+    </div>
+
+    <!-- Order Details Card -->
+    <div class="details-card">
+      <div class="card-header">
+        <h2>📦 Order Details</h2>
+        <span class="order-status" [ngClass]="getStatusClass(order.status)">
+          {{ order.status }}
+        </span>
+      </div>
+
+      <div class="details-grid">
+        <!-- Shipping Info -->
+        <div class="detail-section">
+          <h3>📍 Shipping Address</h3>
+          <p class="address-name">{{ order.shippingAddress.fullName }}</p>
+          <p>{{ order.shippingAddress.address }}</p>
+          <p>{{ order.shippingAddress.city }}</p>
+          <p>📞 {{ order.shippingAddress.phone }}</p>
+        </div>
+
+        <!-- Payment Info -->
+        <div class="detail-section">
+          <h3>💳 Payment Method</h3>
+          <p class="payment-method">Pay on Delivery</p>
+          <p class="payment-note">You will pay when your order arrives</p>
+        </div>
+
+        <!-- Order Info -->
+        <div class="detail-section">
+          <h3>📅 Order Information</h3>
+          <p><strong>Placed:</strong> {{ formatDate(order.createdAt) }}</p>
+          <p><strong>Items:</strong> {{ order.items.length }} product(s)</p>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div class="items-section">
+        <h3>🛍️ Items Ordered</h3>
+        <div class="order-items">
+          <div class="order-item" *ngFor="let item of order.items">
+            <div class="item-info">
+              <span class="item-name">{{ item.productName }}</span>
+              <span class="item-quantity">Qty: {{ item.quantity }}</span>
+            </div>
+            <div class="item-price">
+              ${{ (item.price * item.quantity) | number:'1.2-2' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="order-total">
+          <div class="total-row">
+            <span>Subtotal</span>
+            <span>${{ order.totalAmount | number:'1.2-2' }}</span>
+          </div>
+          <div class="total-row">
+            <span>Shipping</span>
+            <span class="free">FREE</span>
+          </div>
+          <div class="total-row grand-total">
+            <span>Total</span>
+            <span>${{ order.totalAmount | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- What's Next -->
+    <div class="next-steps-card">
+      <h2>🚀 What's Next?</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-icon">📧</div>
+          <div class="step-text">
+            <strong>Order Confirmation</strong>
+            <p>Your order has been placed successfully</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-icon">📦</div>
+          <div class="step-text">
+            <strong>Preparing Your Order</strong>
+            <p>Seller will prepare your items for shipping</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-icon">🚚</div>
+          <div class="step-text">
+            <strong>Delivery</strong>
+            <p>Pay on delivery when your order arrives</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <a routerLink="/profile" class="btn btn-primary">
+        📋 View Order History
+      </a>
+      <a routerLink="/products" class="btn btn-outline">
+        🛒 Continue Shopping
+      </a>
+    </div>
+  </div>
+</div>
+

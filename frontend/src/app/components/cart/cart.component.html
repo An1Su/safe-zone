@@ -1,0 +1,202 @@
+<div class="cart-container">
+  <div class="cart-header">
+    <h1>🛒 Shopping Cart</h1>
+    <span class="item-count" *ngIf="cartItems.length > 0">
+      {{ cartItems.length }} {{ cartItems.length === 1 ? 'item' : 'items' }}
+    </span>
+  </div>
+
+  <!-- Validation Warning Banner -->
+  <div class="validation-banner warning-message" *ngIf="hasValidationIssues">
+    <span class="warning-icon">⚠️</span>
+    <div class="warning-content">
+      <strong>Some items require attention</strong>
+      <p>Please resolve the issues below before proceeding to checkout.</p>
+    </div>
+  </div>
+
+  <!-- Not Logged In Banner -->
+  <div class="validation-banner info-message" *ngIf="!isLoggedIn && cartItems.length > 0">
+    <span class="info-icon">ℹ️</span>
+    <div class="info-content">
+      <strong>Sign in to checkout</strong>
+      <p>You need to be logged in to complete your purchase. <a routerLink="/login">Sign in</a> or <a routerLink="/register">create an account</a>.</p>
+    </div>
+  </div>
+
+  <!-- Empty Cart State -->
+  <div class="empty-state" *ngIf="cartItems.length === 0">
+    <div class="empty-icon">🛒</div>
+    <div class="empty-title">Your cart is empty</div>
+    <p class="empty-message">Looks like you haven't added any products yet.</p>
+    <button class="btn btn-primary" (click)="continueShopping()">Browse Products</button>
+  </div>
+
+  <!-- Cart Content - Two Column Layout -->
+  <div class="cart-content" *ngIf="cartItems.length > 0">
+    <!-- Left Section - Product List -->
+    <div class="cart-products-section">
+      <!-- Cart Items List -->
+      <div class="cart-items">
+        <div
+          class="cart-item"
+          *ngFor="let item of cartItems"
+          [class.has-error]="getValidationError(item.productId)"
+        >
+          <!-- Selection Checkbox -->
+          <div class="item-select">
+            <input
+              type="checkbox"
+              [checked]="isItemSelected(item.productId)"
+              (change)="toggleItemSelection(item.productId)"
+            />
+          </div>
+
+          <!-- Product Image -->
+          <div class="item-image">
+            <img
+              *ngIf="getProductImage(item.productId)"
+              [src]="getProductImage(item.productId)"
+              [alt]="item.productName"
+            />
+            <div class="placeholder-image" *ngIf="!getProductImage(item.productId)">
+              📦
+            </div>
+          </div>
+
+          <!-- Quantity Controls -->
+          <div class="item-quantity">
+            <button
+              class="qty-btn"
+              (click)="updateQuantity(item.productId, -1)"
+              [disabled]="item.quantity <= 1"
+            >
+              −
+            </button>
+            <input
+              type="number"
+              [value]="item.quantity"
+              min="1"
+              (change)="setQuantity(item.productId, $event)"
+              class="qty-input"
+            />
+            <button
+              class="qty-btn"
+              (click)="updateQuantity(item.productId, 1)"
+            >
+              +
+            </button>
+          </div>
+
+          <!-- Unit Price -->
+          <div class="item-unit-price">
+            ${{ item.price | number:'1.2-2' }}
+          </div>
+
+          <!-- Item Total -->
+          <div class="item-total">
+            ${{ (item.price * item.quantity) | number:'1.2-2' }}
+          </div>
+
+          <!-- Remove Button -->
+          <button
+            class="item-remove"
+            (click)="removeItem(item.productId)"
+            title="Remove item"
+          >
+            ×
+          </button>
+
+          <!-- Validation Error (shown below item if exists) -->
+          <div class="item-error-row" *ngIf="getValidationError(item.productId) as error">
+            <ng-container [ngSwitch]="error.issue">
+              <span *ngSwitchCase="'out_of_stock'" class="error-text">
+                ❌ This product is out of stock
+              </span>
+              <span *ngSwitchCase="'insufficient_stock'" class="error-text">
+                ⚠️ Only {{ error.currentStock }} available (you have {{ error.requestedQuantity }})
+              </span>
+              <span *ngSwitchCase="'not_found'" class="error-text">
+                ❌ This product is no longer available
+              </span>
+            </ng-container>
+
+            <div class="error-actions">
+              <button
+                *ngIf="error.issue === 'insufficient_stock'"
+                class="btn btn-sm btn-warning"
+                (click)="adjustToAvailableStock(item.productId)"
+              >
+                Adjust to {{ error.currentStock }}
+              </button>
+              <button
+                class="btn btn-sm btn-danger"
+                (click)="removeItem(item.productId)"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Select All & Remove Selected - Below Products -->
+      <div class="cart-actions-bar">
+        <label class="select-all-checkbox">
+          <input
+            type="checkbox"
+            [checked]="allSelected"
+            (change)="selectAll()"
+          />
+          <span>Select all</span>
+        </label>
+        <button
+          class="btn btn-outline remove-selected-btn"
+          [disabled]="selectedItems.size === 0"
+          (click)="removeSelected()"
+        >
+          🗑️ Remove selected ({{ selectedItems.size }})
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Section - Order Summary -->
+    <div class="cart-summary-section">
+      <div class="summary-card">
+        <h3>Order Summary</h3>
+        <div class="summary-row">
+          <span>Subtotal ({{ cartItems.length }} items)</span>
+          <span>${{ cartTotal | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span class="free-shipping">FREE</span>
+        </div>
+        <div class="summary-row">
+          <span>Payment</span>
+          <span class="payment-method">Pay on Delivery</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span>${{ cartTotal | number:'1.2-2' }}</span>
+        </div>
+
+        <button
+          class="btn btn-primary btn-checkout"
+          [disabled]="!canProceed || isValidating"
+          (click)="proceedToCheckout()"
+        >
+          <span *ngIf="isValidating">Validating...</span>
+          <span *ngIf="!isValidating && !isLoggedIn">Sign in to Checkout</span>
+          <span *ngIf="!isValidating && isLoggedIn && hasValidationIssues">Resolve Issues First</span>
+          <span *ngIf="!isValidating && isLoggedIn && !hasValidationIssues">Proceed to Checkout</span>
+        </button>
+
+        <button class="btn btn-outline btn-continue" (click)="continueShopping()">
+          Continue Shopping
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

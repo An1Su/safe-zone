@@ -27,9 +27,11 @@
       <button
         class="btn btn-add-to-cart"
         (click)="addToCart(product)"
-        title="Shopping cart coming soon!"
+        [disabled]="product.stock === 0"
+        [class.out-of-stock]="product.stock === 0"
       >
-        🛒 Add to Cart
+        <span *ngIf="product.stock > 0">🛒 Add to Cart</span>
+        <span *ngIf="product.stock === 0">❌ Out of Stock</span>
       </button>
     </div>
   </div>
