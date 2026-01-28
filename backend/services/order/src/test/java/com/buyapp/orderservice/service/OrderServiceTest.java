@@ -66,6 +66,9 @@ class OrderServiceTest {
     private WebClient.RequestBodyUriSpec requestBodyUriSpec;
 
     @Mock
+    private WebClient.RequestBodySpec requestBodySpec;
+
+    @Mock
     private WebClient.RequestHeadersSpec<?> requestHeadersSpec;
 
     @Mock
@@ -116,8 +119,11 @@ class OrderServiceTest {
         doReturn(webClient).when(webClientBuilder).build();
         doReturn(requestHeadersUriSpec).when(webClient).get();
         doReturn(requestBodyUriSpec).when(webClient).post();
-        doReturn(requestHeadersSpec).when(requestHeadersUriSpec).uri(anyString(), any(Object.class));
-        doReturn(requestHeadersSpec).when(requestBodyUriSpec).uri(anyString(), any(Object.class));
+        // GET requests: uri() takes Object... (varargs), so use Object[].class
+        doReturn(requestHeadersSpec).when(requestHeadersUriSpec).uri(anyString(), any(Object[].class));
+        // POST requests: uri() returns RequestBodySpec, then retrieve() returns ResponseSpec
+        doReturn(requestBodySpec).when(requestBodyUriSpec).uri(anyString(), any(Object[].class));
+        doReturn(responseSpec).when(requestBodySpec).retrieve();
         doReturn(responseSpec).when(requestHeadersSpec).retrieve();
     }
 
@@ -379,8 +385,9 @@ class OrderServiceTest {
         // Arrange
         testOrder.setStatus(OrderStatus.SHIPPED); // Cannot cancel shipped orders
         when(orderRepository.findById("order1")).thenReturn(Optional.of(testOrder));
+        // Mock stock restoration (happens before cancel check, but will fail when cancel() throws)
+        mockStockRestorationCall();
 
-        // Act & Assert
         assertThrows(IllegalStateException.class, () -> {
             orderService.cancelOrder("order1", "user1");
         });
