@@ -1,6 +1,6 @@
-package com.buyapp.cartservice.repository;
+package com.buyapp.orderservice.repository;
 
-import com.buyapp.cartservice.model.Cart;
+import com.buyapp.orderservice.model.Cart;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
@@ -20,4 +20,3 @@ public interface CartRepository extends MongoRepository<Cart, String> {
      */
     void deleteByUserId(String userId);
 }
-

@@ -9,8 +9,8 @@ RUN mvn clean install -DskipTests -B
 
 # Build service
 WORKDIR /build/service
-COPY services/cart/pom.xml .
-COPY services/cart/src ./src
+COPY services/order/pom.xml .
+COPY services/order/src ./src
 RUN mvn clean package -DskipTests -B
 
 # Runtime stage
@@ -20,4 +20,3 @@ WORKDIR /app
 COPY --from=builder /build/service/target/*.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
-

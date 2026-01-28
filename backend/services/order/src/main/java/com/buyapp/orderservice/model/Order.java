@@ -76,11 +76,100 @@ public class Order {
                 .sum();
     }
 
+    public boolean isEmpty() {
+        return items == null || items.isEmpty();
+    }
+
     public boolean canBeCancelled() {
         return status == OrderStatus.PENDING || status == OrderStatus.READY_FOR_DELIVERY;
     }
 
     public boolean canBeDeleted() {
         return status == OrderStatus.CANCELLED || status == OrderStatus.DELIVERED;
+    }
+
+    public boolean belongsToUser(String userId) {
+        return this.userId != null && this.userId.equals(userId);
+    }
+
+    public boolean containsSellerItems(String sellerId) {
+        if (items == null || items.isEmpty()) {
+            return false;
+        }
+        return items.stream()
+                .anyMatch(item -> item.getSellerId() != null && item.getSellerId().equals(sellerId));
+    }
+
+    /**
+     * Cancel the order (updates status and timestamp)
+     * @throws IllegalStateException if order cannot be cancelled
+     */
+    public void cancel() {
+        if (!canBeCancelled()) {
+            throw new IllegalStateException(
+                    "Order cannot be cancelled. Current status: " + status);
+        }
+        this.status = OrderStatus.CANCELLED;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * Update order status with validation
+     * @param newStatus the new status
+     * @throws IllegalStateException if status transition is invalid
+     */
+    public void updateStatus(OrderStatus newStatus) {
+        if (!OrderStatus.isValidTransition(this.status, newStatus)) {
+            throw new IllegalStateException(
+                    "Invalid status transition from " + status + " to " + newStatus);
+        }
+        this.status = newStatus;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * Check if order matches search query (by ID or product name)
+     */
+    public boolean matchesQuery(String lowerQuery) {
+        // Match by order ID
+        if (matchesId(lowerQuery)) {
+            return true;
+        }
+
+        // Match by product name (with null safety)
+        if (items != null) {
+            return items.stream()
+                    .anyMatch(item -> item.getProductName() != null
+                            && item.getProductName().toLowerCase().contains(lowerQuery));
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if order matches search query for seller (by ID or seller's product names)
+     */
+    public boolean matchesSellerQuery(String sellerId, String lowerQuery) {
+        // Match by order ID
+        if (matchesId(lowerQuery)) {
+            return true;
+        }
+
+        // Match by seller's product names (with null safety)
+        if (items != null) {
+            return items.stream()
+                    .filter(item -> item.getSellerId() != null && item.getSellerId().equals(sellerId))
+                    .anyMatch(item -> item.getProductName() != null
+                            && item.getProductName().toLowerCase().contains(lowerQuery));
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if order ID matches the query
+     */
+    private boolean matchesId(String lowerQuery) {
+        return id != null && id.toLowerCase().contains(lowerQuery);
     }
 }

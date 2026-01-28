@@ -1,4 +1,4 @@
-package com.buyapp.cartservice.model;
+package com.buyapp.orderservice.model;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

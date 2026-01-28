@@ -44,11 +44,16 @@ spring:
                   args:
                     maxSize: 2MB
 
-            # Cart Service routes
+            # Order Service routes (includes cart and orders)
             - id: cart-service
-              uri: lb://cart-service
+              uri: lb://order-service
               predicates:
                 - Path=/cart/**
+
+            - id: order-service
+              uri: lb://order-service
+              predicates:
+                - Path=/orders/**
 
 server:
   port: 8080

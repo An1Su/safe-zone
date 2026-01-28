@@ -1,4 +1,4 @@
-package com.buyapp.cartservice.model;
+package com.buyapp.orderservice.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.CreatedDate;
@@ -67,6 +67,41 @@ public class Cart {
         }
     }
 
+    public void updateItem(String productId, Integer quantity, Double price) {
+        CartItem item = findItemByProductId(productId);
+        if (item != null) {
+            item.setQuantity(quantity);
+            item.setPrice(price);
+            updatedAt = LocalDateTime.now();
+        }
+    }
+
+    /**
+     * Add quantity to existing item or add new item if not found
+     */
+    public void addOrUpdateItem(CartItem newItem) {
+        CartItem existingItem = findItemByProductId(newItem.getProductId());
+        if (existingItem != null) {
+            // Add quantities together
+            existingItem.setQuantity(existingItem.getQuantity() + newItem.getQuantity());
+            // Update price in case it changed
+            existingItem.setPrice(newItem.getPrice());
+        } else {
+            // Add new item
+            addItem(newItem);
+        }
+        updatedAt = LocalDateTime.now();
+    }
+
+    public void clear() {
+        if (items != null) {
+            items.clear();
+        } else {
+            items = new ArrayList<>();
+        }
+        updatedAt = LocalDateTime.now();
+    }
+
     public CartItem findItemByProductId(String productId) {
         if (items == null) {
             return null;
@@ -88,5 +123,24 @@ public class Cart {
 
     public boolean isEmpty() {
         return items == null || items.isEmpty();
+    }
+
+    /**
+     * Convert cart items to order items with seller IDs
+     * @param sellerIdCache Map of productId -> sellerId
+     * @return List of OrderItems
+     */
+    public List<com.buyapp.orderservice.model.OrderItem> toOrderItems(java.util.Map<String, String> sellerIdCache) {
+        if (items == null || items.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return items.stream()
+                .map(cartItem -> new com.buyapp.orderservice.model.OrderItem(
+                        cartItem.getProductId(),
+                        cartItem.getProductName(),
+                        sellerIdCache.get(cartItem.getProductId()),
+                        cartItem.getQuantity(),
+                        cartItem.getPrice()))
+                .toList();
     }
 }
