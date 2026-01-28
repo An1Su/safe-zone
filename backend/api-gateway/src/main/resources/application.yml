@@ -4,56 +4,54 @@ spring:
 
   cloud:
     gateway:
-      server:
-        webflux:
-          discovery:
-            locator:
-              enabled: true
-              lower-case-service-id: true
-          routes:
-            # Auth routes (public)
-            - id: auth-service
-              uri: lb://user-service
-              predicates:
-                - Path=/auth/**
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # Auth routes (public)
+        - id: auth-service
+          uri: lb://user-service
+          predicates:
+            - Path=/auth/**
 
-            # User Service routes
-            - id: user-service
-              uri: lb://user-service
-              predicates:
-                - Path=/users/**
+        # User Service routes
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/users/**
 
-            # Product Service - all endpoints
-            - id: all-products
-              uri: lb://product-service
-              predicates:
-                - Path=/products
+        # Product Service - all endpoints
+        - id: all-products
+          uri: lb://product-service
+          predicates:
+            - Path=/products
 
-            - id: product-service
-              uri: lb://product-service
-              predicates:
-                - Path=/products/**
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/products/**
 
-            # Media Service routes
-            - id: media-service
-              uri: lb://media-service
-              predicates:
-                - Path=/media/**
-              filters:
-                - name: RequestSize
-                  args:
-                    maxSize: 2MB
+        # Media Service routes
+        - id: media-service
+          uri: lb://media-service
+          predicates:
+            - Path=/media/**
+          filters:
+            - name: RequestSize
+              args:
+                maxSize: 2MB
 
-            # Order Service routes (includes cart and orders)
-            - id: cart-service
-              uri: lb://order-service
-              predicates:
-                - Path=/cart/**
+        # Order Service routes (includes cart and orders)
+        - id: cart-service
+          uri: lb://order-service
+          predicates:
+            - Path=/cart/**
 
-            - id: order-service
-              uri: lb://order-service
-              predicates:
-                - Path=/orders/**
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/**
 
 server:
   port: 8080
