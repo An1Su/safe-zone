@@ -43,10 +43,20 @@ spring:
                 maxSize: 2MB
 
         # Order Service routes (includes cart and orders)
+        - id: cart-base
+          uri: lb://order-service
+          predicates:
+            - Path=/cart
+
         - id: cart-service
           uri: lb://order-service
           predicates:
             - Path=/cart/**
+
+        - id: orders-base
+          uri: lb://order-service
+          predicates:
+            - Path=/orders
 
         - id: order-service
           uri: lb://order-service
