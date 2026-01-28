@@ -53,7 +53,8 @@ describe('CartService', () => {
     authServiceSpy.getAuthHeaders.and.returnValue(
       new HttpHeaders({ Authorization: 'Bearer mock-token' }),
     );
-    authServiceSpy.isLoggedIn.and.returnValue(true);
+    // Return false to prevent auto-loading cart in constructor
+    authServiceSpy.isLoggedIn.and.returnValue(false);
 
     TestBed.configureTestingModule({
       providers: [
@@ -200,7 +201,8 @@ describe('CartService', () => {
         expect(cart.total).toBe(0);
       });
 
-      const req = httpMock.expectOne(`${environment.apiUrl}/cart`);
+      // Only expect DELETE request, not GET
+      const req = httpMock.expectOne((request) => request.method === 'DELETE' && request.url === `${environment.apiUrl}/cart`);
       expect(req.request.method).toBe('DELETE');
       expect(req.request.withCredentials).toBe(true);
       req.flush(null);
