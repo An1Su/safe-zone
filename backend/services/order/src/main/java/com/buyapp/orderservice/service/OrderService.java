@@ -453,7 +453,7 @@ public class OrderService {
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            throw new ResourceNotFoundException("Seller not found with email: " + email, e);
+            throw new ResourceNotFoundException("Seller not found with email: " + email);
         }
     }
 
