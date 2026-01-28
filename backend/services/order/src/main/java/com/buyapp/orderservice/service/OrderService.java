@@ -14,6 +14,7 @@ import com.buyapp.common.dto.OrderDto;
 import com.buyapp.common.dto.OrderDto.OrderItemDto;
 import com.buyapp.common.dto.ProductDto;
 import com.buyapp.common.dto.ShippingAddressDto;
+import com.buyapp.common.exception.BadRequestException;
 import com.buyapp.common.exception.ResourceNotFoundException;
 import com.buyapp.orderservice.model.Cart;
 import com.buyapp.orderservice.model.CartItem;
@@ -414,7 +415,7 @@ public class OrderService {
                     .bodyToMono(Void.class)
                     .block();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to " + action + " stock for product: " + productId, e);
+            throw new BadRequestException("Failed to " + action + " stock for product: " + productId + ": " + e.getMessage());
         }
     }
 

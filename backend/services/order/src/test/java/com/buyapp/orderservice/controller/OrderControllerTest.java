@@ -3,7 +3,6 @@ package com.buyapp.orderservice.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -13,7 +12,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -251,7 +249,7 @@ class OrderControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value("order1"));
 
-        verify(orderService).searchOrders(eq("user1"), eq("order1"), eq(null), eq(null), eq(null));
+        verify(orderService).searchOrders("user1", "order1", null, null, null);
     }
 
     // ========== Seller Endpoint Tests ==========
@@ -312,6 +310,6 @@ class OrderControllerTest {
                 .param("q", "order1"))
                 .andExpect(status().isOk());
 
-        verify(orderService).searchSellerOrders(eq("seller@example.com"), eq("order1"), eq(null), eq(null), eq(null));
+        verify(orderService).searchSellerOrders("seller@example.com", "order1", null, null, null);
     }
 }
