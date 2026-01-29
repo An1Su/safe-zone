@@ -86,7 +86,7 @@ pipeline {
                     // Analyze frontend with LCOV coverage
                     sh '''
                         cd frontend
-                        npx sonarqube-scanner \
+                        sonar-scanner \
                             -Dsonar.projectKey=safe-zone-frontend \
                             -Dsonar.host.url=http://host.docker.internal:9000 \
                             -Dsonar.token=${SONAR_TOKEN} \
@@ -107,7 +107,6 @@ pipeline {
                         sh '''
                             sleep 30
 
-                            # Check quality gate for both projects
                             for PROJECT in safe-zone safe-zone-frontend; do
                                 RESPONSE=$(curl -s -u "${SONAR_TOKEN}:" \
                                     "http://host.docker.internal:9000/api/qualitygates/project_status?projectKey=${PROJECT}")
