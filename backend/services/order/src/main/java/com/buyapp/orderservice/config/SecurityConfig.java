@@ -1,6 +1,5 @@
-package com.buyapp.productservice.config;
+package com.buyapp.orderservice.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -18,8 +17,11 @@ import com.buyapp.common.security.JwtAuthenticationFilter;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -27,12 +29,13 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable) // CORS handled by Gateway
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/products", "/products/{id}", "/actuator/**").permitAll() // Public endpoints
-                        .requestMatchers("/products/user/{userId}").permitAll() // Internal service calls
-                        .requestMatchers("/products/{id}/seller-id", "/products/{id}/reduce-stock", "/products/{id}/restore-stock").permitAll() // Internal Order Service calls
+                        // All endpoints permitted - Gateway already authenticated and added X-User-Email header
+                        // Include both exact paths and wildcard paths
+                        .requestMatchers("/cart", "/cart/**", "/orders", "/orders/**", "/actuator/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 }
+
