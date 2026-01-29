@@ -50,11 +50,10 @@ pipeline {
         stage('Frontend Tests') {
             steps {
                 sh '''
-                    echo "Running frontend tests"
+                    echo "Running frontend tests with coverage"
                     cd frontend
                     npm ci
-                    # Disable coverage for now - tests hang with coverage enabled
-                    npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage=false
+                    npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage=true
                 '''
             }
         }
@@ -72,7 +71,7 @@ pipeline {
                         # Build all modules to ensure classes are compiled for SonarQube
                         ./mvnw install -DskipTests
                     '''
-                    // Analyze all backend services with explicit source paths
+                    // Analyze all backend services and frontend with coverage
                     sh '''
                         cd backend
                         ./mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
@@ -81,8 +80,10 @@ pipeline {
                             -Dsonar.host.url=http://host.docker.internal:9000 \
                             -Dsonar.token=${SONAR_TOKEN} \
                             -Dsonar.java.source=17 \
+                            -Dsonar.sources=.,../frontend/src \
                             -Dsonar.coverage.jacoco.xmlReportPaths=services/user/target/site/jacoco/jacoco.xml,services/product/target/site/jacoco/jacoco.xml,services/media/target/site/jacoco/jacoco.xml,services/order/target/site/jacoco/jacoco.xml \
-                            -Dsonar.coverage.exclusions=**/dto/**/*.java,**/model/**/*.java,**/event/**/*.java,**/exception/**/*.java,**/security/**/*.java,**/config/**/*.java
+                            -Dsonar.javascript.lcov.reportPaths=../frontend/coverage/lcov.info \
+                            -Dsonar.coverage.exclusions=**/dto/**/*.java,**/model/**/*.java,**/event/**/*.java,**/exception/**/*.java,**/security/**/*.java,**/config/**/*.java,**/node_modules/**,**/*.spec.ts
                     '''
                 }
             }
