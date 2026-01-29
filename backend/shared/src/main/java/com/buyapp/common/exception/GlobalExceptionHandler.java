@@ -15,6 +15,8 @@ import java.nio.file.AccessDeniedException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String FORBIDDEN = "Forbidden";
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(
             ResourceNotFoundException ex, HttpServletRequest request) {
@@ -53,7 +55,7 @@ public class GlobalExceptionHandler {
             ForbiddenException ex, HttpServletRequest request) {
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.FORBIDDEN.value(),
-                "Forbidden",
+                FORBIDDEN,
                 ex.getMessage(),
                 request.getRequestURI());
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
@@ -76,7 +78,7 @@ public class GlobalExceptionHandler {
             AccessDeniedException ex, HttpServletRequest request) {
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.FORBIDDEN.value(),
-                "Forbidden",
+                FORBIDDEN,
                 ex.getMessage(),
                 request.getRequestURI());
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
@@ -88,7 +90,7 @@ public class GlobalExceptionHandler {
             AuthorizationDeniedException ex, HttpServletRequest request) {
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.FORBIDDEN.value(),
-                "Forbidden",
+                FORBIDDEN,
                 "You don't have permission to access this resource",
                 request.getRequestURI());
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);

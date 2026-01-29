@@ -78,9 +78,7 @@ class OrderServiceTest {
     private OrderService orderService;
 
     private Cart testCart;
-    private CartItem testCartItem;
     private Order testOrder;
-    private OrderItem testOrderItem;
     private ProductDto testProductDto;
     private UserDto testUserDto;
     private ShippingAddressDto testShippingAddress;
@@ -90,11 +88,11 @@ class OrderServiceTest {
     void setUp() {
         // Setup test cart
         testCart = new Cart("user1");
-        testCartItem = new CartItem("product1", "Product 1", 2, 99.99);
+        CartItem testCartItem = new CartItem("product1", "Product 1", 2, 99.99);
         testCart.addItem(testCartItem);
 
         // Setup test order
-        testOrderItem = new OrderItem("product1", "Product 1", "seller1", 2, 99.99);
+        OrderItem testOrderItem = new OrderItem("product1", "Product 1", "seller1", 2, 99.99);
         testOrder = new Order("user1", Arrays.asList(testOrderItem), createShippingAddress());
         testOrder.setId("order1");
         testOrder.setStatus(OrderStatus.PENDING);

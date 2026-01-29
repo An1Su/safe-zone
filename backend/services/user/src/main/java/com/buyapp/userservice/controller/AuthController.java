@@ -24,6 +24,9 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class AuthController {
 
+    private static final String SAME_SITE_STRICT = "Strict";
+    private static final String ROLE_CLIENT = "client";
+
     @Autowired
     private UserRepository userRepository;
 
@@ -60,7 +63,7 @@ public class AuthController {
         ResponseCookie jwtCookie = ResponseCookie.from("jwt", token)
                 .httpOnly(true)
                 .secure(false) // Set to false for development
-                .sameSite("Strict")
+                .sameSite(SAME_SITE_STRICT)
                 .maxAge(24 * 60 * 60) // 24 hours
                 .path("/")
                 .build();
@@ -77,13 +80,13 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> register(@RequestBody UserDto userDto) {
         // Set default role to CLIENT if not specified
         if (userDto.getRole() == null || userDto.getRole().isEmpty()) {
-            userDto.setRole("client");
+            userDto.setRole(ROLE_CLIENT);
         }
 
         // Validate role (only client or seller allowed)
         String role = userDto.getRole().toLowerCase();
-        if (!role.equals("client") && !role.equals("seller")) {
-            userDto.setRole("client"); // Default to client for invalid roles
+        if (!role.equals(ROLE_CLIENT) && !role.equals("seller")) {
+            userDto.setRole(ROLE_CLIENT); // Default to client for invalid roles
         }
 
         UserDto createdUser = userService.createUser(userDto);
@@ -93,7 +96,7 @@ public class AuthController {
         ResponseCookie jwtCookie = ResponseCookie.from("jwt", token)
                 .httpOnly(true)
                 .secure(false) // Set to false for development
-                .sameSite("Strict")
+                .sameSite(SAME_SITE_STRICT)
                 .maxAge(24 * 60 * 60) // 24 hours
                 .path("/")
                 .build();
@@ -136,7 +139,7 @@ public class AuthController {
         ResponseCookie clearCookie = ResponseCookie.from("jwt", "")
                 .httpOnly(true)
                 .secure(false) // Set to false for development
-                .sameSite("Strict")
+                .sameSite(SAME_SITE_STRICT)
                 .maxAge(0) // Expire immediately
                 .path("/")
                 .build();

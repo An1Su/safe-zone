@@ -38,6 +38,8 @@ public class MediaService {
     private static final String UPLOAD_DIR = "uploads/images/";
     private static final long MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
     private static final int MAX_IMAGES_PER_PRODUCT = 5;
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
+    private static final String DELETE_FILE_ERROR = "Could not delete file: ";
     private static final String[] ALLOWED_CONTENT_TYPES = {
             "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"
     };
@@ -72,7 +74,7 @@ public class MediaService {
 
         // Check if user owns the product or is an admin
         boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(auth -> auth.getAuthority().equals(ROLE_ADMIN));
 
         if (!product.getUser().equals(userEmail) && !isAdmin) {
             throw new ForbiddenException("You can only upload media for your own products");
@@ -142,7 +144,7 @@ public class MediaService {
 
         String userEmail = authentication.getName();
         boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(auth -> auth.getAuthority().equals(ROLE_ADMIN));
 
         if (!product.getUser().equals(userEmail) && !isAdmin) {
             throw new ForbiddenException("You can only delete media for your own products");
@@ -154,7 +156,7 @@ public class MediaService {
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
             // Log error but don't fail the transaction
-            System.err.println("Could not delete file: " + media.getImagePath() + " - " + e.getMessage());
+            System.err.println(DELETE_FILE_ERROR + media.getImagePath() + " - " + e.getMessage());
         }
 
         // Delete from database
@@ -171,7 +173,7 @@ public class MediaService {
 
         String userEmail = authentication.getName();
         boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(auth -> auth.getAuthority().equals(ROLE_ADMIN));
 
         if (!product.getUser().equals(userEmail) && !isAdmin) {
             throw new ForbiddenException("You can only delete media for your own products");
@@ -185,7 +187,7 @@ public class MediaService {
                 Path filePath = Paths.get(media.getImagePath());
                 Files.deleteIfExists(filePath);
             } catch (IOException e) {
-                System.err.println("Could not delete file: " + media.getImagePath() + " - " + e.getMessage());
+                System.err.println(DELETE_FILE_ERROR + media.getImagePath() + " - " + e.getMessage());
             }
         }
 
@@ -204,7 +206,7 @@ public class MediaService {
                 Path filePath = Paths.get(media.getImagePath());
                 Files.deleteIfExists(filePath);
             } catch (IOException e) {
-                System.err.println("Could not delete file: " + media.getImagePath() + " - " + e.getMessage());
+                System.err.println(DELETE_FILE_ERROR + media.getImagePath() + " - " + e.getMessage());
             }
         }
 

@@ -18,6 +18,9 @@ import java.util.stream.Collectors;
 @Service
 public class ProductService {
 
+    private static final String PRODUCT_NOT_FOUND = "Product not found with this id:";
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
+
     @Autowired
     private ProductRepository productRepository;
 
@@ -36,13 +39,13 @@ public class ProductService {
 
     public ProductDto getProductById(String id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with this id:" + id));
+                .orElseThrow(() -> new ResourceNotFoundException(PRODUCT_NOT_FOUND + id));
         return toDto(product);
     }
 
     public Product getProductEntityById(String id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with this id:" + id));
+                .orElseThrow(() -> new ResourceNotFoundException(PRODUCT_NOT_FOUND + id));
     }
 
     public ProductDto createProduct(ProductDto productDto, Authentication authentication) {
@@ -72,7 +75,7 @@ public class ProductService {
 
     public ProductDto updateProduct(String id, ProductDto productDto, Authentication authentication) {
         Product existing = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with this id:" + id));
+                .orElseThrow(() -> new ResourceNotFoundException(PRODUCT_NOT_FOUND + id));
 
         if (!canModifyProduct(existing, authentication)) {
             throw new ForbiddenException("You don't have permission to modify this product");
@@ -106,7 +109,7 @@ public class ProductService {
 
     public void deleteProduct(String id, Authentication authentication) {
         Product existing = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with this id:" + id));
+                .orElseThrow(() -> new ResourceNotFoundException(PRODUCT_NOT_FOUND + id));
 
         if (!canModifyProduct(existing, authentication)) {
             throw new ForbiddenException("You don't have permission to modify this product");
@@ -182,7 +185,7 @@ public class ProductService {
     private boolean canModifyProduct(Product product, Authentication authentication) {
         String currentUserEmail = authentication.getName();
         boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(auth -> auth.getAuthority().equals(ROLE_ADMIN));
 
         if (isAdmin) {
             return true;
