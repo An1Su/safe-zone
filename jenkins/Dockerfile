@@ -39,6 +39,13 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 RUN curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-linux-aarch64" -o /usr/local/bin/docker-compose \
   && chmod +x /usr/local/bin/docker-compose
 
+# Install SonarScanner CLI (Java-based, platform independent)
+ARG SONAR_SCANNER_VERSION=5.0.1.3006
+RUN curl -fsSL https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}.zip -o /tmp/sonar-scanner.zip \
+  && unzip /tmp/sonar-scanner.zip -d /opt \
+  && ln -s /opt/sonar-scanner-${SONAR_SCANNER_VERSION}/bin/sonar-scanner /usr/local/bin/sonar-scanner \
+  && rm /tmp/sonar-scanner.zip
+
 # Make entrypoint executable
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
