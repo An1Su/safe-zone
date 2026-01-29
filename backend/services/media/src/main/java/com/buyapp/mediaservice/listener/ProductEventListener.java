@@ -1,12 +1,12 @@
 package com.buyapp.mediaservice.listener;
 
-import com.buyapp.common.event.ProductEvent;
-import com.buyapp.mediaservice.service.MediaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+
+import com.buyapp.common.event.ProductEvent;
+import com.buyapp.mediaservice.service.MediaService;
 
 @Component
 public class ProductEventListener {
@@ -19,10 +19,8 @@ public class ProductEventListener {
         this.mediaService = mediaService;
     }
 
-    @KafkaListener(topics = "${kafka.topic.product-events:product-events}",
-    groupId = "${spring.kafka.consumer.group-id:media-service-group}",
-    containerFactory = "productEventKafkaListenerContainerFactory")
-    
+    @KafkaListener(topics = "${kafka.topic.product-events:product-events}", groupId = "${spring.kafka.consumer.group-id:media-service-group}", containerFactory = "productEventKafkaListenerContainerFactory")
+
     public void handleProductEvent(ProductEvent event) {
         log.info("Received product event: {}", event);
 

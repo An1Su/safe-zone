@@ -24,6 +24,8 @@ import java.util.Map;
 @RequestMapping("/media")
 public class MediaController {
 
+    private static final String MESSAGE_KEY = "message";
+
     @Autowired
     private MediaService mediaService;
 
@@ -76,7 +78,7 @@ public class MediaController {
             Authentication authentication) {
 
         mediaService.deleteMedia(id, authentication);
-        return ResponseEntity.ok(Map.of("message", "Media deleted successfully"));
+        return ResponseEntity.ok(Map.of(MESSAGE_KEY, "Media deleted successfully"));
     }
 
     @DeleteMapping("/product/{productId}")
@@ -86,7 +88,7 @@ public class MediaController {
             Authentication authentication) {
 
         mediaService.deleteMediaByProductId(productId, authentication);
-        return ResponseEntity.ok(Map.of("message", "All media for product deleted successfully"));
+        return ResponseEntity.ok(Map.of(MESSAGE_KEY, "All media for product deleted successfully"));
     }
 
     // Internal endpoint for other services (Product Service calls this when
@@ -96,6 +98,6 @@ public class MediaController {
             @PathVariable String productId) {
 
         mediaService.deleteMediaByProductIdInternal(productId);
-        return ResponseEntity.ok(Map.of("message", "All media for product deleted successfully"));
+        return ResponseEntity.ok(Map.of(MESSAGE_KEY, "All media for product deleted successfully"));
     }
 }

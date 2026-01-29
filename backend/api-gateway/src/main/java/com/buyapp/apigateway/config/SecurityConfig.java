@@ -21,6 +21,11 @@ import com.buyapp.apigateway.filter.JwtRequestFilter;
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
+    private static final String PRODUCTS_PATH = "/products/**";
+    private static final String MEDIA_PATH = "/media/**";
+    private static final String ROLE_SELLER = "SELLER";
+    private static final String ROLE_CLIENT = "CLIENT";
+
     private final JwtRequestFilter jwtRequestFilter;
 
     @Value("${cors.allowed-origins}")
@@ -49,18 +54,18 @@ public class SecurityConfig {
                         // Public endpoints
                         .pathMatchers("/actuator/health").permitAll()
                         .pathMatchers("/auth/**").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/products/**").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/media/**").permitAll()
+                        .pathMatchers(HttpMethod.GET, PRODUCTS_PATH).permitAll()
+                        .pathMatchers(HttpMethod.GET, MEDIA_PATH).permitAll()
 
                         // Protected endpoints - user profile
-                        .pathMatchers("/users/me").hasAnyRole("CLIENT", "SELLER")
+                        .pathMatchers("/users/me").hasAnyRole(ROLE_CLIENT, ROLE_SELLER)
 
                         // Protected endpoints - seller only
-                        .pathMatchers(HttpMethod.POST, "/products/**").hasRole("SELLER")
-                        .pathMatchers(HttpMethod.PUT, "/products/**").hasRole("SELLER")
-                        .pathMatchers(HttpMethod.DELETE, "/products/**").hasRole("SELLER")
-                        .pathMatchers(HttpMethod.POST, "/media/**").hasRole("SELLER")
-                        .pathMatchers(HttpMethod.DELETE, "/media/**").hasRole("SELLER")
+                        .pathMatchers(HttpMethod.POST, PRODUCTS_PATH).hasRole(ROLE_SELLER)
+                        .pathMatchers(HttpMethod.PUT, PRODUCTS_PATH).hasRole(ROLE_SELLER)
+                        .pathMatchers(HttpMethod.DELETE, PRODUCTS_PATH).hasRole(ROLE_SELLER)
+                        .pathMatchers(HttpMethod.POST, MEDIA_PATH).hasRole(ROLE_SELLER)
+                        .pathMatchers(HttpMethod.DELETE, MEDIA_PATH).hasRole(ROLE_SELLER)
 
                         // All other endpoints require authentication
                         .anyExchange().authenticated())

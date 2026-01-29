@@ -2,7 +2,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environments';
-import { CreateOrderRequest, Order, OrderSearchParams, OrderStatus, OrderStats } from '../models/order.model';
+import {
+  CreateOrderRequest,
+  Order,
+  OrderSearchParams,
+  OrderStats,
+  OrderStatus,
+} from '../models/order.model';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -145,15 +151,11 @@ export class OrderService {
    */
   updateOrderStatus(orderId: string, status: OrderStatus): Observable<Order> {
     const params = new HttpParams().set('status', status);
-    return this.http.put<Order>(
-      `${this.apiUrl}/${orderId}/status`,
-      null,
-      {
-        headers: this.authService.getAuthHeaders(),
-        withCredentials: true,
-        params,
-      },
-    );
+    return this.http.put<Order>(`${this.apiUrl}/${orderId}/status`, null, {
+      headers: this.authService.getAuthHeaders(),
+      withCredentials: true,
+      params,
+    });
   }
 
   /**

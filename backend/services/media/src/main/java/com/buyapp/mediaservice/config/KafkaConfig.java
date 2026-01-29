@@ -15,6 +15,8 @@ import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
+import org.springframework.lang.NonNull;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +32,7 @@ public class KafkaConfig {
 
     // Producer Configuration for MediaEvent
     @Bean
+    @NonNull
     public ProducerFactory<String, MediaEvent> mediaEventProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -46,6 +49,7 @@ public class KafkaConfig {
 
     // Consumer Configuration for ProductEvent
     @Bean
+    @NonNull
     public ConsumerFactory<String, ProductEvent> productEventConsumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);

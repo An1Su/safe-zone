@@ -20,6 +20,9 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
+    private static final String USER_NOT_FOUND = "User not found with id: ";
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
+
     @Autowired
     private UserRepository userRepository;
 
@@ -32,20 +35,13 @@ public class UserService {
     @Autowired
     private UserEventProducer userEventProducer;
 
-    // Helper method to get User from UserDetails
-    private User getUserFromUserDetails(UserDetails userDetails) {
-        String email = userDetails.getUsername();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Authenticated user not found in database"));
-    }
-
     public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
     }
 
     public UserDto getUserById(String id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND + id));
         return toDto(user);
     }
 
@@ -72,11 +68,11 @@ public class UserService {
 
     public UserDto updateUser(String id, UserDto userDto, Authentication authentication) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND + id));
 
         String currentUserEmail = authentication.getName();
         boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(auth -> auth.getAuthority().equals(ROLE_ADMIN));
 
         if (!isAdmin && !user.getEmail().equals(currentUserEmail)) {
             throw new ForbiddenException("You can only update your own profile");
@@ -104,7 +100,7 @@ public class UserService {
 
     public void deleteUser(String id, UserDetails userDetails) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND + id));
 
         // Publish USER_DELETED event for async cascading deletes BEFORE deletion
         if ("seller".equalsIgnoreCase(user.getRole())) {
@@ -125,7 +121,7 @@ public class UserService {
      */
     public void updateUserAvatar(String userId, String avatarId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND + userId));
 
         // Set avatar to null if empty string is passed
         user.setAvatar(avatarId != null && !avatarId.isEmpty() ? avatarId : null);

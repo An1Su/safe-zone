@@ -50,11 +50,10 @@ pipeline {
         stage('Frontend Tests') {
             steps {
                 sh '''
-                    echo "Running frontend tests"
+                    echo "Running frontend tests with coverage"
                     cd frontend
                     npm ci
-                    # Disable coverage for now - tests hang with coverage enabled
-                    npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage=false
+                    npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage=true
                 '''
             }
         }
@@ -72,7 +71,7 @@ pipeline {
                         # Build all modules to ensure classes are compiled for SonarQube
                         ./mvnw install -DskipTests
                     '''
-                    // Analyze all backend services with explicit source paths
+                    // Analyze backend services with JaCoCo coverage
                     sh '''
                         cd backend
                         ./mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
@@ -84,6 +83,17 @@ pipeline {
                             -Dsonar.coverage.jacoco.xmlReportPaths=services/user/target/site/jacoco/jacoco.xml,services/product/target/site/jacoco/jacoco.xml,services/media/target/site/jacoco/jacoco.xml,services/order/target/site/jacoco/jacoco.xml \
                             -Dsonar.coverage.exclusions=**/dto/**/*.java,**/model/**/*.java,**/event/**/*.java,**/exception/**/*.java,**/security/**/*.java,**/config/**/*.java
                     '''
+                    // Analyze frontend with LCOV coverage
+                    sh '''
+                        cd frontend
+                        sonar-scanner \
+                            -Dsonar.projectKey=safe-zone-frontend \
+                            -Dsonar.host.url=http://host.docker.internal:9000 \
+                            -Dsonar.token=${SONAR_TOKEN} \
+                            -Dsonar.sources=src \
+                            -Dsonar.exclusions=**/*.spec.ts \
+                            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                    '''
                 }
             }
         }
@@ -92,34 +102,17 @@ pipeline {
             steps {
                 echo 'Checking SonarQube Quality Gate'
 
-                // for quality gate result (timeout after 5 minutes)
                 timeout(time: 5, unit: 'MINUTES') {
                     withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
                         sh '''
-                            echo "Waiting for SonarQube analysis to complete..."
                             sleep 30
 
-                            # Check quality gate status
-                            RESPONSE=$(curl -s -u "${SONAR_TOKEN}:" \
-                                "http://host.docker.internal:9000/api/qualitygates/project_status?projectKey=safe-zone")
-
-                            echo "API Response: ${RESPONSE}"
-
-                            QUALITY_GATE=$(echo "${RESPONSE}" | grep -o \'"status":"[^"]*"\' | head -1 | cut -d\'"\'  -f4)
-
-                            echo "Quality Gate Status: ${QUALITY_GATE}"
-
-                            # Quality gate check (warning mode for feature branches)
-                            if [ "${QUALITY_GATE}" = "OK" ]; then
-                                echo "✅ Quality Gate PASSED!"
-                            elif [ "${QUALITY_GATE}" = "NONE" ]; then
-                                echo "⚠️  Quality Gate: No status yet (first analysis)"
-                            else
-                                echo "⚠️  Quality Gate: ${QUALITY_GATE}"
-                                echo "Check SonarQube dashboard for details: http://localhost:9000"
-                                # Non-blocking for now - review hotspots in SonarQube to fix permanently
-                                echo "Continuing build despite quality gate warning..."
-                            fi
+                            for PROJECT in safe-zone safe-zone-frontend; do
+                                RESPONSE=$(curl -s -u "${SONAR_TOKEN}:" \
+                                    "http://host.docker.internal:9000/api/qualitygates/project_status?projectKey=${PROJECT}")
+                                STATUS=$(echo "${RESPONSE}" | grep -o '"status":"[^"]*"' | head -1 | cut -d'"' -f4)
+                                echo "${PROJECT}: ${STATUS:-NO_STATUS}"
+                            done
                         '''
                     }
                 }
