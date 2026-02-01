@@ -436,3 +436,84 @@
   color: #28a745;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
+
+// Buyer Actions
+.buyer-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.action-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 16px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  &.action-orders {
+    border-color: #d63384;
+    background: linear-gradient(135deg, #fff5f9 0%, #ffffff 100%);
+
+    &:hover {
+      border-color: #b02a6f;
+      box-shadow: 0 8px 24px rgba(214, 51, 132, 0.2);
+    }
+
+    .action-icon {
+      background: linear-gradient(135deg, #d63384 0%, #b02a6f 100%);
+    }
+  }
+
+  &.action-cart {
+    border-color: #6c757d;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+
+    &:hover {
+      border-color: #495057;
+      box-shadow: 0 8px 24px rgba(108, 117, 125, 0.2);
+    }
+
+    .action-icon {
+      background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    }
+  }
+}
+
+.action-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.action-content {
+  flex: 1;
+
+  h3 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: #666;
+  }
+}

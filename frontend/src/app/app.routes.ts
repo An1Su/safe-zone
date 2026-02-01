@@ -5,6 +5,7 @@ import { CartComponent } from './components/cart/cart.component';
 import { CheckoutComponent } from './components/checkout/checkout.component';
 import { HomeComponent } from './components/home/home.component';
 import { OrderConfirmationComponent } from './components/order-confirmation/order-confirmation.component';
+import { OrderHistoryComponent } from './components/order-history/order-history.component';
 import { ProductDetailComponent } from './components/products/product-detail.component';
 import { ProductListComponent } from './components/products/product-list.component';
 import { UserProfileComponent } from './components/profile/user-profile.component';
@@ -32,6 +33,11 @@ export const routes: Routes = [
   {
     path: 'order-confirmation/:id',
     component: OrderConfirmationComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'orders',
+    component: OrderHistoryComponent,
     canActivate: [authGuard],
   },
 

@@ -1,0 +1,118 @@
+<div class="order-history-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>📋 Order History</h1>
+    <a routerLink="/products" class="btn btn-primary">
+      🛒 Continue Shopping
+    </a>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading your orders...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="error-icon">❌</div>
+    <h2>Something went wrong</h2>
+    <p>{{ error }}</p>
+    <button class="btn btn-primary" (click)="loadOrders()">Try Again</button>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading && !error" class="order-content">
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-value stat-pink">{{ stats.totalOrders }}</span>
+        <span class="stat-label">Total Orders</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value stat-green">{{ stats.delivered }}</span>
+        <span class="stat-label">Delivered</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value stat-blue">{{ stats.inProgress }}</span>
+        <span class="stat-label">In Progress</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value stat-dark">{{ stats.totalSpent | currency:'USD':'symbol':'1.2-2' }}</span>
+        <span class="stat-label">Total Spent</span>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="orders.length === 0" class="empty-state">
+      <div class="empty-icon">📦</div>
+      <h2>No orders yet</h2>
+      <p>When you place orders, they'll appear here.</p>
+      <a routerLink="/products" class="btn btn-primary">Start Shopping</a>
+    </div>
+
+    <!-- Orders List -->
+    <div *ngIf="orders.length > 0" class="orders-list">
+      <div *ngFor="let order of orders" class="order-card">
+        <!-- Order Header -->
+        <div class="order-header">
+          <div class="order-meta">
+            <div class="meta-item">
+              <span class="meta-label">Order placed</span>
+              <span class="meta-value">{{ formatDate(order.createdAt) }}</span>
+            </div>
+            <div class="meta-divider"></div>
+            <div class="meta-item">
+              <span class="meta-label">Total</span>
+              <span class="meta-value">{{ order.totalAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="meta-divider"></div>
+            <div class="meta-item">
+              <span class="meta-label">Order #</span>
+              <span class="meta-value order-number">{{ getOrderNumber(order) }}</span>
+            </div>
+          </div>
+          <span class="order-status" [ngClass]="getStatusClass(order.status)">
+            {{ getStatusLabel(order.status) }}
+          </span>
+        </div>
+
+        <!-- Order Items -->
+        <div class="order-items">
+          <div *ngFor="let item of order.items" class="order-item">
+            <div class="item-image">
+              <img
+                *ngIf="getProductImage(item.productId)"
+                [src]="getProductImage(item.productId)"
+                [alt]="item.productName"
+              />
+              <div class="image-placeholder" *ngIf="!getProductImage(item.productId)">📦</div>
+            </div>
+            <div class="item-details">
+              <h4 class="item-name">{{ item.productName }}</h4>
+              <p class="item-quantity">Qty: {{ item.quantity }}</p>
+            </div>
+            <div class="item-price">
+              {{ (item.price * item.quantity) | currency:'USD':'symbol':'1.2-2' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Actions -->
+        <div class="order-actions">
+          <a [routerLink]="['/order-confirmation', order.id]" class="btn btn-outline btn-sm">
+            👁️ View Details
+          </a>
+          <button
+            *ngIf="canCancel(order)"
+            class="btn btn-danger btn-sm"
+            (click)="cancelOrder(order)"
+          >
+            ✕ Cancel Order
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
