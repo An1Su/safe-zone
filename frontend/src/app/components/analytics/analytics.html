@@ -1,0 +1,94 @@
+<div class="analytics-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>📊 Analytics Dashboard</h1>
+    <a routerLink="/profile" class="btn btn-secondary">← Back to Profile</a>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading analytics...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="error-icon">❌</div>
+    <h2>Something went wrong</h2>
+    <p>{{ error }}</p>
+    <button class="btn btn-primary" (click)="reload()">Try Again</button>
+  </div>
+
+  <!-- Buyer Analytics -->
+  <div *ngIf="!loading && !error && isBuyer" class="analytics-content">
+    <div class="stats-summary">
+      <div class="stat-card">
+        <span class="stat-value">{{ buyerStats.totalSpent | currency:'USD':'symbol':'1.2-2' }}</span>
+        <span class="stat-label">Total Spent</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ buyerStats.mostBoughtProducts.length }}</span>
+        <span class="stat-label">Top Products</span>
+      </div>
+    </div>
+
+    <div class="chart-section" *ngIf="buyerStats.mostBoughtProducts.length > 0">
+      <h2>Most Purchased Products</h2>
+      <canvas baseChart
+        [data]="buyerProductChartData"
+        [options]="chartOptions"
+        type="bar">
+      </canvas>
+    </div>
+
+    <div *ngIf="buyerStats.mostBoughtProducts.length === 0" class="empty-state">
+      <div class="empty-icon">📊</div>
+      <h2>No purchase data yet</h2>
+      <p>Start shopping to see your analytics!</p>
+      <a routerLink="/products" class="btn btn-primary">Browse Products</a>
+    </div>
+  </div>
+
+  <!-- Seller Analytics -->
+  <div *ngIf="!loading && !error && isSeller" class="analytics-content">
+    <div class="stats-summary">
+      <div class="stat-card">
+        <span class="stat-value">{{ sellerStats.revenue | currency:'USD':'symbol':'1.2-2' }}</span>
+        <span class="stat-label">Total Revenue</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ sellerStats.totalUnitsSold }}</span>
+        <span class="stat-label">Units Sold</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ sellerStats.bestSellingProducts.length }}</span>
+        <span class="stat-label">Active Products</span>
+      </div>
+    </div>
+
+    <div class="chart-section" *ngIf="sellerStats.bestSellingProducts.length > 0">
+      <h2>Best Selling Products (Units Sold)</h2>
+      <canvas baseChart
+        [data]="sellerProductChartData"
+        [options]="chartOptions"
+        type="bar">
+      </canvas>
+    </div>
+
+    <div class="chart-section" *ngIf="sellerStats.bestSellingProducts.length > 0">
+      <h2>Product Revenue</h2>
+      <canvas baseChart
+        [data]="sellerRevenueChartData"
+        [options]="chartOptions"
+        type="bar">
+      </canvas>
+    </div>
+
+    <div *ngIf="sellerStats.bestSellingProducts.length === 0" class="empty-state">
+      <div class="empty-icon">📊</div>
+      <h2>No sales data yet</h2>
+      <p>When customers purchase your products, analytics will appear here.</p>
+      <a routerLink="/seller/dashboard" class="btn btn-primary">Manage Products</a>
+    </div>
+  </div>
+</div>
