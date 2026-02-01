@@ -1,16 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { ChartConfiguration, ChartOptions, Chart, registerables } from 'chart.js';
+import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { Order, OrderItem } from '../../models/order.model';
 import { AuthService } from '../../services/auth.service';
 import { OrderService } from '../../services/order.service';
-
-// Register Chart.js components (only once)
-if (!Chart.registry.getPlugin('bar')) {
-  Chart.register(...registerables);
-}
 
 interface BuyerStats {
   totalSpent: number;

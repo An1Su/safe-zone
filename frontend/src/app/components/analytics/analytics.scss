@@ -88,8 +88,8 @@
   gap: $spacing-lg;
 
   .stat-card {
-    background: $background-secondary;
-    border-radius: $border-radius;
+    background: $bg-card;
+    border-radius: $radius-lg;
     padding: $spacing-xl;
     text-align: center;
     box-shadow: $shadow-sm;
@@ -113,8 +113,8 @@
 }
 
 .chart-section {
-  background: $background-secondary;
-  border-radius: $border-radius;
+  background: $bg-card;
+  border-radius: $radius-lg;
   padding: $spacing-xl;
   box-shadow: $shadow-sm;
 

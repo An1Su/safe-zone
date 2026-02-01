@@ -52,7 +52,7 @@ pipeline {
                 sh '''
                     echo "Running frontend tests with coverage"
                     cd frontend
-                    npm ci
+                    npm ci --legacy-peer-deps
                     npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage=true
                 '''
             }
