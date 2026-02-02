@@ -82,22 +82,26 @@ pipeline {
                     // Analyze backend services with JaCoCo coverage
                     sh '''
                         cd backend
+                        BRANCH_NAME="${env.BRANCH_NAME:-main}"
                         ./mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                             -Dsonar.projectKey=safe-zone \
                             -Dsonar.projectName="safe-zone" \
                             -Dsonar.host.url=http://host.docker.internal:9000 \
                             -Dsonar.token=${SONAR_TOKEN} \
                             -Dsonar.java.source=17 \
+                            -Dsonar.branch.name="${BRANCH_NAME}" \
                             -Dsonar.coverage.jacoco.xmlReportPaths=services/user/target/site/jacoco/jacoco.xml,services/product/target/site/jacoco/jacoco.xml,services/media/target/site/jacoco/jacoco.xml,services/order/target/site/jacoco/jacoco.xml \
                             -Dsonar.coverage.exclusions=**/dto/**/*.java,**/model/**/*.java,**/event/**/*.java,**/exception/**/*.java,**/security/**/*.java,**/config/**/*.java
                     '''
                     // Analyze frontend with LCOV coverage
                     sh '''
                         cd frontend
+                        BRANCH_NAME="${env.BRANCH_NAME:-main}"
                         sonar-scanner \
                             -Dsonar.projectKey=safe-zone-frontend \
                             -Dsonar.host.url=http://host.docker.internal:9000 \
                             -Dsonar.token=${SONAR_TOKEN} \
+                            -Dsonar.branch.name="${BRANCH_NAME}" \
                             -Dsonar.sources=src \
                             -Dsonar.exclusions=**/*.spec.ts \
                             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
@@ -117,9 +121,16 @@ pipeline {
 
                             FAILED_PROJECTS=""
 
+                            BRANCH_NAME="${env.BRANCH_NAME:-main}"
                             for PROJECT in safe-zone safe-zone-frontend; do
+                                # For main branch, use project key directly; for other branches, append branch name
+                                if [ "$BRANCH_NAME" = "main" ]; then
+                                    PROJECT_KEY="${PROJECT}"
+                                else
+                                    PROJECT_KEY="${PROJECT}:${BRANCH_NAME}"
+                                fi
                                 RESPONSE=$(curl -s -u "${SONAR_TOKEN}:" \
-                                    "http://host.docker.internal:9000/api/qualitygates/project_status?projectKey=${PROJECT}")
+                                    "http://host.docker.internal:9000/api/qualitygates/project_status?projectKey=${PROJECT_KEY}")
                                 STATUS=$(echo "${RESPONSE}" | grep -o '"status":"[^"]*"' | head -1 | cut -d'"' -f4)
 
                                 if [ -z "$STATUS" ]; then

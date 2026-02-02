@@ -27,8 +27,7 @@
                 "input": "src/assets",
                 "output": "assets"
               },
-              "src/favicon.svg",
-              "src/favicon.ico"
+              "src/favicon.svg"
             ],
             "styles": ["src/styles.scss"]
           },
