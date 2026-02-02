@@ -30,7 +30,7 @@ public class MediaEventProducer {
         logger.info("Sending media event: {}", event);
 
         String mediaId = Objects.requireNonNull(event.getMediaId(), "Media ID cannot be null");
-        String topic = Objects.requireNonNull(mediaEventsTopic, "Media events topic cannot be null");
+        String topic = mediaEventsTopic != null ? mediaEventsTopic : "media-events";
         CompletableFuture<SendResult<String, MediaEvent>> future = kafkaTemplate.send(topic,
                 mediaId, event);
 
