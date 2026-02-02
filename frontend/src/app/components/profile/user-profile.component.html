@@ -49,6 +49,16 @@
       <a routerLink="/seller/dashboard" class="btn btn-primary">Manage Products</a>
     </div>
 
+    <div class="seller-actions">
+      <a routerLink="/analytics" class="action-card action-analytics">
+        <div class="action-icon">📊</div>
+        <div class="action-content">
+          <h3>Analytics</h3>
+          <p>View sales statistics and revenue insights</p>
+        </div>
+      </a>
+    </div>
+
     <div *ngIf="isLoading" class="loading">Loading your products...</div>
 
     <div *ngIf="!isLoading && sellerProducts.length === 0" class="empty-state">
@@ -107,6 +117,13 @@
         <div class="action-content">
           <h3>Shopping Cart</h3>
           <p>View items in your cart and checkout</p>
+        </div>
+      </a>
+      <a routerLink="/analytics" class="action-card action-analytics">
+        <div class="action-icon">📊</div>
+        <div class="action-content">
+          <h3>Analytics</h3>
+          <p>View your spending statistics and insights</p>
         </div>
       </a>
     </div>

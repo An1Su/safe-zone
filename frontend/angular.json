@@ -27,8 +27,12 @@
                 "input": "src/assets",
                 "output": "assets"
               },
-              "src/favicon.svg",
-              "src/favicon.ico"
+              {
+                "glob": "**/*",
+                "input": "public",
+                "output": "/"
+              },
+              "src/favicon.svg"
             ],
             "styles": ["src/styles.scss"]
           },

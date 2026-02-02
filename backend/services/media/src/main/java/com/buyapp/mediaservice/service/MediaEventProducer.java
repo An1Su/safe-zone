@@ -1,5 +1,6 @@
 package com.buyapp.mediaservice.service;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
@@ -28,8 +29,10 @@ public class MediaEventProducer {
     public void sendMediaEvent(MediaEvent event) {
         logger.info("Sending media event: {}", event);
 
-        CompletableFuture<SendResult<String, MediaEvent>> future = kafkaTemplate.send(mediaEventsTopic,
-                event.getMediaId(), event);
+        String mediaId = Objects.requireNonNull(event.getMediaId(), "Media ID cannot be null");
+        String topic = mediaEventsTopic != null ? mediaEventsTopic : "media-events";
+        CompletableFuture<SendResult<String, MediaEvent>> future = kafkaTemplate.send(topic,
+                mediaId, event);
 
         future.whenComplete((result, ex) -> {
             if (ex == null) {

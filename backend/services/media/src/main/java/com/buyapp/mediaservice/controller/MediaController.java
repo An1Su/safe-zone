@@ -1,8 +1,8 @@
 package com.buyapp.mediaservice.controller;
 
+import com.buyapp.common.exception.ResourceNotFoundException;
 import com.buyapp.mediaservice.model.Media;
 import com.buyapp.mediaservice.service.MediaService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/media")
@@ -26,8 +28,11 @@ public class MediaController {
 
     private static final String MESSAGE_KEY = "message";
 
-    @Autowired
-    private MediaService mediaService;
+    private final MediaService mediaService;
+
+    public MediaController(MediaService mediaService) {
+        this.mediaService = mediaService;
+    }
 
     @PostMapping("/upload/{productId}")
     @PreAuthorize("hasRole('SELLER') or hasRole('ADMIN')")
@@ -51,7 +56,9 @@ public class MediaController {
         try {
             Media media = mediaService.getMediaById(id);
             Path filePath = Paths.get(media.getImagePath());
-            Resource resource = new UrlResource(filePath.toUri());
+            URI uri = Objects.requireNonNull(filePath.toUri(), 
+                    "Invalid file path: " + media.getImagePath());
+            Resource resource = new UrlResource(uri);
 
             if (resource.exists() && resource.isReadable()) {
                 String contentType = Files.probeContentType(filePath);
@@ -64,10 +71,10 @@ public class MediaController {
                         .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + media.getFileName() + "\"")
                         .body(resource);
             } else {
-                throw new RuntimeException("File not found: " + media.getFileName());
+                throw new ResourceNotFoundException("File not found: " + media.getFileName());
             }
         } catch (IOException e) {
-            throw new RuntimeException("File not found");
+            throw new ResourceNotFoundException("File not found: " + e.getMessage());
         }
     }
 
