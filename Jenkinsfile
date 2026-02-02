@@ -82,7 +82,9 @@ pipeline {
                     // Analyze backend services with JaCoCo coverage
                     sh '''
                         cd backend
-                        BRANCH_NAME="${env.BRANCH_NAME:-main}"
+                        if [ -z "$BRANCH_NAME" ]; then
+                            BRANCH_NAME="main"
+                        fi
                         ./mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                             -Dsonar.projectKey=safe-zone \
                             -Dsonar.projectName="safe-zone" \
@@ -96,7 +98,9 @@ pipeline {
                     // Analyze frontend with LCOV coverage
                     sh '''
                         cd frontend
-                        BRANCH_NAME="${env.BRANCH_NAME:-main}"
+                        if [ -z "$BRANCH_NAME" ]; then
+                            BRANCH_NAME="main"
+                        fi
                         sonar-scanner \
                             -Dsonar.projectKey=safe-zone-frontend \
                             -Dsonar.host.url=http://host.docker.internal:9000 \
@@ -121,7 +125,9 @@ pipeline {
 
                             FAILED_PROJECTS=""
 
-                            BRANCH_NAME="${env.BRANCH_NAME:-main}"
+                            if [ -z "$BRANCH_NAME" ]; then
+                                BRANCH_NAME="main"
+                            fi
                             for PROJECT in safe-zone safe-zone-frontend; do
                                 # For main branch, use project key directly; for other branches, append branch name
                                 if [ "$BRANCH_NAME" = "main" ]; then
