@@ -101,8 +101,8 @@ export class Analytics implements OnInit {
   };
 
   constructor(
-    private orderService: OrderService,
-    private authService: AuthService
+    private readonly orderService: OrderService,
+    private readonly authService: AuthService
   ) {}
 
   ngOnInit(): void {

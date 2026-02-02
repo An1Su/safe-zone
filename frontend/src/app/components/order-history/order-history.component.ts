@@ -32,8 +32,8 @@ export class OrderHistoryComponent implements OnInit {
   productImages: Map<string, string> = new Map();
 
   constructor(
-    private orderService: OrderService,
-    private mediaService: MediaService
+    private readonly orderService: OrderService,
+    private readonly mediaService: MediaService
   ) {}
 
   ngOnInit(): void {
@@ -46,11 +46,12 @@ export class OrderHistoryComponent implements OnInit {
 
     this.orderService.getOrders().subscribe({
       next: (orders) => {
-        this.orders = orders.sort((a, b) => {
+        const sortedOrders = [...orders].sort((a, b) => {
           const dateA = new Date(a.createdAt || 0).getTime();
           const dateB = new Date(b.createdAt || 0).getTime();
           return dateB - dateA;
         });
+        this.orders = sortedOrders;
         this.calculateStats();
         this.loadProductImages();
         this.loading = false;

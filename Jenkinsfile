@@ -70,6 +70,14 @@ pipeline {
                         cd backend
                         # Build all modules to ensure classes are compiled for SonarQube
                         ./mvnw install -DskipTests
+
+                        # Generate JaCoCo reports from existing execution data (if tests were run)
+                        # This ensures reports exist even if they weren't generated in test phase
+                        # Use || true to prevent build failure if execution data doesn't exist
+                        (cd services/user && ../../mvnw jacoco:report -DskipTests || true)
+                        (cd services/product && ../../mvnw jacoco:report -DskipTests || true)
+                        (cd services/media && ../../mvnw jacoco:report -DskipTests || true)
+                        (cd services/order && ../../mvnw jacoco:report -DskipTests || true)
                     '''
                     // Analyze backend services with JaCoCo coverage
                     sh '''
@@ -108,18 +116,18 @@ pipeline {
                             sleep 30
 
                             FAILED_PROJECTS=""
-                            
+
                             for PROJECT in safe-zone safe-zone-frontend; do
                                 RESPONSE=$(curl -s -u "${SONAR_TOKEN}:" \
                                     "http://host.docker.internal:9000/api/qualitygates/project_status?projectKey=${PROJECT}")
                                 STATUS=$(echo "${RESPONSE}" | grep -o '"status":"[^"]*"' | head -1 | cut -d'"' -f4)
-                                
+
                                 if [ -z "$STATUS" ]; then
                                     STATUS="NO_STATUS"
                                 fi
-                                
+
                                 echo "${PROJECT}: ${STATUS}"
-                                
+
                                 # Fail build if quality gate status is ERROR
                                 if [ "$STATUS" = "ERROR" ]; then
                                     echo "❌ Quality Gate FAILED for ${PROJECT}"
@@ -133,7 +141,7 @@ pipeline {
                                     FAILED_PROJECTS="${FAILED_PROJECTS} ${PROJECT}"
                                 fi
                             done
-                            
+
                             # Fail the build if any project failed quality gate
                             if [ -n "$FAILED_PROJECTS" ]; then
                                 echo "❌ Quality Gate check FAILED for projects:${FAILED_PROJECTS}"
