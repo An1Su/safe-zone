@@ -3,7 +3,8 @@ package com.buyapp.mediaservice.config;
 import com.buyapp.common.dto.ProductDto;
 import com.buyapp.mediaservice.model.Media;
 import com.buyapp.mediaservice.repository.MediaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,141 +15,180 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Configuration
 public class DataInitializer {
 
-    @Autowired
-    private MediaRepository mediaRepository;
-
-    @Autowired
-    private WebClient.Builder webClientBuilder;
-
+    private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
+    
+    private final MediaRepository mediaRepository;
+    private final WebClient.Builder webClientBuilder;
     private static final String UPLOAD_DIR = "uploads/images/";
+    private static final int MAX_RETRIES = 10;
+    private static final long RETRY_DELAY_MS = 2000;
+    private static final String DEFAULT_CONTENT_TYPE = "image/jpeg";
+
+    public DataInitializer(MediaRepository mediaRepository, WebClient.Builder webClientBuilder) {
+        this.mediaRepository = mediaRepository;
+        this.webClientBuilder = webClientBuilder;
+    }
 
     @Bean
     CommandLineRunner initMediaDatabase() {
         return args -> {
-            // Only seed if database is empty
-            if (mediaRepository.count() == 0) {
-                System.out.println("Initializing media database with seed data...");
-
-                // Wait for product service to be ready and products to be created
-                List<ProductDto> products = getProductsWithRetry();
-                
-                if (products == null || products.isEmpty()) {
-                    System.out.println("Warning: Could not find products. Make sure products are created first.");
-                    System.out.println("Media will not be seeded.");
-                    return;
-                }
-
-                // Create upload directory if it doesn't exist
-                Path uploadDir = Paths.get(UPLOAD_DIR);
-                if (!Files.exists(uploadDir)) {
-                    Files.createDirectories(uploadDir);
-                }
-
-                // Match products to images and create media records
-                List<Media> mediaList = new ArrayList<>();
-                
-                for (ProductDto product : products) {
-                    if (product.getId() == null || product.getName() == null) {
-                        System.out.println("Skipping product with null id or name");
-                        continue;
-                    }
-                    
-                    // Find matching image based on product name/description keywords
-                    String imageFileName = findMatchingImage(product.getName(), product.getDescription());
-                    
-                    if (imageFileName != null) {
-                        Path imagePath = Paths.get(UPLOAD_DIR).resolve(imageFileName);
-                        
-                        if (!Files.exists(imagePath)) {
-                            System.out.println("Image file not found: " + imagePath + " for product: " + product.getName());
-                            continue;
-                        }
-                        
-                        Media media = new Media();
-                        media.setImagePath(UPLOAD_DIR + imageFileName);
-                        media.setProductId(product.getId());
-                        media.setFileName(imageFileName);
-                        
-                        // Detect content type from file extension
-                        media.setContentType(detectContentType(imageFileName));
-                        
-                        // Get actual file size
-                        try {
-                            media.setFileSize(Files.size(imagePath));
-                        } catch (IOException e) {
-                            System.out.println("Error reading file size for " + imageFileName + ": " + e.getMessage());
-                            media.setFileSize(0L);
-                        }
-                        
-                        mediaList.add(media);
-                        System.out.println("Matched image '" + imageFileName + "' to product '" + product.getName() + "'");
-                    } else {
-                        System.out.println("No matching image found for product: " + product.getName());
-                    }
-                }
-
-                if (!mediaList.isEmpty()) {
-                    mediaRepository.saveAll(mediaList);
-                    System.out.println("Seed media created successfully! (" + mediaList.size() + " images)");
-                } else {
-                    System.out.println("No media was created. Check if seed images exist in " + UPLOAD_DIR);
-                }
-            } else {
-                System.out.println("Media database already contains media. Skipping seed data.");
+            if (shouldSkipSeeding()) {
+                return;
             }
+
+            logger.info("Initializing media database with seed data...");
+            List<ProductDto> products = getProductsWithRetry();
+            
+            if (products.isEmpty()) {
+                logger.warn("Could not find products. Make sure products are created first.");
+                logger.warn("Media will not be seeded.");
+                return;
+            }
+
+            ensureUploadDirectoryExists();
+            List<Media> mediaList = createMediaRecordsForProducts(products);
+            saveMediaRecords(mediaList);
         };
     }
 
-    private List<ProductDto> getProductsWithRetry() {
-        int retries = 0;
-        int maxRetries = 10;
-        long retryDelayMs = 2000;
+    private boolean shouldSkipSeeding() {
+        if (mediaRepository.count() > 0) {
+            logger.info("Media database already contains media. Skipping seed data.");
+            return true;
+        }
+        return false;
+    }
 
-        while (retries < maxRetries) {
-            try {
-                List<ProductDto> products = webClientBuilder.build()
-                        .get()
-                        .uri("http://product-service/products")
-                        .retrieve()
-                        .bodyToFlux(ProductDto.class)
-                        .collectList()
-                        .block();
+    private void ensureUploadDirectoryExists() {
+        try {
+            Path uploadDir = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+        } catch (IOException e) {
+            logger.error("Error creating upload directory: {}", e.getMessage(), e);
+        }
+    }
 
-                if (products != null && !products.isEmpty()) {
-                    return products;
-                }
-
-                retries++;
-                if (retries < maxRetries) {
-                    System.out.println("Waiting for products to be created... (attempt " + retries + "/" + maxRetries + ")");
-                    Thread.sleep(retryDelayMs);
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                System.out.println("Interrupted while waiting for products");
-                return null;
-            } catch (Exception e) {
-                retries++;
-                if (retries >= maxRetries) {
-                    System.out.println("Error fetching products after " + maxRetries + " attempts: " + e.getMessage());
-                    return null;
-                }
-                try {
-                    System.out.println("Error fetching products (attempt " + retries + "/" + maxRetries + "): " + e.getMessage());
-                    Thread.sleep(retryDelayMs);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    return null;
-                }
+    private List<Media> createMediaRecordsForProducts(List<ProductDto> products) {
+        List<Media> mediaList = new ArrayList<>();
+        
+        for (ProductDto product : products) {
+            Media media = createMediaForProduct(product);
+            if (media != null) {
+                mediaList.add(media);
             }
         }
+        
+        return mediaList;
+    }
 
-        return null;
+    private Media createMediaForProduct(ProductDto product) {
+        if (!isValidProduct(product)) {
+            return null;
+        }
+        
+        String imageFileName = findMatchingImage(product.getName(), product.getDescription());
+        if (imageFileName == null) {
+            logger.debug("No matching image found for product: {}", product.getName());
+            return null;
+        }
+        
+        Path imagePath = Paths.get(UPLOAD_DIR).resolve(imageFileName);
+        if (!Files.exists(imagePath)) {
+            logger.warn("Image file not found: {} for product: {}", imagePath, product.getName());
+            return null;
+        }
+        
+        return buildMediaEntity(product, imageFileName, imagePath);
+    }
+
+    private boolean isValidProduct(ProductDto product) {
+        if (product.getId() == null || product.getName() == null) {
+            logger.debug("Skipping product with null id or name");
+            return false;
+        }
+        return true;
+    }
+
+    private Media buildMediaEntity(ProductDto product, String imageFileName, Path imagePath) {
+        Media media = new Media();
+        media.setImagePath(UPLOAD_DIR + imageFileName);
+        media.setProductId(product.getId());
+        media.setFileName(imageFileName);
+        media.setContentType(detectContentType(imageFileName));
+        media.setFileSize(getFileSize(imagePath, imageFileName));
+        
+        logger.debug("Matched image '{}' to product '{}'", imageFileName, product.getName());
+        return media;
+    }
+
+    private Long getFileSize(Path imagePath, String imageFileName) {
+        try {
+            return Files.size(imagePath);
+        } catch (IOException e) {
+            logger.warn("Error reading file size for {}: {}", imageFileName, e.getMessage(), e);
+            return 0L;
+        }
+    }
+
+    private void saveMediaRecords(List<Media> mediaList) {
+        if (mediaList.isEmpty()) {
+            logger.warn("No media was created. Check if seed images exist in {}", UPLOAD_DIR);
+            return;
+        }
+        
+        mediaRepository.saveAll(mediaList);
+        logger.info("Seed media created successfully! ({} images)", mediaList.size());
+    }
+
+    private List<ProductDto> getProductsWithRetry() {
+        for (int retries = 0; retries < MAX_RETRIES; retries++) {
+            List<ProductDto> products = attemptFetchProducts();
+            if (products != null && !products.isEmpty()) {
+                return products;
+            }
+            
+            if (retries < MAX_RETRIES - 1) {
+                waitBeforeRetry(retries);
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    private List<ProductDto> attemptFetchProducts() {
+        try {
+            return fetchProductsFromService();
+        } catch (Exception e) {
+            logger.warn("Error fetching products: {}", e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    private List<ProductDto> fetchProductsFromService() {
+        return webClientBuilder.build()
+                .get()
+                .uri("http://product-service/products")
+                .retrieve()
+                .bodyToFlux(ProductDto.class)
+                .collectList()
+                .block();
+    }
+
+    private void waitBeforeRetry(int retries) {
+        try {
+            logger.debug("Waiting for products to be created... (attempt {}/{})", retries + 1, MAX_RETRIES);
+            Thread.sleep(RETRY_DELAY_MS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.warn("Interrupted while waiting for products");
+        }
     }
 
     /**
@@ -197,12 +237,12 @@ public class DataInitializer {
      */
     private String detectContentType(String fileName) {
         if (fileName == null) {
-            return "image/jpeg"; // Default
+            return DEFAULT_CONTENT_TYPE;
         }
         
         String lowerName = fileName.toLowerCase();
         if (lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg")) {
-            return "image/jpeg";
+            return DEFAULT_CONTENT_TYPE;
         } else if (lowerName.endsWith(".png")) {
             return "image/png";
         } else if (lowerName.endsWith(".gif")) {
@@ -211,6 +251,6 @@ public class DataInitializer {
             return "image/webp";
         }
         
-        return "image/jpeg"; // Default fallback
+        return DEFAULT_CONTENT_TYPE;
     }
 }

@@ -1,8 +1,8 @@
 package com.buyapp.mediaservice.controller;
 
+import com.buyapp.common.exception.ResourceNotFoundException;
 import com.buyapp.mediaservice.model.Avatar;
 import com.buyapp.mediaservice.service.AvatarService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -14,18 +14,23 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/media/avatar")
 public class AvatarController {
 
-    @Autowired
-    private AvatarService avatarService;
+    private final AvatarService avatarService;
+
+    public AvatarController(AvatarService avatarService) {
+        this.avatarService = avatarService;
+    }
 
     /**
      * Upload avatar for authenticated seller
@@ -58,7 +63,9 @@ public class AvatarController {
         try {
             Avatar avatar = avatarService.getAvatarById(id);
             Path filePath = Paths.get(avatar.getImagePath());
-            Resource resource = new UrlResource(filePath.toUri());
+            URI uri = Objects.requireNonNull(filePath.toUri(), 
+                    "Invalid file path: " + avatar.getImagePath());
+            Resource resource = new UrlResource(uri);
 
             if (resource.exists() && resource.isReadable()) {
                 String contentType = Files.probeContentType(filePath);
@@ -71,10 +78,10 @@ public class AvatarController {
                         .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + avatar.getFileName() + "\"")
                         .body(resource);
             } else {
-                throw new RuntimeException("File not found: " + avatar.getFileName());
+                throw new ResourceNotFoundException("File not found: " + avatar.getFileName());
             }
         } catch (IOException e) {
-            throw new RuntimeException("File not found");
+            throw new ResourceNotFoundException("File not found: " + e.getMessage());
         }
     }
 

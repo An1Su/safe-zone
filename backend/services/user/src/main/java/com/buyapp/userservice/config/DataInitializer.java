@@ -3,7 +3,8 @@ package com.buyapp.userservice.config;
 import com.buyapp.userservice.model.Role;
 import com.buyapp.userservice.model.User;
 import com.buyapp.userservice.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,18 +16,22 @@ import java.util.List;
 @Configuration
 public class DataInitializer {
 
-    @Autowired
-    private UserRepository userRepository;
+    private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public DataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Bean
     CommandLineRunner initDatabase() {
         return args -> {
             // Only seed if database is empty
             if (userRepository.count() == 0) {
-                System.out.println("Initializing database with seed data...");
+                logger.info("Initializing database with seed data...");
 
                 String password = passwordEncoder.encode("12345");
 
@@ -38,9 +43,9 @@ public class DataInitializer {
                 );
 
                 userRepository.saveAll(users);
-                System.out.println("Seed users created successfully!");
+                logger.info("Seed users created successfully!");
             } else {
-                System.out.println("Database already contains users. Skipping seed data.");
+                logger.info("Database already contains users. Skipping seed data.");
             }
         };
     }

@@ -107,12 +107,41 @@ pipeline {
                         sh '''
                             sleep 30
 
+                            FAILED_PROJECTS=""
+                            
                             for PROJECT in safe-zone safe-zone-frontend; do
                                 RESPONSE=$(curl -s -u "${SONAR_TOKEN}:" \
                                     "http://host.docker.internal:9000/api/qualitygates/project_status?projectKey=${PROJECT}")
                                 STATUS=$(echo "${RESPONSE}" | grep -o '"status":"[^"]*"' | head -1 | cut -d'"' -f4)
-                                echo "${PROJECT}: ${STATUS:-NO_STATUS}"
+                                
+                                if [ -z "$STATUS" ]; then
+                                    STATUS="NO_STATUS"
+                                fi
+                                
+                                echo "${PROJECT}: ${STATUS}"
+                                
+                                # Fail build if quality gate status is ERROR
+                                if [ "$STATUS" = "ERROR" ]; then
+                                    echo "❌ Quality Gate FAILED for ${PROJECT}"
+                                    FAILED_PROJECTS="${FAILED_PROJECTS} ${PROJECT}"
+                                elif [ "$STATUS" = "OK" ]; then
+                                    echo "✅ Quality Gate PASSED for ${PROJECT}"
+                                elif [ "$STATUS" = "WARN" ]; then
+                                    echo "⚠️  Quality Gate WARNING for ${PROJECT} (continuing)"
+                                else
+                                    echo "⚠️  Unknown status '${STATUS}' for ${PROJECT} (treating as failure)"
+                                    FAILED_PROJECTS="${FAILED_PROJECTS} ${PROJECT}"
+                                fi
                             done
+                            
+                            # Fail the build if any project failed quality gate
+                            if [ -n "$FAILED_PROJECTS" ]; then
+                                echo "❌ Quality Gate check FAILED for projects:${FAILED_PROJECTS}"
+                                echo "Please fix the issues reported by SonarQube before proceeding."
+                                exit 1
+                            else
+                                echo "✅ All Quality Gates PASSED"
+                            fi
                         '''
                     }
                 }

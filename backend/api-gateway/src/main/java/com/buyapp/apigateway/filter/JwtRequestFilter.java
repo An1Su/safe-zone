@@ -2,7 +2,6 @@ package com.buyapp.apigateway.filter;
 
 import com.buyapp.apigateway.util.JwtUtil;
 import io.jsonwebtoken.Claims;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -17,12 +16,16 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class JwtRequestFilter implements WebFilter {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
+
+    public JwtRequestFilter(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     @Override
     @NonNull
@@ -67,8 +70,9 @@ public class JwtRequestFilter implements WebFilter {
                     .build();
 
             // Set security context and continue
-            return chain.filter(modifiedExchange)
+            Mono<Void> filterResult = chain.filter(modifiedExchange)
                     .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
+            return Objects.requireNonNull(filterResult, "Filter chain must return non-null Mono");
 
         } catch (Exception e) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);

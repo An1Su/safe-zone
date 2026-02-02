@@ -10,9 +10,11 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.lang.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Configuration
 public class KafkaProducerConfig {
@@ -21,6 +23,7 @@ public class KafkaProducerConfig {
     private String bootstrapServers;
 
     @Bean
+    @NonNull
     public ProducerFactory<String, UserEvent> userEventProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -32,6 +35,7 @@ public class KafkaProducerConfig {
 
     @Bean
     public KafkaTemplate<String, UserEvent> userEventKafkaTemplate() {
-        return new KafkaTemplate<>(userEventProducerFactory());
+        ProducerFactory<String, UserEvent> factory = userEventProducerFactory();
+        return new KafkaTemplate<>(Objects.requireNonNull(factory, "ProducerFactory cannot be null"));
     }
 }

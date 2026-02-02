@@ -6,7 +6,6 @@ import com.buyapp.common.exception.ForbiddenException;
 import com.buyapp.common.exception.ResourceNotFoundException;
 import com.buyapp.mediaservice.model.Avatar;
 import com.buyapp.mediaservice.repository.AvatarRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,17 +17,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class AvatarService {
 
-    @Autowired
-    private AvatarRepository avatarRepository;
-
-    @Autowired
-    private WebClient.Builder webClientBuilder;
+    private final AvatarRepository avatarRepository;
+    private final WebClient.Builder webClientBuilder;
 
     private static final String AVATAR_UPLOAD_DIR = "uploads/avatars/";
     private static final long MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
@@ -36,7 +33,10 @@ public class AvatarService {
             "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"
     };
 
-    public AvatarService() {
+    public AvatarService(AvatarRepository avatarRepository, WebClient.Builder webClientBuilder) {
+        this.avatarRepository = avatarRepository;
+        this.webClientBuilder = webClientBuilder;
+        
         // Create upload directory if it doesn't exist
         try {
             Path uploadPath = Paths.get(AVATAR_UPLOAD_DIR);
@@ -44,7 +44,7 @@ public class AvatarService {
                 Files.createDirectories(uploadPath);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Could not create avatar upload directory", e);
+            throw new BadRequestException("Could not create avatar upload directory: " + e.getMessage());
         }
     }
 
@@ -65,15 +65,19 @@ public class AvatarService {
         }
 
         // Delete existing avatar if exists
-        Optional<Avatar> existingAvatar = avatarRepository.findByUserId(currentUser.getId());
-        if (existingAvatar.isPresent()) {
-            deleteAvatarFile(existingAvatar.get().getImagePath());
-            avatarRepository.delete(existingAvatar.get());
+        Optional<Avatar> existingAvatarOptional = avatarRepository.findByUserId(currentUser.getId());
+        if (existingAvatarOptional.isPresent()) {
+            Avatar existingAvatar = Objects.requireNonNull(existingAvatarOptional.get(), 
+                    "Avatar should not be null after isPresent check");
+            deleteAvatarFile(existingAvatar.getImagePath());
+            avatarRepository.delete(existingAvatar);
         }
 
         try {
             // Generate unique filename
-            String originalFilename = file.getOriginalFilename();
+            // Note: validateFile() already ensures filename is not null, but we add explicit check for compiler
+            String originalFilename = Objects.requireNonNull(file.getOriginalFilename(), 
+                    "Filename cannot be null after validation");
             String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
             String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
 
@@ -110,8 +114,9 @@ public class AvatarService {
     }
 
     public Avatar getAvatarById(String id) {
-        return avatarRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Avatar not found with id: " + id));
+        String nonNullId = Objects.requireNonNull(id, "Avatar ID cannot be null");
+        return avatarRepository.findById(nonNullId)
+                .orElseThrow(() -> new ResourceNotFoundException("Avatar not found with id: " + nonNullId));
     }
 
     @Transactional
@@ -122,16 +127,19 @@ public class AvatarService {
             throw new IllegalArgumentException("Authenticated user not found");
         }
 
-        Optional<Avatar> avatar = avatarRepository.findByUserId(currentUser.getId());
-        if (avatar.isEmpty()) {
+        Optional<Avatar> avatarOptional = avatarRepository.findByUserId(currentUser.getId());
+        if (avatarOptional.isEmpty()) {
             throw new ResourceNotFoundException("No avatar found for current user");
         }
 
+        Avatar avatar = Objects.requireNonNull(avatarOptional.get(), 
+                "Avatar should not be null after isEmpty check");
+
         // Delete file from disk
-        deleteAvatarFile(avatar.get().getImagePath());
+        deleteAvatarFile(avatar.getImagePath());
 
         // Delete from database
-        avatarRepository.delete(avatar.get());
+        avatarRepository.delete(avatar);
 
         // Clear user's avatar field
         updateUserAvatar(currentUser.getId(), null);
@@ -161,10 +169,12 @@ public class AvatarService {
 
     private void updateUserAvatar(String userId, String avatarId) {
         try {
+            org.springframework.http.MediaType contentType = Objects.requireNonNull(
+                    org.springframework.http.MediaType.TEXT_PLAIN, "ContentType cannot be null");
             webClientBuilder.build()
                     .put()
                     .uri("http://user-service/users/internal/avatar/{userId}", userId)
-                    .contentType(org.springframework.http.MediaType.TEXT_PLAIN)
+                    .contentType(contentType)
                     .bodyValue(avatarId != null ? avatarId : "")
                     .retrieve()
                     .bodyToMono(Void.class)
