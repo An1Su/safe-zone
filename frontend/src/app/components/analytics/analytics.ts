@@ -60,6 +60,11 @@ export class Analytics implements OnInit {
     datasets: [],
   };
 
+  buyerPieChartData: ChartConfiguration<'pie'>['data'] = {
+    labels: [],
+    datasets: [],
+  };
+
   // Chart color constants (avoid duplication)
   private readonly CHART_COLORS = {
     buyer: {
@@ -96,6 +101,19 @@ export class Analytics implements OnInit {
           maxRotation: 45,
           minRotation: 0,
         },
+      },
+    },
+  };
+
+  pieChartOptions: ChartOptions<'pie'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+      },
+      tooltip: {
+        enabled: true,
       },
     },
   };
@@ -168,10 +186,14 @@ export class Analytics implements OnInit {
 
     // Calculate most bought products
     const productMap = new Map<string, number>();
+    const productSpentMap = new Map<string, number>();
     orders.forEach((order) => {
       order.items.forEach((item: OrderItem) => {
         const current = productMap.get(item.productName) || 0;
         productMap.set(item.productName, current + item.quantity);
+        
+        const currentSpent = productSpentMap.get(item.productName) || 0;
+        productSpentMap.set(item.productName, currentSpent + (item.price * item.quantity));
       });
     });
 
@@ -181,7 +203,7 @@ export class Analytics implements OnInit {
       .sort((a, b) => b.quantity - a.quantity)
       .slice(0, 5);
 
-    // Update chart data
+    // Update bar chart data
     this.buyerProductChartData = {
       labels: this.buyerStats.mostBoughtProducts.map((p) => p.name),
       datasets: [
@@ -194,6 +216,30 @@ export class Analytics implements OnInit {
         },
       ],
     };
+
+    // Update pie chart data - total spent per product
+    const pieData = Array.from(productSpentMap.entries())
+      .map(([name, spent]) => ({ name, spent }))
+      .sort((a, b) => b.spent - a.spent)
+      .slice(0, 5);
+
+    if (pieData.length > 0) {
+      this.buyerPieChartData = {
+        labels: pieData.map((p) => p.name),
+        datasets: [
+          {
+            data: pieData.map((p) => p.spent),
+            backgroundColor: [
+              'rgba(75, 192, 192, 0.6)',
+              'rgba(255, 99, 132, 0.6)',
+              'rgba(54, 162, 235, 0.6)',
+              'rgba(255, 206, 86, 0.6)',
+              'rgba(153, 102, 255, 0.6)',
+            ],
+          },
+        ],
+      };
+    }
   }
 
   calculateSellerStats(orders: Order[]): void {
