@@ -11,6 +11,7 @@ import { ProductDetailComponent } from './components/products/product-detail.com
 import { ProductListComponent } from './components/products/product-list.component';
 import { UserProfileComponent } from './components/profile/user-profile.component';
 import { SellerDashboardComponent } from './components/seller/seller-dashboard.component';
+import { SellerOrdersComponent } from './components/seller/seller-orders.component';
 import { authGuard } from './guards/auth.guard';
 import { sellerGuard } from './guards/role.guard';
 
@@ -58,6 +59,11 @@ export const routes: Routes = [
   {
     path: 'seller/dashboard',
     component: SellerDashboardComponent,
+    canActivate: [sellerGuard],
+  },
+  {
+    path: 'seller/orders',
+    component: SellerOrdersComponent,
     canActivate: [sellerGuard],
   },
 
