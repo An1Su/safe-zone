@@ -3,7 +3,6 @@ import { FormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { Order, OrderStatus } from '../../models/order.model';
-import { AuthService } from '../../services/auth.service';
 import { MediaService } from '../../services/media.service';
 import { OrderService } from '../../services/order.service';
 import { SellerOrdersComponent } from './seller-orders.component';
@@ -12,7 +11,6 @@ describe('SellerOrdersComponent', () => {
   let component: SellerOrdersComponent;
   let fixture: ComponentFixture<SellerOrdersComponent>;
   let orderServiceSpy: jasmine.SpyObj<OrderService>;
-  let authServiceSpy: jasmine.SpyObj<AuthService>;
   let mediaServiceSpy: jasmine.SpyObj<MediaService>;
 
   const mockOrders: Order[] = [
@@ -111,7 +109,6 @@ describe('SellerOrdersComponent', () => {
       'getSellerOrders',
       'updateOrderStatus',
     ]);
-    authServiceSpy = jasmine.createSpyObj('AuthService', ['getAuthHeaders']);
     mediaServiceSpy = jasmine.createSpyObj('MediaService', [
       'getMediaByProduct',
       'getMediaFile',
@@ -125,7 +122,6 @@ describe('SellerOrdersComponent', () => {
       imports: [SellerOrdersComponent, RouterTestingModule, FormsModule],
       providers: [
         { provide: OrderService, useValue: orderServiceSpy },
-        { provide: AuthService, useValue: authServiceSpy },
         { provide: MediaService, useValue: mediaServiceSpy },
       ],
     }).compileComponents();

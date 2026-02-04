@@ -2,8 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Order, OrderSearchParams, OrderStatus } from '../../models/order.model';
-import { AuthService } from '../../services/auth.service';
+import { Order, OrderStatus } from '../../models/order.model';
 import { MediaService } from '../../services/media.service';
 import { OrderService } from '../../services/order.service';
 
@@ -66,7 +65,6 @@ export class SellerOrdersComponent implements OnInit {
 
   constructor(
     private readonly orderService: OrderService,
-    private readonly authService: AuthService,
     private readonly mediaService: MediaService
   ) {}
 
