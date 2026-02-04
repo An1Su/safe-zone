@@ -224,23 +224,21 @@ export class Analytics implements OnInit {
       .sort((a, b) => b.spent - a.spent)
       .slice(0, 5);
 
-    if (pieData.length > 0) {
-      this.buyerPieChartData = {
-        labels: pieData.map((p) => p.name),
-        datasets: [
-          {
-            data: pieData.map((p) => p.spent),
-            backgroundColor: [
-              'rgba(75, 192, 192, 0.6)',
-              'rgba(255, 99, 132, 0.6)',
-              'rgba(54, 162, 235, 0.6)',
-              'rgba(255, 206, 86, 0.6)',
-              'rgba(153, 102, 255, 0.6)',
-            ],
-          },
-        ],
-      };
-    }
+    this.buyerPieChartData = pieData.length > 0 ? {
+      labels: pieData.map((p) => p.name),
+      datasets: [
+        {
+          data: pieData.map((p) => p.spent),
+          backgroundColor: [
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
+          ],
+        },
+      ],
+    } : { labels: [], datasets: [] };
   }
 
   calculateSellerStats(orders: Order[]): void {
