@@ -38,16 +38,11 @@
       <h2>Most Purchased Products</h2>
       <canvas baseChart [data]="buyerProductChartData" [options]="chartOptions" type="bar">
       </canvas>
-      <h2 *ngIf="buyerPieChartData.labels && buyerPieChartData.labels.length > 0">
-        Total Spent per Product
-      </h2>
-      <canvas
-        baseChart
-        *ngIf="buyerPieChartData.labels && buyerPieChartData.labels.length > 0"
+      <h2>Total Spent per Product</h2>
+      <canvas baseChart
         [data]="buyerPieChartData"
         [options]="pieChartOptions"
-        type="pie"
-      >
+        type="pie">
       </canvas>
     </div>
 
