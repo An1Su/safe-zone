@@ -175,6 +175,7 @@ export class Analytics implements OnInit {
   calculateBuyerStats(orders: Order[]): void {
     if (orders.length === 0) {
       this.buyerStats = { totalSpent: 0, mostBoughtProducts: [] };
+      this.buyerPieChartData = { labels: [], datasets: [] };
       return;
     }
 
