@@ -23,9 +23,7 @@
   <div *ngIf="!loading && !error && isBuyer" class="analytics-content">
     <div class="stats-summary">
       <div class="stat-card">
-        <span class="stat-value">{{
-          buyerStats.totalSpent | currency : 'USD' : 'symbol' : '1.2-2'
-        }}</span>
+        <span class="stat-value">{{ buyerStats.totalSpent | currency:'USD':'symbol':'1.2-2' }}</span>
         <span class="stat-label">Total Spent</span>
       </div>
       <div class="stat-card">
@@ -36,7 +34,10 @@
 
     <div class="chart-section" *ngIf="buyerStats.mostBoughtProducts.length > 0">
       <h2>Most Purchased Products</h2>
-      <canvas baseChart [data]="buyerProductChartData" [options]="chartOptions" type="bar">
+      <canvas baseChart
+        [data]="buyerProductChartData"
+        [options]="chartOptions"
+        type="bar">
       </canvas>
       <h2>Total Spent per Product</h2>
       <canvas baseChart
@@ -58,9 +59,7 @@
   <div *ngIf="!loading && !error && isSeller" class="analytics-content">
     <div class="stats-summary">
       <div class="stat-card">
-        <span class="stat-value">{{
-          sellerStats.revenue | currency : 'USD' : 'symbol' : '1.2-2'
-        }}</span>
+        <span class="stat-value">{{ sellerStats.revenue | currency:'USD':'symbol':'1.2-2' }}</span>
         <span class="stat-label">Total Revenue</span>
       </div>
       <div class="stat-card">
@@ -75,13 +74,19 @@
 
     <div class="chart-section" *ngIf="sellerStats.bestSellingProducts.length > 0">
       <h2>Best Selling Products (Units Sold)</h2>
-      <canvas baseChart [data]="sellerProductChartData" [options]="chartOptions" type="bar">
+      <canvas baseChart
+        [data]="sellerProductChartData"
+        [options]="chartOptions"
+        type="bar">
       </canvas>
     </div>
 
     <div class="chart-section" *ngIf="sellerStats.bestSellingProducts.length > 0">
       <h2>Product Revenue</h2>
-      <canvas baseChart [data]="sellerRevenueChartData" [options]="chartOptions" type="bar">
+      <canvas baseChart
+        [data]="sellerRevenueChartData"
+        [options]="chartOptions"
+        type="bar">
       </canvas>
     </div>
 
