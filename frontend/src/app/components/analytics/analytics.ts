@@ -107,7 +107,7 @@ export class Analytics implements OnInit {
 
   pieChartOptions: ChartOptions<'pie'> = {
     responsive: true,
-    maintainAspectRatio: false,
+    maintainAspectRatio: true,
     plugins: {
       legend: {
         display: true,
@@ -220,22 +220,25 @@ export class Analytics implements OnInit {
 
     // Update pie chart data - total spent per product
     const pieData = Array.from(productSpentMap.entries())
-      .map(([name, spent]) => ({ name, spent }))
+      .map(([name, spent]) => ({ name, spent: Number(spent) || 0 }))
+      .filter((p) => p.spent > 0)
       .sort((a, b) => b.spent - a.spent)
       .slice(0, 5);
+
+    const pieColors = [
+      'rgba(75, 192, 192, 0.6)',
+      'rgba(255, 99, 132, 0.6)',
+      'rgba(54, 162, 235, 0.6)',
+      'rgba(255, 206, 86, 0.6)',
+      'rgba(153, 102, 255, 0.6)',
+    ];
 
     this.buyerPieChartData = pieData.length > 0 ? {
       labels: pieData.map((p) => p.name),
       datasets: [
         {
           data: pieData.map((p) => p.spent),
-          backgroundColor: [
-            'rgba(75, 192, 192, 0.6)',
-            'rgba(255, 99, 132, 0.6)',
-            'rgba(54, 162, 235, 0.6)',
-            'rgba(255, 206, 86, 0.6)',
-            'rgba(153, 102, 255, 0.6)',
-          ],
+          backgroundColor: pieColors.slice(0, pieData.length),
         },
       ],
     } : { labels: [], datasets: [] };
