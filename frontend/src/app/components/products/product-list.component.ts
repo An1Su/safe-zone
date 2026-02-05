@@ -44,10 +44,10 @@ export class ProductListComponent implements OnInit {
   categories: ProductCategory[] = ['Face', 'Eyes', 'Lips'];
 
   constructor(
-    private productService: ProductService,
-    private cartService: CartService,
-    private mediaService: MediaService,
-    private authService: AuthService,
+    private readonly productService: ProductService,
+    private readonly cartService: CartService,
+    private readonly mediaService: MediaService,
+    private readonly authService: AuthService,
   ) {}
 
   ngOnInit(): void {
