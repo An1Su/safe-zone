@@ -185,6 +185,14 @@ describe('ProductListComponent', () => {
       component.totalPages = 3;
       component.currentPage = 1;
       
+      // Update mock to return page 2
+      productService.searchProducts.and.returnValue(of({
+        products: mockProducts,
+        total: 3,
+        page: 2,
+        totalPages: 3,
+      }));
+      
       component.goToPage(2);
       
       expect(component.currentPage).toBe(2);
