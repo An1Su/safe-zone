@@ -101,28 +101,28 @@ public class DataInitializer {
         return Arrays.asList(
             new Product(null, "Velvet Matte Lipstick", 
                 "Long-lasting matte lipstick with velvety finish. Rich color payoff that stays put all day.", 
-                24.99, 50, seller1Id),
+                24.99, 50, seller1Id, "Lips"),
             new Product(null, "Rose Gold Eyeshadow Palette", 
                 "12-shade eyeshadow palette featuring rose gold tones. Highly pigmented and blendable.", 
-                48.99, 30, seller1Id),
+                48.99, 30, seller1Id, "Eyes"),
             new Product(null, "Volumizing Drama Mascara", 
                 "Builds volume and length for dramatic lashes. Waterproof formula.", 
-                19.99, 75, seller1Id),
+                19.99, 75, seller1Id, "Eyes"),
             new Product(null, "Silk Glow Blush", 
                 "Silky smooth blush with natural glow finish. Buildable coverage.", 
-                28.99, 40, seller1Id),
+                28.99, 40, seller1Id, "Face"),
             new Product(null, "Crystal Shine Lip Gloss", 
                 "High-shine lip gloss with crystal shimmer. Non-sticky formula.", 
-                16.99, 60, seller1Id),
+                16.99, 60, seller1Id, "Lips"),
             new Product(null, "Diamond Dust Highlighter", 
                 "Luminous highlighter with diamond-like shimmer. Creates a dewy glow.", 
-                34.99, 35, seller1Id),
+                34.99, 35, seller1Id, "Face"),
             new Product(null, "Berry Bliss Lipstick", 
                 "Rich berry-toned lipstick with satin finish. Comfortable wear.", 
-                22.99, 45, seller1Id),
+                22.99, 45, seller1Id, "Lips"),
             new Product(null, "Smoky Night Palette", 
                 "10-shade palette perfect for creating smoky eye looks. Includes matte and shimmer.", 
-                52.99, 25, seller1Id)
+                52.99, 25, seller1Id, "Eyes")
         );
     }
 
@@ -130,28 +130,28 @@ public class DataInitializer {
         return Arrays.asList(
             new Product(null, "Lengthening Lash Mascara", 
                 "Lengthens and separates lashes for a natural look. Smudge-proof.", 
-                18.99, 55, seller2Id),
+                18.99, 55, seller2Id, "Eyes"),
             new Product(null, "Coral Dream Blush", 
                 "Vibrant coral blush with soft matte finish. Perfect for warm skin tones.", 
-                26.99, 42, seller2Id),
+                26.99, 42, seller2Id, "Face"),
             new Product(null, "Nude Shimmer Gloss", 
                 "Nude-toned lip gloss with subtle shimmer. Everyday essential.", 
-                14.99, 70, seller2Id),
+                14.99, 70, seller2Id, "Lips"),
             new Product(null, "Golden Hour Highlighter", 
                 "Warm golden highlighter for a sun-kissed glow. Buildable intensity.", 
-                32.99, 38, seller2Id),
+                32.99, 38, seller2Id, "Face"),
             new Product(null, "Ruby Red Lipstick", 
                 "Classic red lipstick with creamy formula. Bold and beautiful.", 
-                26.99, 48, seller2Id),
+                26.99, 48, seller2Id, "Lips"),
             new Product(null, "Peach Perfect Blush", 
                 "Soft peach blush with natural finish. Flatters all skin tones.", 
-                24.99, 50, seller2Id),
+                24.99, 50, seller2Id, "Face"),
             new Product(null, "Sunset Glow Palette", 
                 "15-shade palette inspired by sunset colors. Mix of matte and metallic.", 
-                44.99, 28, seller2Id),
+                44.99, 28, seller2Id, "Eyes"),
             new Product(null, "Waterproof Wonder Mascara", 
                 "Waterproof mascara that won't budge. Perfect for active days.", 
-                21.99, 65, seller2Id)
+                21.99, 65, seller2Id, "Eyes")
         );
     }
 
