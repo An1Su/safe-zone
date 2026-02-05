@@ -89,8 +89,8 @@ export class SellerDashboardComponent implements OnInit {
           }
         });
       },
-      error: (error) => {
-        console.error('Error loading products:', error);
+      error: (err) => {
+        console.error('Error loading products:', err);
         this.error = 'Failed to load your products.';
         this.loading = false;
       },
@@ -102,8 +102,8 @@ export class SellerDashboardComponent implements OnInit {
       next: (media) => {
         this.productMedia.set(productId, media);
       },
-      error: (error) => {
-        console.error('Error loading media for product:', productId, error);
+      error: (err) => {
+        console.error('Error loading media for product:', productId, err);
       },
     });
   }
@@ -194,9 +194,9 @@ export class SellerDashboardComponent implements OnInit {
             setTimeout(() => (this.successMessage = ''), 3000);
           }
         },
-        error: (error) => {
-          console.error('Error uploading image:', error);
-          this.imageError.set(productId, error.error?.message || 'Failed to upload image');
+        error: (err) => {
+          console.error('Error uploading image:', err);
+          this.imageError.set(productId, err.error?.message || 'Failed to upload image');
           this.uploadingImages.set(productId, false);
         },
       });
@@ -214,9 +214,9 @@ export class SellerDashboardComponent implements OnInit {
         this.successMessage = 'Image deleted successfully!';
         setTimeout(() => (this.successMessage = ''), 3000);
       },
-      error: (error) => {
-        console.error('Error deleting image:', error);
-        this.imageError.set(productId, error.error?.message || 'Failed to delete image');
+      error: (err) => {
+        console.error('Error deleting image:', err);
+        this.imageError.set(productId, err.error?.message || 'Failed to delete image');
       },
     });
   }
@@ -269,9 +269,9 @@ export class SellerDashboardComponent implements OnInit {
           this.finishProductCreation();
         }
       },
-      error: (error) => {
-        console.error('Error creating product:', error);
-        this.formError = error.error?.message || 'Failed to create product. Please try again.';
+      error: (err) => {
+        console.error('Error creating product:', err);
+        this.formError = err.error?.message || 'Failed to create product. Please try again.';
         this.submitting = false;
       },
     });
@@ -363,9 +363,9 @@ export class SellerDashboardComponent implements OnInit {
             setTimeout(() => (this.successMessage = ''), 3000);
           }
         },
-        error: (error) => {
-          console.error('Error uploading image:', error);
-          this.formError = error.error?.message || 'Failed to upload some images.';
+        error: (err) => {
+          console.error('Error uploading image:', err);
+          this.formError = err.error?.message || 'Failed to upload some images.';
           this.submitting = false;
         },
       });
@@ -412,9 +412,9 @@ export class SellerDashboardComponent implements OnInit {
         this.showEditForm = false;
         this.submitting = false;
       },
-      error: (error) => {
-        console.error('Error updating product:', error);
-        this.formError = error.error?.message || 'Failed to update product. Please try again.';
+      error: (err) => {
+        console.error('Error updating product:', err);
+        this.formError = err.error?.message || 'Failed to update product. Please try again.';
         this.submitting = false;
       },
     });
@@ -435,8 +435,8 @@ export class SellerDashboardComponent implements OnInit {
         this.myProducts = this.myProducts.filter((p) => p.id !== id);
         this.successMessage = 'Product deleted successfully!';
       },
-      error: (error) => {
-        console.error('Error deleting product:', error);
+      error: (err) => {
+        console.error('Error deleting product:', err);
         this.error = 'Failed to delete product. Please try again.';
       },
     });
