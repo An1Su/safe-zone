@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { Media, Product } from '../../models/ecommerce.model';
+import { Media, Product, ProductCategory } from '../../models/ecommerce.model';
 import { AuthService } from '../../services/auth.service';
 import { MediaService } from '../../services/media.service';
 import { ProductService } from '../../services/product.service';
@@ -39,11 +39,14 @@ export class SellerDashboardComponent implements OnInit {
   allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
   maxFileSize = 2 * 1024 * 1024; // 2MB
 
+  categories: ProductCategory[] = ['Face', 'Eyes', 'Lips'];
+
   newProduct: Product = {
     name: '',
     description: '',
     price: 0,
     stock: 0,
+    category: undefined,
   };
 
   editProduct: Product = {
@@ -51,6 +54,7 @@ export class SellerDashboardComponent implements OnInit {
     description: '',
     price: 0,
     stock: 0,
+    category: undefined,
   };
 
   constructor(

@@ -36,4 +36,6 @@ public class Product {
 
     @Field("userId")
     private String userId;
+
+    private String category; // Face, Eyes, Lips
 }

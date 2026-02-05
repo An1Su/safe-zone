@@ -1,44 +1,206 @@
-<div class="product-list-container">
-  <h1>All Products</h1>
+<!-- Hero Banner -->
+<div class="shop-hero">
+  <div class="hero-content">
+    <h1>Shop All Products</h1>
+    <p>Discover your perfect beauty essentials from our curated collection</p>
+  </div>
+</div>
 
-  <div *ngIf="loading" class="loading">Loading products...</div>
-
-  <div *ngIf="error" class="error">{{ error }}</div>
-
-  <div class="products-grid">
-    <div *ngFor="let product of products" class="product-card">
-      <a [routerLink]="['/products', product.id]" class="card-link">
-        <div class="card-image-container">
-          <app-image-slider
-            [images]="getProductImageUrls(product.id!)"
-            [alt]="product.name"
-            [showDots]="true"
-          ></app-image-slider>
-        </div>
-        <div class="card-content">
-          <h3 class="card-title">{{ product.name }}</h3>
-          <p class="card-description">{{ product.description }}</p>
-          <div class="card-meta">
-            <div class="card-price">${{ product.price }}</div>
-            <div class="card-stock">Stock: {{ product.stock }}</div>
-          </div>
-        </div>
-      </a>
-      <button
-        class="btn btn-add-to-cart"
-        (click)="addToCart(product)"
-        [disabled]="product.stock === 0"
-        [class.out-of-stock]="product.stock === 0"
-      >
-        <span *ngIf="product.stock > 0">🛒 Add to Cart</span>
-        <span *ngIf="product.stock === 0">❌ Out of Stock</span>
-      </button>
+<div class="shop-container">
+  <!-- Search Bar -->
+  <div class="search-section">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="onSearch()"
+        placeholder="Search products, brands, categories..."
+        class="search-input"
+      />
+    </div>
+    
+    <div class="view-controls">
+      <select [(ngModel)]="sortBy" (change)="onSortChange()" class="sort-select">
+        <option value="newest">Featured</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="name">Name A-Z</option>
+      </select>
+      
+      <div class="view-toggle">
+        <button 
+          [class.active]="viewMode === 'grid'" 
+          (click)="setViewMode('grid')"
+          class="view-btn"
+        >
+          <span>⊞</span>
+        </button>
+        <button 
+          [class.active]="viewMode === 'list'" 
+          (click)="setViewMode('list')"
+          class="view-btn"
+        >
+          <span>☰</span>
+        </button>
+      </div>
     </div>
   </div>
 
-  <div *ngIf="!loading && products.length === 0" class="empty-state">
-    <div class="empty-icon">📦</div>
-    <div class="empty-title">No Products Available</div>
-    <p class="empty-message">Check back later for new products!</p>
+  <div class="shop-layout">
+    <!-- Filters Sidebar -->
+    <aside class="filters-sidebar">
+      <div class="filters-header">
+        <h2>Filters</h2>
+        <button class="clear-filters" (click)="clearFilters()">Clear all</button>
+      </div>
+
+      <!-- Categories -->
+      <div class="filter-group">
+        <h3>Categories</h3>
+        <div class="filter-options">
+          <label 
+            *ngFor="let category of categories" 
+            class="filter-option"
+            [class.selected]="selectedCategory === category"
+          >
+            <input
+              type="radio"
+              name="category"
+              [checked]="selectedCategory === category"
+              (change)="onCategoryChange(category)"
+            />
+            <span class="radio-custom"></span>
+            <span class="option-label">{{ category }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Price Range -->
+      <div class="filter-group">
+        <h3>Price Range</h3>
+        <div class="price-slider">
+          <input
+            type="range"
+            min="0"
+            max="100"
+            [(ngModel)]="priceRange"
+            (change)="onPriceRangeChange()"
+            class="slider"
+          />
+          <div class="price-labels">
+            <span>${{ minPrice }}</span>
+            <span>${{ priceRange }}</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Products Grid -->
+    <main class="products-main">
+      <div class="products-header">
+        <span class="results-count">Showing {{ products.length }} of {{ totalProducts }} products</span>
+      </div>
+
+      <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading products...</p>
+      </div>
+
+      <div *ngIf="error" class="error-state">
+        <span class="error-icon">⚠️</span>
+        <p>{{ error }}</p>
+        <button (click)="loadProducts()" class="retry-btn">Try Again</button>
+      </div>
+
+      <div 
+        *ngIf="!loading && !error" 
+        class="products-grid"
+        [class.list-view]="viewMode === 'list'"
+      >
+        <div *ngFor="let product of products" class="product-card">
+          <a [routerLink]="['/products', product.id]" class="card-link">
+            <!-- NEW badge for featured items -->
+            <div class="card-badge" *ngIf="product.stock > 10">NEW</div>
+            
+            <div class="card-image">
+              <img 
+                *ngIf="getFirstProductImage(product.id!)" 
+                [src]="getFirstProductImage(product.id!)" 
+                [alt]="product.name"
+              />
+              <div *ngIf="!getFirstProductImage(product.id!)" class="placeholder-image">
+                <span>🎨</span>
+              </div>
+            </div>
+            
+            <div class="card-content">
+              <span class="card-category">{{ product.category || 'Beauty' }}</span>
+              <h3 class="card-title">{{ product.name }}</h3>
+              
+              <div class="card-rating">
+                <span class="stars">★★★★★</span>
+                <span class="rating-text">(5.0)</span>
+              </div>
+              
+              <div class="card-footer">
+                <div class="card-price">
+                  <span class="current-price">${{ product.price.toFixed(2) }}</span>
+                </div>
+                
+                <button 
+                  *ngIf="isBuyer()"
+                  class="add-to-cart-btn"
+                  (click)="addToCart(product, $event)"
+                  [disabled]="product.stock === 0"
+                  [class.out-of-stock]="product.stock === 0"
+                >
+                  <span *ngIf="product.stock > 0">🛒</span>
+                  <span *ngIf="product.stock === 0">✕</span>
+                </button>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!loading && !error && products.length === 0" class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3>No products found</h3>
+        <p>Try adjusting your filters or search terms</p>
+        <button (click)="clearFilters()" class="clear-btn">Clear Filters</button>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="totalPages > 1" class="pagination">
+        <button 
+          class="page-btn prev"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          ‹ Previous
+        </button>
+        
+        <div class="page-numbers">
+          <button 
+            *ngFor="let page of getPageNumbers()"
+            class="page-num"
+            [class.active]="page === currentPage"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+        </div>
+        
+        <button 
+          class="page-btn next"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)"
+        >
+          Next ›
+        </button>
+      </div>
+    </main>
   </div>
 </div>

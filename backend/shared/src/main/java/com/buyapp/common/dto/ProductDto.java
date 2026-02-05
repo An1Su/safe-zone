@@ -29,4 +29,6 @@ public class ProductDto {
     private Integer stock;
 
     private String user; // Email of the owner
+
+    private String category; // Face, Eyes, Lips
 }

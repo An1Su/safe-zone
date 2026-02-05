@@ -7,6 +7,8 @@ export interface User {
   avatar?: string;
 }
 
+export type ProductCategory = 'Face' | 'Eyes' | 'Lips';
+
 export interface Product {
   id?: string;
   name: string;
@@ -14,6 +16,7 @@ export interface Product {
   price: number;
   stock: number;
   user?: string; // Owner email
+  category?: ProductCategory;
 }
 
 export interface Media {
