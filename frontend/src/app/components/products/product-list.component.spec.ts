@@ -65,7 +65,7 @@ describe('ProductListComponent', () => {
     ]);
     const authServiceSpy = jasmine.createSpyObj('AuthService', [
       'isLoggedIn',
-      'getUserRole',
+      'isClient',
     ]);
 
     productServiceSpy.searchProducts.and.returnValue(of(mockSearchResult));
@@ -240,14 +240,14 @@ describe('ProductListComponent', () => {
   describe('isBuyer', () => {
     it('should return true for logged in client', () => {
       authService.isLoggedIn.and.returnValue(true);
-      authService.getUserRole.and.returnValue('client');
+      authService.isClient.and.returnValue(true);
       
       expect(component.isBuyer()).toBeTrue();
     });
 
     it('should return false for seller', () => {
       authService.isLoggedIn.and.returnValue(true);
-      authService.getUserRole.and.returnValue('seller');
+      authService.isClient.and.returnValue(false);
       
       expect(component.isBuyer()).toBeFalse();
     });

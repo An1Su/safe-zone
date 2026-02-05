@@ -211,6 +211,6 @@ export class ProductListComponent implements OnInit {
   }
 
   isBuyer(): boolean {
-    return this.authService.isLoggedIn() && this.authService.getUserRole() === 'client';
+    return this.authService.isLoggedIn() && this.authService.isClient();
   }
 }
