@@ -21,12 +21,13 @@ class ProductDtoTest {
         assertNull(dto.getPrice());
         assertNull(dto.getStock());
         assertNull(dto.getUser());
+        assertNull(dto.getCategory());
     }
 
     @Test
     void parameterizedConstructor_ShouldSetAllFields() {
         // Arrange & Act
-        ProductDto dto = new ProductDto("1", "Test Product", "Test Description", 99.99, 50, "user@test.com");
+        ProductDto dto = new ProductDto("1", "Test Product", "Test Description", 99.99, 50, "user@test.com", "Face");
 
         // Assert
         assertEquals("1", dto.getId());
@@ -35,6 +36,7 @@ class ProductDtoTest {
         assertEquals(99.99, dto.getPrice());
         assertEquals(50, dto.getStock());
         assertEquals("user@test.com", dto.getUser());
+        assertEquals("Face", dto.getCategory());
     }
 
     @Test
@@ -49,6 +51,7 @@ class ProductDtoTest {
         dto.setPrice(149.99);
         dto.setStock(100);
         dto.setUser("seller@test.com");
+        dto.setCategory("Eyes");
 
         // Assert
         assertEquals("123", dto.getId());
@@ -57,6 +60,19 @@ class ProductDtoTest {
         assertEquals(149.99, dto.getPrice());
         assertEquals(100, dto.getStock());
         assertEquals("seller@test.com", dto.getUser());
+        assertEquals("Eyes", dto.getCategory());
+    }
+
+    @Test
+    void setCategory_WithValidCategory_ShouldSetCategory() {
+        // Arrange
+        ProductDto dto = new ProductDto();
+
+        // Act
+        dto.setCategory("Lips");
+
+        // Assert
+        assertEquals("Lips", dto.getCategory());
     }
 
     @Test
