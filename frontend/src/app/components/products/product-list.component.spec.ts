@@ -72,7 +72,7 @@ describe('ProductListComponent', () => {
     productServiceSpy.getCategories.and.returnValue(['Face', 'Eyes', 'Lips']);
     mediaServiceSpy.getMediaByProduct.and.returnValue(of([]));
     authServiceSpy.isLoggedIn.and.returnValue(true);
-    authServiceSpy.getUserRole.and.returnValue('client');
+    authServiceSpy.isClient.and.returnValue(true);
 
     await TestBed.configureTestingModule({
       imports: [
