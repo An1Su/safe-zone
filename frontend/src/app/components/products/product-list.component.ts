@@ -82,8 +82,8 @@ export class ProductListComponent implements OnInit {
           }
         });
       },
-      error: (error) => {
-        console.error('Error loading products:', error);
+      error: (err) => {
+        console.error('Error loading products:', err);
         this.error = 'Failed to load products. Please try again.';
         this.loading = false;
       },
@@ -95,8 +95,8 @@ export class ProductListComponent implements OnInit {
       next: (media) => {
         this.productMedia.set(productId, media);
       },
-      error: (error) => {
-        console.error('Error loading media for product:', productId, error);
+      error: (err) => {
+        console.error('Error loading media for product:', productId, err);
       },
     });
   }
