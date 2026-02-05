@@ -39,6 +39,12 @@
         [options]="chartOptions"
         type="bar">
       </canvas>
+      <h2>Total Spent per Product</h2>
+      <canvas baseChart
+        [data]="buyerPieChartData"
+        [options]="pieChartOptions"
+        type="pie">
+      </canvas>
     </div>
 
     <div *ngIf="buyerStats.mostBoughtProducts.length === 0" class="empty-state">

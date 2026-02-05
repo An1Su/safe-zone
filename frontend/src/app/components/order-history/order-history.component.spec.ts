@@ -291,5 +291,109 @@ describe('OrderHistoryComponent', () => {
       expect(compiled.querySelector('.empty-state')).toBeTruthy();
     });
   });
+
+  describe('Product images', () => {
+    it('should load product images for order items', () => {
+      const mockMedia = [{
+        id: 'media-1',
+        productId: 'prod-1',
+        imagePath: '/images/prod-1.jpg',
+        fileName: 'prod-1.jpg',
+        contentType: 'image/jpeg',
+        fileSize: 1024,
+      }];
+      mediaServiceSpy.getMediaByProduct.and.returnValue(of(mockMedia));
+      mediaServiceSpy.getMediaFile.and.returnValue('http://example.com/image.jpg');
+
+      fixture.detectChanges();
+
+      expect(mediaServiceSpy.getMediaByProduct).toHaveBeenCalled();
+      expect(mediaServiceSpy.getMediaFile).toHaveBeenCalledWith('media-1');
+    });
+
+    it('should not set image when media array is empty', () => {
+      mediaServiceSpy.getMediaByProduct.and.returnValue(of([]));
+
+      fixture.detectChanges();
+
+      expect(mediaServiceSpy.getMediaFile).not.toHaveBeenCalled();
+    });
+
+    it('should return product image from map', () => {
+      component.productImages.set('prod-1', 'http://example.com/image.jpg');
+
+      expect(component.getProductImage('prod-1')).toBe('http://example.com/image.jpg');
+    });
+
+    it('should return undefined for unknown product', () => {
+      expect(component.getProductImage('unknown-prod')).toBeUndefined();
+    });
+  });
+
+  describe('Cancel order edge cases', () => {
+    it('should not cancel order without id', () => {
+      fixture.detectChanges();
+
+      const orderWithoutId: Order = {
+        ...createMockOrders()[2],
+        id: undefined,
+      };
+
+      component.cancelOrder(orderWithoutId);
+
+      expect(orderServiceSpy.cancelOrder).not.toHaveBeenCalled();
+    });
+
+    it('should handle error when cancelling order fails', () => {
+      fixture.detectChanges();
+
+      const pendingOrder = component.orders.find((o) => o.status === 'PENDING')!;
+      orderServiceSpy.cancelOrder.and.returnValue(throwError(() => new Error('Cancel failed')));
+
+      spyOn(window, 'confirm').and.returnValue(true);
+      spyOn(window, 'alert');
+      spyOn(console, 'error');
+
+      component.cancelOrder(pendingOrder);
+
+      expect(orderServiceSpy.cancelOrder).toHaveBeenCalledWith(pendingOrder.id!);
+      expect(window.alert).toHaveBeenCalledWith('Failed to cancel order. Please try again.');
+    });
+  });
+
+  describe('Order number edge cases', () => {
+    it('should use current year when createdAt is undefined', () => {
+      const orderWithoutDate: Order = {
+        ...createMockOrders()[0],
+        createdAt: undefined,
+      };
+
+      const orderNumber = component.getOrderNumber(orderWithoutDate);
+      const currentYear = new Date().getFullYear();
+
+      expect(orderNumber).toContain(`ORD-${currentYear}-`);
+    });
+  });
+
+  describe('Status edge cases', () => {
+    it('should return default status class for unknown status', () => {
+      const unknownStatus = 'UNKNOWN' as OrderStatus;
+      expect(component.getStatusClass(unknownStatus)).toBe('status-pending');
+    });
+
+    it('should return status string for unknown status label', () => {
+      const unknownStatus = 'UNKNOWN' as OrderStatus;
+      expect(component.getStatusLabel(unknownStatus)).toBe('UNKNOWN');
+    });
+  });
+
+  describe('Date formatting edge cases', () => {
+    it('should format string date correctly', () => {
+      const formatted = component.formatDate('2024-01-25T12:00:00Z');
+      expect(formatted).toContain('January');
+      expect(formatted).toContain('25');
+      expect(formatted).toContain('2024');
+    });
+  });
 });
 

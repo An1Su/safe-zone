@@ -43,13 +43,20 @@
   </div>
 
   <!-- Seller View: Products for Sale -->
-  <div *ngIf="isSeller()" class="seller-section">
+  <div *ngIf="isSeller()" class="buyer-section">
     <div class="section-header">
-      <h2>My Products for Sale</h2>
+      <h2>My Account</h2>
       <a routerLink="/seller/dashboard" class="btn btn-primary">Manage Products</a>
     </div>
 
-    <div class="seller-actions">
+    <div class="buyer-actions">
+      <a routerLink="/orders" class="action-card action-orders">
+        <div class="action-icon">📋</div>
+        <div class="action-content">
+          <h3>View Sales History</h3>
+          <p>Track product delivery and view past completed orders</p>
+        </div>
+      </a>
       <a routerLink="/analytics" class="action-card action-analytics">
         <div class="action-icon">📊</div>
         <div class="action-content">
@@ -57,43 +64,13 @@
           <p>View sales statistics and revenue insights</p>
         </div>
       </a>
-    </div>
-
-    <div *ngIf="isLoading" class="loading">Loading your products...</div>
-
-    <div *ngIf="!isLoading && sellerProducts.length === 0" class="empty-state">
-      <p>You haven't listed any products yet.</p>
-      <a routerLink="/seller/dashboard" class="btn btn-primary">Create Your First Product</a>
-    </div>
-
-    <div *ngIf="!isLoading && sellerProducts.length > 0" class="products-grid">
-      <div *ngFor="let product of sellerProducts" class="product-card">
-        <div class="product-image">
-          <app-image-slider
-            *ngIf="getProductImages(product.id!).length > 0"
-            [images]="getProductImages(product.id!)"
-            [alt]="product.name"
-          ></app-image-slider>
-          <div *ngIf="getProductImages(product.id!).length === 0" class="no-image">No Image</div>
+      <a routerLink="/seller/dashboard" class="action-card action-products">
+        <div class="action-icon">💄</div>
+        <div class="action-content">
+          <h3>My Products</h3>
+          <p>View products in stock</p>
         </div>
-        <div class="product-info">
-          <h3>{{ product.name }}</h3>
-          <p class="description">{{ product.description | slice : 0 : 60 }}...</p>
-          <div class="product-meta">
-            <span class="price">${{ product.price | number : '1.2-2' }}</span>
-            <span class="stock">Stock: {{ product.stock }}</span>
-          </div>
-          <div class="product-actions">
-            <a
-              [routerLink]="['/seller/dashboard']"
-              [queryParams]="{ productId: product.id }"
-              class="btn btn-sm btn-secondary"
-            >
-              Edit
-            </a>
-          </div>
-        </div>
-      </div>
+      </a>
     </div>
   </div>
 
