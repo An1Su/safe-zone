@@ -1,0 +1,248 @@
+<div class="order-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>{{ isSeller ? '📦 Manage Orders' : '📋 Order History' }}</h1>
+    <a
+      [routerLink]="isSeller ? '/seller/dashboard' : '/products'"
+      [ngClass]="isSeller ? 'btn btn-outline' : 'btn btn-primary'"
+    >
+      {{ isSeller ? '← Back to Products' : '🛒 Continue Shopping' }}
+    </a>
+  </div>
+
+  <!-- Success Message (Seller only) -->
+  <div *ngIf="successMessage" class="success-message">
+    ✓ {{ successMessage }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>{{ isSeller ? 'Loading orders...' : 'Loading your orders...' }}</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="error-icon">❌</div>
+    <h2>Something went wrong</h2>
+    <p>{{ error }}</p>
+    <button class="btn btn-primary" (click)="loadOrders()">Try Again</button>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading && !error" class="order-content">
+    <!-- Stats Cards -->
+    <div class="stats-grid" [ngClass]="{ 'stats-grid-seller': isSeller }">
+      <!-- Buyer Stats -->
+      <ng-container *ngIf="!isSeller">
+        <div class="stat-card">
+          <span class="stat-value stat-pink">{{ buyerStats.totalOrders }}</span>
+          <span class="stat-label">Total Orders</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value stat-green">{{ buyerStats.delivered }}</span>
+          <span class="stat-label">Delivered</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value stat-blue">{{ buyerStats.inProgress }}</span>
+          <span class="stat-label">In Progress</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value stat-dark">
+            {{ buyerStats.totalSpent | currency: 'USD':'symbol':'1.2-2' }}
+          </span>
+          <span class="stat-label">Total Spent</span>
+        </div>
+      </ng-container>
+
+      <!-- Seller Stats -->
+      <ng-container *ngIf="isSeller">
+        <div class="stat-card">
+          <span class="stat-value stat-pink">{{ sellerStats.totalOrders }}</span>
+          <span class="stat-label">Total Orders</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value stat-orange">{{ sellerStats.pending }}</span>
+          <span class="stat-label">Pending</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value stat-blue">{{ sellerStats.shipped }}</span>
+          <span class="stat-label">Shipped</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value stat-green">{{ sellerStats.delivered }}</span>
+          <span class="stat-label">Delivered</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value stat-dark">
+            {{ sellerStats.totalRevenue | currency: 'USD':'symbol':'1.2-2' }}
+          </span>
+          <span class="stat-label">Total Revenue</span>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Filters (Seller only) -->
+    <div *ngIf="isSeller" class="filters-bar">
+      <div class="search-box">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="applyFilters()"
+          placeholder="Search orders, products, customers..."
+          class="search-input"
+        />
+      </div>
+      <div class="filter-controls">
+        <select
+          [(ngModel)]="statusFilter"
+          (ngModelChange)="applyFilters()"
+          class="status-select"
+        >
+          <option *ngFor="let option of statusOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+        <button
+          *ngIf="searchQuery || statusFilter"
+          class="btn btn-sm btn-outline"
+          (click)="clearFilters()"
+        >
+          Clear Filters
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="displayOrders.length === 0" class="empty-state">
+      <div class="empty-icon">{{ isSeller ? '📋' : '📦' }}</div>
+      <h2>{{ isSeller ? 'No orders found' : 'No orders yet' }}</h2>
+      <p *ngIf="isSeller && orders.length === 0">
+        When customers order your products, they'll appear here.
+      </p>
+      <p *ngIf="isSeller && orders.length > 0">
+        No orders match your current filters.
+      </p>
+      <p *ngIf="!isSeller">
+        When you place orders, they'll appear here.
+      </p>
+      <a *ngIf="!isSeller" routerLink="/products" class="btn btn-primary">
+        Start Shopping
+      </a>
+    </div>
+
+    <!-- Orders List -->
+    <div *ngIf="displayOrders.length > 0" class="orders-list">
+      <div *ngFor="let order of displayOrders" class="order-card">
+        <!-- Order Header -->
+        <div class="order-header">
+          <div class="order-meta">
+            <div class="meta-item">
+              <span class="meta-label">{{ isSeller ? 'Order #' : 'Order placed' }}</span>
+              <span class="meta-value" [ngClass]="{ 'order-number': isSeller }">
+                {{ isSeller ? getOrderNumber(order) : formatDate(order.createdAt) }}
+              </span>
+            </div>
+            <div class="meta-divider"></div>
+            <div class="meta-item" *ngIf="isSeller">
+              <span class="meta-label">Date</span>
+              <span class="meta-value">{{ formatDate(order.createdAt) }}</span>
+            </div>
+            <div class="meta-divider" *ngIf="isSeller"></div>
+            <div class="meta-item">
+              <span class="meta-label">Total</span>
+              <span class="meta-value">
+                {{ order.totalAmount | currency: 'USD':'symbol':'1.2-2' }}
+              </span>
+            </div>
+            <div class="meta-divider" *ngIf="!isSeller"></div>
+            <div class="meta-item" *ngIf="!isSeller">
+              <span class="meta-label">Order #</span>
+              <span class="meta-value order-number">{{ getOrderNumber(order) }}</span>
+            </div>
+          </div>
+          <span class="order-status" [ngClass]="getStatusClass(order.status)">
+            {{ getStatusLabel(order.status) }}
+          </span>
+        </div>
+
+        <!-- Customer Info (Seller only) -->
+        <div *ngIf="isSeller" class="customer-info">
+          <div class="customer-details">
+            <span class="customer-icon">👤</span>
+            <div class="customer-text">
+              <strong>{{ order.shippingAddress.fullName }}</strong>
+              <span
+                >{{ order.shippingAddress.address }}, {{ order.shippingAddress.city }}</span
+              >
+              <span>📞 {{ order.shippingAddress.phone }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="order-items">
+          <div *ngFor="let item of order.items" class="order-item">
+            <div class="item-image">
+              <img
+                *ngIf="productImages.get(item.productId)"
+                [src]="productImages.get(item.productId)"
+                [alt]="item.productName"
+              />
+              <div class="image-placeholder" *ngIf="!productImages.get(item.productId)">
+                📦
+              </div>
+            </div>
+            <div class="item-details">
+              <h4 class="item-name">{{ item.productName }}</h4>
+              <p class="item-quantity">Qty: {{ item.quantity }}</p>
+            </div>
+            <div class="item-price">
+              {{ (item.price * item.quantity) | currency: 'USD':'symbol':'1.2-2' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Actions -->
+        <!-- Buyer Actions -->
+        <div *ngIf="!isSeller" class="order-actions">
+          <a [routerLink]="['/order-confirmation', order.id]" class="btn btn-outline btn-sm">
+            👁️ View Details
+          </a>
+          <button
+            *ngIf="!isSeller && order.status === 'PENDING'"
+            class="btn btn-danger btn-sm"
+            (click)="cancelOrder(order)"
+          >
+            ✕ Cancel Order
+          </button>
+        </div>
+
+        <!-- Seller Actions -->
+        <div *ngIf="isSeller && hasStatusOptions(order)" class="order-actions">
+          <span class="action-label">Update Status:</span>
+          <div class="action-buttons">
+            <button
+              *ngFor="let nextStatus of nextStatusOptions[order.status]"
+              class="btn btn-sm"
+              [ngClass]="nextStatus === 'CANCELLED' ? 'btn-danger' : 'btn-primary'"
+              (click)="updateOrderStatus(order, nextStatus)"
+            >
+              {{ getStatusLabel(nextStatus) }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Completed/Cancelled Badge (Seller only) -->
+        <div *ngIf="isSeller && isOrderCompleted(order)" class="order-completed">
+          <span *ngIf="order.status === 'DELIVERED'" class="completed-badge">
+            ✓ Order Completed
+          </span>
+          <span *ngIf="order.status === 'CANCELLED'" class="cancelled-badge">
+            ✕ Order Cancelled
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

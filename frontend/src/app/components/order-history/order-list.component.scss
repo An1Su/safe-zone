@@ -2,7 +2,7 @@
 @use '../../../styles/variables' as *;
 @use '../../../styles/mixins' as *;
 
-.seller-orders-container {
+.order-list-container {
   @include container();
   padding-top: $spacing-xl;
   padding-bottom: $spacing-3xl;
@@ -28,7 +28,7 @@
   }
 }
 
-// Success Message
+// Success Message (Seller only)
 .success-message {
   background: color.adjust($success-color, $lightness: 40%);
   color: color.adjust($success-color, $lightness: -20%);
@@ -92,60 +92,70 @@
 // Stats Grid
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: $spacing-lg;
   margin-bottom: $spacing-2xl;
 
+  &.stats-grid-seller {
+    grid-template-columns: repeat(5, 1fr);
+
+    @media (max-width: $breakpoint-tablet) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
   @media (max-width: $breakpoint-tablet) {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 
   @media (max-width: $breakpoint-mobile) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
     gap: $spacing-md;
   }
 }
 
 .stat-card {
   @include card-base();
-  padding: $spacing-lg;
+  padding: $spacing-lg $spacing-xl;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xs;
+  border: 2px solid $border-color;
+  background: white;
 
   .stat-value {
+    display: block;
     font-size: 1.75rem;
     font-weight: 700;
+    margin-bottom: $spacing-xs;
+
+    &.stat-pink {
+      color: $primary-color;
+    }
+
+    &.stat-green {
+      color: $success-color;
+    }
+
+    &.stat-blue {
+      color: $info-color;
+    }
+
+    &.stat-orange {
+      color: #f59e0b;
+    }
+
+    &.stat-dark {
+      color: $text-primary;
+    }
   }
 
   .stat-label {
     font-size: 0.875rem;
     color: $text-secondary;
-  }
-
-  .stat-pink {
-    color: $primary-color;
-  }
-
-  .stat-orange {
-    color: #f59e0b;
-  }
-
-  .stat-blue {
-    color: #3b82f6;
-  }
-
-  .stat-green {
-    color: $success-color;
-  }
-
-  .stat-dark {
-    color: $text-primary;
+    font-weight: 500;
   }
 }
 
-// Filters Bar
+// Filters Bar (Seller only)
 .filters-bar {
   @include flex-between();
   gap: $spacing-lg;
@@ -209,12 +219,12 @@
   flex-direction: column;
   padding: $spacing-4xl;
   text-align: center;
-  background: $bg-card;
-  border-radius: $radius-lg;
+  @include card-base();
 
   .empty-icon {
-    font-size: 4rem;
+    font-size: 5rem;
     margin-bottom: $spacing-lg;
+    opacity: 0.6;
   }
 
   h2 {
@@ -232,39 +242,47 @@
 .orders-list {
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
+  gap: $spacing-xl;
 }
 
+// Order Card
 .order-card {
   @include card-base();
   overflow: hidden;
 }
 
-// Order Header
 .order-header {
   @include flex-between();
-  padding: $spacing-lg;
+  padding: $spacing-lg $spacing-xl;
   background: $bg-light;
   border-bottom: 1px solid $border-color;
-  flex-wrap: wrap;
-  gap: $spacing-md;
+
+  @media (max-width: $breakpoint-tablet) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-md;
+  }
 }
 
 .order-meta {
   display: flex;
   align-items: center;
-  gap: $spacing-lg;
+  gap: $spacing-md;
   flex-wrap: wrap;
+
+  @media (max-width: $breakpoint-mobile) {
+    flex-wrap: wrap;
+  }
 }
 
 .meta-item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: $spacing-xs;
 
   .meta-label {
     font-size: 0.75rem;
-    color: $text-secondary;
+    color: $text-muted;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
@@ -274,53 +292,56 @@
     color: $text-primary;
 
     &.order-number {
-      font-family: monospace;
-      color: $primary-color;
+      font-family: $font-mono;
+      color: $text-secondary;
     }
   }
 }
 
 .meta-divider {
   width: 1px;
-  height: 30px;
+  height: 40px;
   background: $border-color;
+
+  @media (max-width: $breakpoint-mobile) {
+    display: none;
+  }
 }
 
 .order-status {
   padding: $spacing-xs $spacing-md;
   border-radius: $radius-pill;
-  font-size: 0.8125rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  text-transform: capitalize;
 
   &.status-pending {
-    background: #fef3c7;
-    color: #92400e;
+    background: rgba($warning-color, 0.15);
+    color: color.adjust($warning-color, $lightness: -25%);
   }
 
   &.status-ready {
-    background: #dbeafe;
-    color: #1e40af;
+    background: rgba($info-color, 0.15);
+    color: color.adjust($info-color, $lightness: -15%);
   }
 
   &.status-shipped {
-    background: #e0e7ff;
-    color: #3730a3;
+    background: rgba($info-color, 0.15);
+    color: color.adjust($info-color, $lightness: -15%);
   }
 
   &.status-delivered {
-    background: #d1fae5;
-    color: #065f46;
+    background: rgba($success-color, 0.15);
+    color: color.adjust($success-color, $lightness: -10%);
   }
 
   &.status-cancelled {
-    background: #fee2e2;
-    color: #991b1b;
+    background: rgba($danger-color, 0.15);
+    color: $danger-dark;
   }
 }
 
-// Customer Info
+// Customer Info (Seller only)
 .customer-info {
   padding: $spacing-md $spacing-lg;
   background: #fafafa;
@@ -354,13 +375,13 @@
 
 // Order Items
 .order-items {
-  padding: $spacing-lg;
+  padding: $spacing-lg $spacing-xl;
 }
 
 .order-item {
   display: flex;
   align-items: center;
-  gap: $spacing-md;
+  gap: $spacing-lg;
   padding: $spacing-md 0;
 
   &:not(:last-child) {
@@ -369,12 +390,13 @@
 }
 
 .item-image {
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
   border-radius: $radius-md;
-  overflow: hidden;
-  background: $bg-light;
+  background: linear-gradient(135deg, #ffeef8 0%, #fff5f5 100%);
+  @include flex-center();
   flex-shrink: 0;
+  overflow: hidden;
 
   img {
     width: 100%;
@@ -383,28 +405,25 @@
   }
 
   .image-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     font-size: 1.5rem;
-    color: $text-secondary;
+    opacity: 0.7;
   }
 }
 
 .item-details {
   flex: 1;
+  min-width: 0;
 
   .item-name {
     font-weight: 600;
     color: $text-primary;
     margin: 0 0 $spacing-xs 0;
+    @include text-truncate();
   }
 
   .item-quantity {
     font-size: 0.875rem;
-    color: $text-secondary;
+    color: $text-muted;
     margin: 0;
   }
 }
@@ -412,14 +431,17 @@
 .item-price {
   font-weight: 600;
   color: $text-primary;
+  white-space: nowrap;
 }
 
 // Order Actions
 .order-actions {
-  @include flex-between();
-  padding: $spacing-lg;
-  background: $bg-light;
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-lg $spacing-xl;
   border-top: 1px solid $border-color;
+  background: $bg-light;
+  align-items: center;
 
   .action-label {
     font-weight: 500;
@@ -429,6 +451,17 @@
   .action-buttons {
     display: flex;
     gap: $spacing-sm;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: $breakpoint-mobile) {
+    flex-direction: column;
+    align-items: stretch;
+
+    .action-buttons {
+      width: 100%;
+      flex-direction: column;
+    }
   }
 }
 

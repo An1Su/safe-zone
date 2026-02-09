@@ -33,7 +33,7 @@
       <!-- User Menu (logged in) -->
       <div *ngIf="isLoggedIn() && currentUser" class="nav-user">
         <a routerLink="/seller/dashboard" class="nav-link" *ngIf="isSeller()">Manage Products</a>
-        <a routerLink="/seller/orders" class="nav-link" *ngIf="isSeller()">📦 Orders</a>
+        <a routerLink="/orders" class="nav-link" *ngIf="isSeller()">📦 Orders</a>
         <a routerLink="/orders" class="nav-link" *ngIf="isBuyer()">📋 My Orders</a>
 
         <!-- User Dropdown -->

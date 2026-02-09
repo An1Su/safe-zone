@@ -6,12 +6,12 @@ import { CheckoutComponent } from './components/checkout/checkout.component';
 import { HomeComponent } from './components/home/home.component';
 import { OrderConfirmationComponent } from './components/order-confirmation/order-confirmation.component';
 import { Analytics } from './components/analytics/analytics';
-import { OrderHistoryComponent } from './components/order-history/order-history.component';
+import { OrderListComponent } from './components/order-history/order-list.component';
+import { SellerOrdersRedirectComponent } from './components/order-history/seller-orders-redirect.component';
 import { ProductDetailComponent } from './components/products/product-detail.component';
 import { ProductListComponent } from './components/products/product-list.component';
 import { UserProfileComponent } from './components/profile/user-profile.component';
 import { SellerDashboardComponent } from './components/seller/seller-dashboard.component';
-import { SellerOrdersComponent } from './components/seller/seller-orders.component';
 import { authGuard } from './guards/auth.guard';
 import { sellerGuard } from './guards/role.guard';
 
@@ -39,7 +39,7 @@ export const routes: Routes = [
   },
   {
     path: 'orders',
-    component: OrderHistoryComponent,
+    component: OrderListComponent,
     canActivate: [authGuard],
   },
   {
@@ -61,9 +61,10 @@ export const routes: Routes = [
     component: SellerDashboardComponent,
     canActivate: [sellerGuard],
   },
+  // Redirect old seller/orders route to unified orders (with seller guard)
   {
     path: 'seller/orders',
-    component: SellerOrdersComponent,
+    component: SellerOrdersRedirectComponent,
     canActivate: [sellerGuard],
   },
 
