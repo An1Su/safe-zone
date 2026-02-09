@@ -242,7 +242,7 @@ class OrderControllerTest {
     void searchOrders_ShouldReturnFilteredOrders() throws Exception {
         // Arrange
         List<OrderDto> orders = Arrays.asList(testOrderDto);
-        when(orderService.searchOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+        when(orderService.searchOrders(anyString(), any(), any(), any(), any())).thenReturn(orders);
 
         // Act & Assert
         mockMvc.perform(get("/orders/search")
@@ -304,7 +304,7 @@ class OrderControllerTest {
     void searchSellerOrders_ShouldReturnFilteredOrders() throws Exception {
         // Arrange
         List<OrderDto> orders = Arrays.asList(testOrderDto);
-        when(orderService.searchSellerOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+        when(orderService.searchSellerOrders(anyString(), any(), any(), any(), any())).thenReturn(orders);
 
         // Act & Assert
         mockMvc.perform(get("/orders/seller/search")
@@ -319,7 +319,7 @@ class OrderControllerTest {
     void searchOrders_WithStatusFilter_ShouldReturnFilteredOrders() throws Exception {
         // Arrange
         List<OrderDto> orders = Arrays.asList(testOrderDto);
-        when(orderService.searchOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+        when(orderService.searchOrders(anyString(), any(), any(), any(), any())).thenReturn(orders);
 
         // Act & Assert
         mockMvc.perform(get("/orders/search")
@@ -335,7 +335,7 @@ class OrderControllerTest {
     void searchOrders_WithDateRange_ShouldReturnFilteredOrders() throws Exception {
         // Arrange
         List<OrderDto> orders = Arrays.asList(testOrderDto);
-        when(orderService.searchOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+        when(orderService.searchOrders(anyString(), any(), any(), any(), any())).thenReturn(orders);
 
         // Act & Assert
         mockMvc.perform(get("/orders/search")
@@ -351,7 +351,7 @@ class OrderControllerTest {
     void searchOrders_WithAllFilters_ShouldReturnFilteredOrders() throws Exception {
         // Arrange
         List<OrderDto> orders = Arrays.asList(testOrderDto);
-        when(orderService.searchOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+        when(orderService.searchOrders(anyString(), any(), any(), any(), any())).thenReturn(orders);
 
         // Act & Assert
         mockMvc.perform(get("/orders/search")
@@ -369,7 +369,7 @@ class OrderControllerTest {
     void searchSellerOrders_WithStatusFilter_ShouldReturnFilteredOrders() throws Exception {
         // Arrange
         List<OrderDto> orders = Arrays.asList(testOrderDto);
-        when(orderService.searchSellerOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+        when(orderService.searchSellerOrders(anyString(), any(), any(), any(), any())).thenReturn(orders);
 
         // Act & Assert
         mockMvc.perform(get("/orders/seller/search")
@@ -384,7 +384,7 @@ class OrderControllerTest {
     void searchSellerOrders_WithDateRange_ShouldReturnFilteredOrders() throws Exception {
         // Arrange
         List<OrderDto> orders = Arrays.asList(testOrderDto);
-        when(orderService.searchSellerOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+        when(orderService.searchSellerOrders(anyString(), any(), any(), any(), any())).thenReturn(orders);
 
         // Act & Assert
         mockMvc.perform(get("/orders/seller/search")
@@ -400,7 +400,7 @@ class OrderControllerTest {
     void searchSellerOrders_WithAllFilters_ShouldReturnFilteredOrders() throws Exception {
         // Arrange
         List<OrderDto> orders = Arrays.asList(testOrderDto);
-        when(orderService.searchSellerOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+        when(orderService.searchSellerOrders(anyString(), any(), any(), any(), any())).thenReturn(orders);
 
         // Act & Assert
         mockMvc.perform(get("/orders/seller/search")
@@ -418,7 +418,7 @@ class OrderControllerTest {
     void searchOrders_WithoutFilters_ShouldReturnAllOrders() throws Exception {
         // Arrange
         List<OrderDto> orders = Arrays.asList(testOrderDto);
-        when(orderService.searchOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+        when(orderService.searchOrders(anyString(), any(), any(), any(), any())).thenReturn(orders);
 
         // Act & Assert
         mockMvc.perform(get("/orders/search")
@@ -433,7 +433,7 @@ class OrderControllerTest {
     void searchSellerOrders_WithoutFilters_ShouldReturnAllOrders() throws Exception {
         // Arrange
         List<OrderDto> orders = Arrays.asList(testOrderDto);
-        when(orderService.searchSellerOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+        when(orderService.searchSellerOrders(anyString(), any(), any(), any(), any())).thenReturn(orders);
 
         // Act & Assert
         mockMvc.perform(get("/orders/seller/search")
