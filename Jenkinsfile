@@ -219,7 +219,7 @@ pipeline {
                             exit 1
                         fi
 
-                        echo "✅ Deployment successful - all services healthy"
+                        echo "✅ Deployment successful - all services healthy "
                     '''
                 }
             }
