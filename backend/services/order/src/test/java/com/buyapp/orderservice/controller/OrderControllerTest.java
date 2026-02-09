@@ -3,6 +3,7 @@ package com.buyapp.orderservice.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -12,6 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -311,5 +313,133 @@ class OrderControllerTest {
                 .andExpect(status().isOk());
 
         verify(orderService).searchSellerOrders("seller@example.com", "order1", null, null, null);
+    }
+
+    @Test
+    void searchOrders_WithStatusFilter_ShouldReturnFilteredOrders() throws Exception {
+        // Arrange
+        List<OrderDto> orders = Arrays.asList(testOrderDto);
+        when(orderService.searchOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+
+        // Act & Assert
+        mockMvc.perform(get("/orders/search")
+                .header("X-User-Email", "user1")
+                .param("status", "PENDING"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("order1"));
+
+        verify(orderService).searchOrders("user1", null, OrderStatus.PENDING, null, null);
+    }
+
+    @Test
+    void searchOrders_WithDateRange_ShouldReturnFilteredOrders() throws Exception {
+        // Arrange
+        List<OrderDto> orders = Arrays.asList(testOrderDto);
+        when(orderService.searchOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+
+        // Act & Assert
+        mockMvc.perform(get("/orders/search")
+                .header("X-User-Email", "user1")
+                .param("dateFrom", "2024-01-01T00:00:00")
+                .param("dateTo", "2024-12-31T23:59:59"))
+                .andExpect(status().isOk());
+
+        verify(orderService).searchOrders(eq("user1"), isNull(), isNull(), any(LocalDateTime.class), any(LocalDateTime.class));
+    }
+
+    @Test
+    void searchOrders_WithAllFilters_ShouldReturnFilteredOrders() throws Exception {
+        // Arrange
+        List<OrderDto> orders = Arrays.asList(testOrderDto);
+        when(orderService.searchOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+
+        // Act & Assert
+        mockMvc.perform(get("/orders/search")
+                .header("X-User-Email", "user1")
+                .param("q", "order1")
+                .param("status", "PENDING")
+                .param("dateFrom", "2024-01-01T00:00:00")
+                .param("dateTo", "2024-12-31T23:59:59"))
+                .andExpect(status().isOk());
+
+        verify(orderService).searchOrders(eq("user1"), eq("order1"), eq(OrderStatus.PENDING), any(LocalDateTime.class), any(LocalDateTime.class));
+    }
+
+    @Test
+    void searchSellerOrders_WithStatusFilter_ShouldReturnFilteredOrders() throws Exception {
+        // Arrange
+        List<OrderDto> orders = Arrays.asList(testOrderDto);
+        when(orderService.searchSellerOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+
+        // Act & Assert
+        mockMvc.perform(get("/orders/seller/search")
+                .header("X-User-Email", "seller@example.com")
+                .param("status", "PENDING"))
+                .andExpect(status().isOk());
+
+        verify(orderService).searchSellerOrders("seller@example.com", null, OrderStatus.PENDING, null, null);
+    }
+
+    @Test
+    void searchSellerOrders_WithDateRange_ShouldReturnFilteredOrders() throws Exception {
+        // Arrange
+        List<OrderDto> orders = Arrays.asList(testOrderDto);
+        when(orderService.searchSellerOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+
+        // Act & Assert
+        mockMvc.perform(get("/orders/seller/search")
+                .header("X-User-Email", "seller@example.com")
+                .param("dateFrom", "2024-01-01T00:00:00")
+                .param("dateTo", "2024-12-31T23:59:59"))
+                .andExpect(status().isOk());
+
+        verify(orderService).searchSellerOrders(eq("seller@example.com"), isNull(), isNull(), any(LocalDateTime.class), any(LocalDateTime.class));
+    }
+
+    @Test
+    void searchSellerOrders_WithAllFilters_ShouldReturnFilteredOrders() throws Exception {
+        // Arrange
+        List<OrderDto> orders = Arrays.asList(testOrderDto);
+        when(orderService.searchSellerOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+
+        // Act & Assert
+        mockMvc.perform(get("/orders/seller/search")
+                .header("X-User-Email", "seller@example.com")
+                .param("q", "order1")
+                .param("status", "PENDING")
+                .param("dateFrom", "2024-01-01T00:00:00")
+                .param("dateTo", "2024-12-31T23:59:59"))
+                .andExpect(status().isOk());
+
+        verify(orderService).searchSellerOrders(eq("seller@example.com"), eq("order1"), eq(OrderStatus.PENDING), any(LocalDateTime.class), any(LocalDateTime.class));
+    }
+
+    @Test
+    void searchOrders_WithoutFilters_ShouldReturnAllOrders() throws Exception {
+        // Arrange
+        List<OrderDto> orders = Arrays.asList(testOrderDto);
+        when(orderService.searchOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+
+        // Act & Assert
+        mockMvc.perform(get("/orders/search")
+                .header("X-User-Email", "user1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("order1"));
+
+        verify(orderService).searchOrders(eq("user1"), isNull(), isNull(), isNull(), isNull());
+    }
+
+    @Test
+    void searchSellerOrders_WithoutFilters_ShouldReturnAllOrders() throws Exception {
+        // Arrange
+        List<OrderDto> orders = Arrays.asList(testOrderDto);
+        when(orderService.searchSellerOrders(anyString(), anyString(), any(), any(), any())).thenReturn(orders);
+
+        // Act & Assert
+        mockMvc.perform(get("/orders/seller/search")
+                .header("X-User-Email", "seller@example.com"))
+                .andExpect(status().isOk());
+
+        verify(orderService).searchSellerOrders(eq("seller@example.com"), isNull(), isNull(), isNull(), isNull());
     }
 }
