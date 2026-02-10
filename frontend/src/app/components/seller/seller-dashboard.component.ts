@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Media, Product, ProductCategory } from '../../models/ecommerce.model';
@@ -14,7 +14,7 @@ import { ProductService } from '../../services/product.service';
   templateUrl: './seller-dashboard.component.html',
   styleUrl: './seller-dashboard.component.scss',
 })
-export class SellerDashboardComponent implements OnInit {
+export class SellerDashboardComponent implements OnInit, OnDestroy {
   myProducts: Product[] = [];
   productMedia: Map<string, Media[]> = new Map();
   loading = true;
@@ -34,7 +34,8 @@ export class SellerDashboardComponent implements OnInit {
   selectedFiles: Map<string, File[]> = new Map();
   uploadingImages: Map<string, boolean> = new Map();
   imageError: Map<string, string> = new Map();
-  newProductImages: File[] = []; // For new product creation
+  /** For new product creation: file + preview URL for display */
+  newProductImageEntries: { file: File; previewUrl: string }[] = [];
   maxImagesPerProduct = 5;
   allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
   maxFileSize = 2 * 1024 * 1024; // 2MB
@@ -67,6 +68,15 @@ export class SellerDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.checkSellerRole();
     this.loadMyProducts();
+  }
+
+  ngOnDestroy(): void {
+    this.revokeNewProductPreviewUrls();
+  }
+
+  private revokeNewProductPreviewUrls(): void {
+    this.newProductImageEntries.forEach((entry) => URL.revokeObjectURL(entry.previewUrl));
+    this.newProductImageEntries = [];
   }
 
   checkSellerRole(): void {
@@ -283,7 +293,7 @@ export class SellerDashboardComponent implements OnInit {
     this.showAddForm = false;
     this.creationStep = 1;
     this.newlyCreatedProductId = null;
-    this.newProductImages = [];
+    this.revokeNewProductPreviewUrls();
     setTimeout(() => (this.successMessage = ''), 3000);
   }
 
@@ -314,7 +324,7 @@ export class SellerDashboardComponent implements OnInit {
       validFiles.push(file);
     }
 
-    const currentCount = this.newProductImages.length;
+    const currentCount = this.newProductImageEntries.length;
     if (currentCount + validFiles.length > this.maxImagesPerProduct) {
       this.formError = `Can only add ${
         this.maxImagesPerProduct - currentCount
@@ -323,16 +333,25 @@ export class SellerDashboardComponent implements OnInit {
       return;
     }
 
-    this.newProductImages = [...this.newProductImages, ...validFiles];
+    validFiles.forEach((file) => {
+      this.newProductImageEntries.push({
+        file,
+        previewUrl: URL.createObjectURL(file),
+      });
+    });
     input.value = '';
   }
 
   removeNewProductImage(index: number): void {
-    this.newProductImages.splice(index, 1);
+    const entry = this.newProductImageEntries[index];
+    if (entry) {
+      URL.revokeObjectURL(entry.previewUrl);
+      this.newProductImageEntries.splice(index, 1);
+    }
   }
 
   uploadNewProductImages(): void {
-    if (!this.newlyCreatedProductId || this.newProductImages.length === 0) {
+    if (!this.newlyCreatedProductId || this.newProductImageEntries.length === 0) {
       this.finishProductCreation();
       return;
     }
@@ -341,10 +360,11 @@ export class SellerDashboardComponent implements OnInit {
     this.formError = '';
 
     let uploaded = 0;
-    const total = this.newProductImages.length;
+    const total = this.newProductImageEntries.length;
     const productId = this.newlyCreatedProductId;
+    const filesToUpload = this.newProductImageEntries.map((e) => e.file);
 
-    this.newProductImages.forEach((file) => {
+    filesToUpload.forEach((file) => {
       this.mediaService.uploadMedia(file, productId).subscribe({
         next: (media) => {
           uploaded++;
@@ -359,7 +379,7 @@ export class SellerDashboardComponent implements OnInit {
             this.showAddForm = false;
             this.creationStep = 1;
             this.newlyCreatedProductId = null;
-            this.newProductImages = [];
+            this.revokeNewProductPreviewUrls();
             setTimeout(() => (this.successMessage = ''), 3000);
           }
         },
@@ -452,7 +472,7 @@ export class SellerDashboardComponent implements OnInit {
     this.formError = '';
     this.creationStep = 1;
     this.newlyCreatedProductId = null;
-    this.newProductImages = [];
+    this.revokeNewProductPreviewUrls();
   }
 
   resetEditForm(): void {
