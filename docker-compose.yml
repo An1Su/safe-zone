@@ -26,7 +26,7 @@ services:
   # MongoDB
   # -------------------
   mongodb:
-    image: mongo:7
+    image: mongo:latest
     container_name: ecom-mongodb
     ports:
       - '27017:27017'
@@ -37,22 +37,23 @@ services:
       - mongodb_data:/data/db
     networks:
       - ecom-network
-    # Auth is enabled, so healthcheck must use credentials. Connection string is more reliable than -u/-p.
-    # start_period gives MongoDB time to run init (create admin user) before we count failures; CI can be slow.
     healthcheck:
       test:
         [
           'CMD',
           'mongosh',
-          'mongodb://admin:password@localhost:27017/admin?authSource=admin',
-          '--quiet',
           '--eval',
-          "db.adminCommand('ping').ok === 1 ? quit(0) : quit(1)",
+          "db.adminCommand('ping')",
+          '-u',
+          'admin',
+          '-p',
+          'password',
+          '--authenticationDatabase',
+          'admin',
         ]
-      interval: 10s
-      timeout: 10s
-      retries: 12
-      start_period: 60s
+      interval: 5s
+      timeout: 2s
+      retries: 10
 
   # -------------------
   # Backend services
