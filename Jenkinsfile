@@ -196,7 +196,7 @@ pipeline {
                     // Deploy new version
                     sh '''
                         # Stop old containers
-                        docker-compose -f docker-compose.yml -f docker-compose.ci.yml down || true
+                        docker-compose -f docker-compose.yml -f docker-compose.ci.yml down -v || true
 
                         # Force remove any lingering containers with ecom- prefix
                         docker ps -a | grep ecom- | awk '{print $1}' | xargs -r docker rm -f || true
@@ -207,19 +207,28 @@ pipeline {
 
                         # Wait for services to be healthy
                         echo "Waiting for services to start..."
-                        sleep 20
+                        sleep 30
 
                         # Verify services are running
                         docker-compose -f docker-compose.yml -f docker-compose.ci.yml ps
 
-                        # Check if all services are healthy
+                        # Check if all services are healthy; if not, wait and retry once
                         UNHEALTHY=$(docker ps --filter "name=ecom-" --filter "health=unhealthy" --format "{{.Names}}" || true)
                         if [ -n "$UNHEALTHY" ]; then
-                            echo "ERROR: Unhealthy services detected: $UNHEALTHY"
+                            echo "Unhealthy services (first check): $UNHEALTHY - waiting 40s and retrying once..."
+                            sleep 40
+                            UNHEALTHY=$(docker ps --filter "name=ecom-" --filter "health=unhealthy" --format "{{.Names}}" || true)
+                        fi
+                        if [ -n "$UNHEALTHY" ]; then
+                            echo "ERROR: Unhealthy services after retry: $UNHEALTHY"
+                            for c in $UNHEALTHY; do
+                                echo "--- Logs for $c (last 60 lines) ---"
+                                docker logs "$c" 2>&1 | tail -60
+                            done
                             exit 1
                         fi
 
-                        echo "✅ Deployment successful - all services healthy "
+                        echo "✅ Deployment successful - all services healthy"
                     '''
                 }
             }
