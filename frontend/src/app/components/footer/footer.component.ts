@@ -25,7 +25,7 @@ export class FooterComponent {
     { label: 'Shipping', path: '/help/shipping' },
     { label: 'Returns', path: '/help/returns' },
     { label: 'Contact Us', path: '/contact' },
-    { label: 'Track Order', path: '/orders' },
+    { label: 'Track Order', path: '/my-orders' },
   ];
 
   companyLinks = [
