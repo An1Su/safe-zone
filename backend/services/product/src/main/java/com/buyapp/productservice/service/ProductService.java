@@ -87,6 +87,7 @@ public class ProductService {
         if (productDto.getStock() != null) {
             existing.setStock(productDto.getStock());
         }
+        existing.setCategory(productDto.getCategory());
 
         Product updated = productRepository.save(existing);
 
@@ -233,6 +234,7 @@ public class ProductService {
         dto.setDescription(product.getDescription());
         dto.setPrice(product.getPrice());
         dto.setStock(product.getStock());
+        dto.setCategory(product.getCategory());
 
         // Convert userId to email for display via User Service call
         UserDto user = getUserById(product.getUserId());
@@ -247,6 +249,7 @@ public class ProductService {
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
         product.setStock(dto.getStock() != null ? dto.getStock() : 0);
+        product.setCategory(dto.getCategory());
         // Note: userId should be set separately in service methods, not from DTO
         return product;
     }

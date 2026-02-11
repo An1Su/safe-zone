@@ -1,0 +1,38 @@
+{
+  "/auth/**": {
+    "target": "https://localhost:8080",
+    "secure": false
+  },
+  "/users/**": {
+    "target": "https://localhost:8080",
+    "secure": false
+  },
+  "/products": {
+    "target": "https://localhost:8080",
+    "secure": false
+  },
+  "/products/**": {
+    "target": "https://localhost:8080",
+    "secure": false
+  },
+  "/media/**": {
+    "target": "https://localhost:8080",
+    "secure": false
+  },
+  "/cart": {
+    "target": "https://localhost:8080",
+    "secure": false
+  },
+  "/cart/**": {
+    "target": "https://localhost:8080",
+    "secure": false
+  },
+  "/orders": {
+    "target": "https://localhost:8080",
+    "secure": false
+  },
+  "/orders/**": {
+    "target": "https://localhost:8080",
+    "secure": false
+  }
+}

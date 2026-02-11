@@ -52,6 +52,19 @@
           ></textarea>
         </div>
 
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select
+            id="category"
+            [(ngModel)]="newProduct.category"
+            name="category"
+            required
+          >
+            <option [ngValue]="undefined" disabled>Select a category</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
+
         <div class="form-row">
           <div class="form-group">
             <label for="price">Price ($)</label>
@@ -102,22 +115,24 @@
       <div *ngIf="formError" class="error-message">{{ formError }}</div>
 
       <!-- Image preview -->
-      <div class="new-product-images" *ngIf="newProductImages.length > 0">
+      <div class="new-product-images" *ngIf="newProductImageEntries.length > 0">
         <div class="image-preview-grid">
-          <div class="image-preview-item" *ngFor="let file of newProductImages; let i = index">
-            <div class="preview-placeholder">{{ file.name }}</div>
+          <div class="image-preview-item" *ngFor="let entry of newProductImageEntries; let i = index">
+            <div class="preview-placeholder">
+              <img [src]="entry.previewUrl" [alt]="entry.file.name" class="preview-img" />
+            </div>
             <button class="image-delete-btn" (click)="removeNewProductImage(i)" title="Remove">
               ×
             </button>
           </div>
         </div>
         <p class="image-count-info">
-          {{ newProductImages.length }}/{{ maxImagesPerProduct }} images selected
+          {{ newProductImageEntries.length }}/{{ maxImagesPerProduct }} images selected
         </p>
       </div>
 
       <!-- File input -->
-      <div class="upload-controls" *ngIf="newProductImages.length < maxImagesPerProduct">
+      <div class="upload-controls" *ngIf="newProductImageEntries.length < maxImagesPerProduct">
         <label class="file-input-label">
           <input
             type="file"
@@ -127,7 +142,7 @@
             [disabled]="submitting"
           />
           <span class="btn-upload">{{
-            newProductImages.length === 0 ? 'Choose Images' : 'Add More Images'
+            newProductImageEntries.length === 0 ? 'Choose Images' : 'Add More Images'
           }}</span>
         </label>
       </div>
@@ -145,12 +160,12 @@
           type="button"
           class="btn-primary"
           (click)="uploadNewProductImages()"
-          [disabled]="submitting || newProductImages.length === 0"
+          [disabled]="submitting || newProductImageEntries.length === 0"
         >
           {{
             submitting
               ? 'Uploading...'
-              : newProductImages.length === 0
+              : newProductImageEntries.length === 0
               ? 'Finish'
               : 'Upload & Finish'
           }}
@@ -185,6 +200,19 @@
           rows="4"
           required
         ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="edit-category">Category</label>
+        <select
+          id="edit-category"
+          [(ngModel)]="editProduct.category"
+          name="edit-category"
+          required
+        >
+          <option [ngValue]="undefined" disabled>Select a category</option>
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+        </select>
       </div>
 
       <div class="form-row">

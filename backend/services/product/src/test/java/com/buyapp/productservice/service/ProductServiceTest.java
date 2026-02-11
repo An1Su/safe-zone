@@ -220,7 +220,7 @@ class ProductServiceTest {
     @Test
     void checkStockAvailability_WhenSufficientStock_ShouldReturnTrue() {
         // Arrange
-        Product product = new Product("1", "Test Product", "Description", 99.99, 10, "user1");
+        Product product = new Product("1", "Test Product", "Description", 99.99, 10, "user1", "Face");
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
 
         // Act
@@ -234,7 +234,7 @@ class ProductServiceTest {
     @Test
     void checkStockAvailability_WhenInsufficientStock_ShouldReturnFalse() {
         // Arrange
-        Product product = new Product("1", "Test Product", "Description", 99.99, 3, "user1");
+        Product product = new Product("1", "Test Product", "Description", 99.99, 3, "user1", "Face");
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
 
         // Act
@@ -248,7 +248,7 @@ class ProductServiceTest {
     @Test
     void checkStockAvailability_WhenStockIsNull_ShouldReturnFalse() {
         // Arrange
-        Product product = new Product("1", "Test Product", "Description", 99.99, null, "user1");
+        Product product = new Product("1", "Test Product", "Description", 99.99, null, "user1", "Face");
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
 
         // Act
@@ -261,7 +261,7 @@ class ProductServiceTest {
     @Test
     void reduceStock_WhenSufficientStock_ShouldReduceSuccessfully() {
         // Arrange
-        Product product = new Product("1", "Test Product", "Description", 99.99, 10, "user1");
+        Product product = new Product("1", "Test Product", "Description", 99.99, 10, "user1", "Face");
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
@@ -276,7 +276,7 @@ class ProductServiceTest {
     @Test
     void reduceStock_WhenInsufficientStock_ShouldThrowException() {
         // Arrange
-        Product product = new Product("1", "Test Product", "Description", 99.99, 2, "user1");
+        Product product = new Product("1", "Test Product", "Description", 99.99, 2, "user1", "Face");
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
 
         // Act & Assert
@@ -294,7 +294,7 @@ class ProductServiceTest {
     @Test
     void reduceStock_WhenStockIsNull_ShouldThrowException() {
         // Arrange
-        Product product = new Product("1", "Test Product", "Description", 99.99, null, "user1");
+        Product product = new Product("1", "Test Product", "Description", 99.99, null, "user1", "Face");
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
 
         // Act & Assert
@@ -307,7 +307,7 @@ class ProductServiceTest {
     @Test
     void restoreStock_WhenStockExists_ShouldIncreaseStock() {
         // Arrange
-        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "user1");
+        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "user1", "Face");
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
@@ -322,7 +322,7 @@ class ProductServiceTest {
     @Test
     void restoreStock_WhenStockIsNull_ShouldSetToQuantity() {
         // Arrange
-        Product product = new Product("1", "Test Product", "Description", 99.99, null, "user1");
+        Product product = new Product("1", "Test Product", "Description", 99.99, null, "user1", "Face");
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
@@ -349,8 +349,8 @@ class ProductServiceTest {
     @Test
     void getProductsByUserId_ShouldReturnUserProducts() {
         // Arrange
-        Product product1 = new Product("1", "Product 1", "Desc 1", 99.99, 10, "user1");
-        Product product2 = new Product("2", "Product 2", "Desc 2", 149.99, 5, "user1");
+        Product product1 = new Product("1", "Product 1", "Desc 1", 99.99, 10, "user1", "Face");
+        Product product2 = new Product("2", "Product 2", "Desc 2", 149.99, 5, "user1", "Eyes");
         List<Product> products = Arrays.asList(product1, product2);
         when(productRepository.findByUserId("user1")).thenReturn(products);
 
@@ -391,7 +391,7 @@ class ProductServiceTest {
     @Test
     void productModel_ConstructorShouldSetAllFields() {
         // Arrange & Act
-        Product product = new Product("1", "Test Product", "Description", 99.99, 10, "user1");
+        Product product = new Product("1", "Test Product", "Description", 99.99, 10, "user1", "Face");
 
         // Assert
         assertEquals("1", product.getId());
@@ -456,7 +456,7 @@ class ProductServiceTest {
     @Test
     void productDto_ConstructorShouldSetAllFields() {
         // Act
-        ProductDto dto = new ProductDto("1", "Product", "Description", 99.99, 10, "user@example.com");
+        ProductDto dto = new ProductDto("1", "Product", "Description", 99.99, 10, "user@example.com", "Face");
 
         // Assert
         assertEquals("1", dto.getId());
@@ -470,7 +470,7 @@ class ProductServiceTest {
     @Test
     void toDto_ShouldConvertProductToDto() {
         // Arrange
-        Product product = new Product("1", "Test Product", "Test Desc", 99.99, 10, "user1");
+        Product product = new Product("1", "Test Product", "Test Desc", 99.99, 10, "user1", "Face");
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
 
         // Act
@@ -487,7 +487,7 @@ class ProductServiceTest {
     @Test
     void checkStockAvailability_WhenExactStock_ShouldReturnTrue() {
         // Arrange
-        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "user1");
+        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "user1", "Face");
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
 
         // Act
@@ -500,7 +500,7 @@ class ProductServiceTest {
     @Test
     void reduceStock_WhenReducingToZero_ShouldWork() {
         // Arrange
-        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "user1");
+        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "user1", "Face");
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
@@ -515,7 +515,7 @@ class ProductServiceTest {
     @Test
     void restoreStock_WithLargeQuantity_ShouldWork() {
         // Arrange
-        Product product = new Product("1", "Test Product", "Description", 99.99, 10, "user1");
+        Product product = new Product("1", "Test Product", "Description", 99.99, 10, "user1", "Face");
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
@@ -536,7 +536,7 @@ class ProductServiceTest {
         dto.setPrice(99.99);
         dto.setStock(null); // Explicitly set to null
 
-        Product product = new Product("1", dto.getName(), dto.getDescription(), dto.getPrice(), 0, "user1");
+        Product product = new Product("1", dto.getName(), dto.getDescription(), dto.getPrice(), 0, "user1", "Face");
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
         // Act - We need to test through a method that uses toEntity
@@ -558,7 +558,7 @@ class ProductServiceTest {
     @Test
     void toDto_WhenUserServiceReturnsNull_ShouldSetUnknownUser() {
         // Arrange
-        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "unknownUserId");
+        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "unknownUserId", "Face");
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
         doReturn(webClient).when(webClientBuilder).build();
         doReturn(requestHeadersUriSpec).when(webClient).get();
@@ -577,7 +577,7 @@ class ProductServiceTest {
     @Test
     void reduceStock_EdgeCase_ExactStockAmount() {
         // Arrange
-        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "user1");
+        Product product = new Product("1", "Test Product", "Description", 99.99, 5, "user1", "Face");
         when(productRepository.findById("1")).thenReturn(Optional.of(product));
         when(productRepository.save(any(Product.class))).thenReturn(product);
 

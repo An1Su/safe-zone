@@ -15,10 +15,14 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -433,42 +437,30 @@ class OrderServiceTest {
         verify(orderRepository, times(1)).save(any(Order.class)); // Only the new order is saved
     }
 
-    @Test
-    void searchOrders_WhenNoFilters_ShouldReturnAllOrders() {
-        // Arrange
-        when(orderRepository.findByUserIdOrderByCreatedAtDesc("user1"))
-                .thenReturn(Arrays.asList(testOrder));
+    // ========== Search Orders Parameterized Tests ==========
 
-        // Act
-        List<OrderDto> result = orderService.searchOrders("user1", null, null, null, null);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(1, result.size());
+    static Stream<Arguments> searchOrdersTestCases() {
+        return Stream.of(
+            Arguments.of("no filters", null, null),
+            Arguments.of("query filter", "order1", null),
+            Arguments.of("status filter", null, OrderStatus.PENDING)
+        );
     }
 
-    @Test
-    void searchOrders_WhenStatusFilter_ShouldReturnFilteredOrders() {
+    @ParameterizedTest(name = "searchOrders with {0}")
+    @MethodSource("searchOrdersTestCases")
+    void searchOrders_ShouldReturnFilteredOrders(String testCase, String query, OrderStatus status) {
         // Arrange
-        when(orderRepository.findByUserIdAndStatusOrderByCreatedAtDesc("user1", OrderStatus.PENDING))
-                .thenReturn(Arrays.asList(testOrder));
+        if (status != null) {
+            when(orderRepository.findByUserIdAndStatusOrderByCreatedAtDesc("user1", status))
+                    .thenReturn(Arrays.asList(testOrder));
+        } else {
+            when(orderRepository.findByUserIdOrderByCreatedAtDesc("user1"))
+                    .thenReturn(Arrays.asList(testOrder));
+        }
 
         // Act
-        List<OrderDto> result = orderService.searchOrders("user1", null, OrderStatus.PENDING, null, null);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(1, result.size());
-    }
-
-    @Test
-    void searchOrders_WhenQueryFilter_ShouldReturnMatchingOrders() {
-        // Arrange
-        when(orderRepository.findByUserIdOrderByCreatedAtDesc("user1"))
-                .thenReturn(Arrays.asList(testOrder));
-
-        // Act
-        List<OrderDto> result = orderService.searchOrders("user1", "order1", null, null, null);
+        List<OrderDto> result = orderService.searchOrders("user1", query, status, null, null);
 
         // Assert
         assertNotNull(result);
@@ -491,17 +483,80 @@ class OrderServiceTest {
         assertEquals(1, result.size());
     }
 
-    // ========== Seller Order Tests ==========
+    @Test
+    void searchOrders_WhenQueryMatchesProductName_ShouldReturnMatchingOrders() {
+        // Arrange
+        OrderItem item = new OrderItem("product1", "Lipstick", "seller1", 2, 99.99);
+        Order orderWithProduct = new Order("user1", Arrays.asList(item), createShippingAddress());
+        orderWithProduct.setId("order2");
+        when(orderRepository.findByUserIdOrderByCreatedAtDesc("user1"))
+                .thenReturn(Arrays.asList(orderWithProduct));
+
+        // Act
+        List<OrderDto> result = orderService.searchOrders("user1", "lipstick", null, null, null);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
 
     @Test
-    void getSellerOrders_WhenValid_ShouldReturnSellerOrders() {
+    void searchOrders_WhenCombinedFilters_ShouldReturnFilteredOrders() {
+        // Arrange
+        testOrder.setStatus(OrderStatus.PENDING);
+        LocalDateTime from = LocalDateTime.now().minusDays(7);
+        LocalDateTime to = LocalDateTime.now();
+        when(orderRepository.findByUserIdAndCreatedAtBetweenOrderByCreatedAtDesc("user1", from, to))
+                .thenReturn(Arrays.asList(testOrder));
+
+        // Act
+        List<OrderDto> result = orderService.searchOrders("user1", "order1", OrderStatus.PENDING, from, to);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void searchOrders_WhenQueryDoesNotMatch_ShouldReturnEmptyList() {
+        // Arrange
+        when(orderRepository.findByUserIdOrderByCreatedAtDesc("user1"))
+                .thenReturn(Arrays.asList(testOrder));
+
+        // Act
+        List<OrderDto> result = orderService.searchOrders("user1", "nonexistent", null, null, null);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    // ========== Seller Order Tests ==========
+
+    static Stream<Arguments> sellerOrderListTestCases() {
+        return Stream.of(
+            Arguments.of("getSellerOrders", false, null, null),
+            Arguments.of("searchSellerOrders no filters", true, null, null),
+            Arguments.of("searchSellerOrders with status", true, null, OrderStatus.PENDING),
+            Arguments.of("searchSellerOrders with query", true, "order1", null)
+        );
+    }
+
+    @ParameterizedTest(name = "{0} should return orders")
+    @MethodSource("sellerOrderListTestCases")
+    void sellerOrdersList_WhenValid_ShouldReturnOrders(String method, boolean isSearch, String query, OrderStatus status) {
         // Arrange
         when(orderRepository.findByItemsSellerIdOrderByCreatedAtDesc("seller1"))
                 .thenReturn(Arrays.asList(testOrder));
         mockUserServiceCall();
 
         // Act
-        List<OrderDto> result = orderService.getSellerOrders("seller@example.com");
+        List<OrderDto> result;
+        if (isSearch) {
+            result = orderService.searchSellerOrders("seller@example.com", query, status, null, null);
+        } else {
+            result = orderService.getSellerOrders("seller@example.com");
+        }
 
         // Assert
         assertNotNull(result);
@@ -564,18 +619,139 @@ class OrderServiceTest {
     }
 
     @Test
-    void searchSellerOrders_WhenValid_ShouldReturnFilteredOrders() {
+    void searchSellerOrders_WhenDateRangeFilter_ShouldReturnFilteredOrders() {
+        // Arrange
+        LocalDateTime from = LocalDateTime.now().minusDays(7);
+        LocalDateTime to = LocalDateTime.now();
+        when(orderRepository.findByCreatedAtBetweenOrderByCreatedAtDesc(from, to))
+                .thenReturn(Arrays.asList(testOrder));
+        mockUserServiceCall();
+
+        // Act
+        List<OrderDto> result = orderService.searchSellerOrders("seller@example.com", null, null, from, to);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void searchSellerOrders_WhenQueryMatchesProductName_ShouldReturnMatchingOrders() {
+        // Arrange
+        OrderItem item = new OrderItem("product1", "Mascara", "seller1", 2, 99.99);
+        Order orderWithProduct = new Order("user1", Arrays.asList(item), createShippingAddress());
+        orderWithProduct.setId("order2");
+        when(orderRepository.findByItemsSellerIdOrderByCreatedAtDesc("seller1"))
+                .thenReturn(Arrays.asList(orderWithProduct));
+        mockUserServiceCall();
+
+        // Act
+        List<OrderDto> result = orderService.searchSellerOrders("seller@example.com", "mascara", null, null, null);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void searchSellerOrders_WhenCombinedFilters_ShouldReturnFilteredOrders() {
+        // Arrange
+        testOrder.setStatus(OrderStatus.PENDING);
+        when(orderRepository.findByItemsSellerIdOrderByCreatedAtDesc("seller1"))
+                .thenReturn(Arrays.asList(testOrder));
+        mockUserServiceCall();
+
+        // Act
+        List<OrderDto> result = orderService.searchSellerOrders("seller@example.com", "order1", OrderStatus.PENDING, null, null);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void searchSellerOrders_WhenQueryDoesNotMatch_ShouldReturnEmptyList() {
         // Arrange
         when(orderRepository.findByItemsSellerIdOrderByCreatedAtDesc("seller1"))
                 .thenReturn(Arrays.asList(testOrder));
         mockUserServiceCall();
 
         // Act
-        List<OrderDto> result = orderService.searchSellerOrders("seller@example.com", null, null, null, null);
+        List<OrderDto> result = orderService.searchSellerOrders("seller@example.com", "nonexistent", null, null, null);
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
+        assertEquals(0, result.size());
+    }
+
+    // ========== Additional Edge Case Tests ==========
+
+    @Test
+    void deleteOrder_WhenOrderDoesNotBelongToUser_ShouldThrowException() {
+        // Arrange
+        testOrder.setStatus(OrderStatus.CANCELLED);
+        when(orderRepository.findById("order1")).thenReturn(Optional.of(testOrder));
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            orderService.deleteOrder("order1", "differentUser");
+        });
+    }
+
+    @Test
+    void redoOrder_WhenOrderDoesNotBelongToUser_ShouldThrowException() {
+        // Arrange
+        testOrder.setStatus(OrderStatus.CANCELLED);
+        when(orderRepository.findById("order1")).thenReturn(Optional.of(testOrder));
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            orderService.redoOrder("order1", "differentUser");
+        });
+    }
+
+    @Test
+    void redoOrder_WhenOrderAnyStatus_ShouldCreateNewOrder() {
+        // Arrange
+        // redoOrder works regardless of order status - it creates a new order from any existing order
+        testOrder.setStatus(OrderStatus.DELIVERED);
+        when(orderRepository.findById("order1")).thenReturn(Optional.of(testOrder));
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        mockProductServiceCall();
+        mockStockReductionCall();
+
+        // Act
+        OrderDto result = orderService.redoOrder("order1", "user1");
+
+        // Assert
+        assertNotNull(result);
+        verify(orderRepository, times(1)).save(any(Order.class));
+    }
+
+    @Test
+    void redoOrder_WhenInsufficientStock_ShouldThrowException() {
+        // Arrange
+        testOrder.setStatus(OrderStatus.CANCELLED);
+        when(orderRepository.findById("order1")).thenReturn(Optional.of(testOrder));
+        testProductDto.setStock(0); // No stock available
+        mockProductServiceCall();
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            orderService.redoOrder("order1", "user1");
+        });
+    }
+
+    @Test
+    void cancelOrder_WhenOrderDoesNotBelongToUser_ShouldThrowException() {
+        // Arrange
+        testOrder.setStatus(OrderStatus.PENDING);
+        when(orderRepository.findById("order1")).thenReturn(Optional.of(testOrder));
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            orderService.cancelOrder("order1", "differentUser");
+        });
     }
 
     // ========== Helper Methods ==========

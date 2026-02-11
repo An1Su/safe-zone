@@ -143,6 +143,14 @@
       color: $text-muted;
       text-align: center;
       word-break: break-all;
+      background: $bg-light;
+
+      .preview-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
     }
 
     .image-delete-btn {

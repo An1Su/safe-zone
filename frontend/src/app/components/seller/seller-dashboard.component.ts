@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { Media, Product } from '../../models/ecommerce.model';
+import { Media, Product, ProductCategory } from '../../models/ecommerce.model';
 import { AuthService } from '../../services/auth.service';
 import { MediaService } from '../../services/media.service';
 import { ProductService } from '../../services/product.service';
@@ -14,7 +14,7 @@ import { ProductService } from '../../services/product.service';
   templateUrl: './seller-dashboard.component.html',
   styleUrl: './seller-dashboard.component.scss',
 })
-export class SellerDashboardComponent implements OnInit {
+export class SellerDashboardComponent implements OnInit, OnDestroy {
   myProducts: Product[] = [];
   productMedia: Map<string, Media[]> = new Map();
   loading = true;
@@ -34,16 +34,20 @@ export class SellerDashboardComponent implements OnInit {
   selectedFiles: Map<string, File[]> = new Map();
   uploadingImages: Map<string, boolean> = new Map();
   imageError: Map<string, string> = new Map();
-  newProductImages: File[] = []; // For new product creation
+  /** For new product creation: file + preview URL for display */
+  newProductImageEntries: { file: File; previewUrl: string }[] = [];
   maxImagesPerProduct = 5;
   allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
   maxFileSize = 2 * 1024 * 1024; // 2MB
+
+  categories: ProductCategory[] = ['Face', 'Eyes', 'Lips'];
 
   newProduct: Product = {
     name: '',
     description: '',
     price: 0,
     stock: 0,
+    category: undefined,
   };
 
   editProduct: Product = {
@@ -51,6 +55,7 @@ export class SellerDashboardComponent implements OnInit {
     description: '',
     price: 0,
     stock: 0,
+    category: undefined,
   };
 
   constructor(
@@ -63,6 +68,15 @@ export class SellerDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.checkSellerRole();
     this.loadMyProducts();
+  }
+
+  ngOnDestroy(): void {
+    this.revokeNewProductPreviewUrls();
+  }
+
+  private revokeNewProductPreviewUrls(): void {
+    this.newProductImageEntries.forEach((entry) => URL.revokeObjectURL(entry.previewUrl));
+    this.newProductImageEntries = [];
   }
 
   checkSellerRole(): void {
@@ -85,8 +99,8 @@ export class SellerDashboardComponent implements OnInit {
           }
         });
       },
-      error: (error) => {
-        console.error('Error loading products:', error);
+      error: (err) => {
+        console.error('Error loading products:', err);
         this.error = 'Failed to load your products.';
         this.loading = false;
       },
@@ -98,8 +112,8 @@ export class SellerDashboardComponent implements OnInit {
       next: (media) => {
         this.productMedia.set(productId, media);
       },
-      error: (error) => {
-        console.error('Error loading media for product:', productId, error);
+      error: (err) => {
+        console.error('Error loading media for product:', productId, err);
       },
     });
   }
@@ -190,9 +204,9 @@ export class SellerDashboardComponent implements OnInit {
             setTimeout(() => (this.successMessage = ''), 3000);
           }
         },
-        error: (error) => {
-          console.error('Error uploading image:', error);
-          this.imageError.set(productId, error.error?.message || 'Failed to upload image');
+        error: (err) => {
+          console.error('Error uploading image:', err);
+          this.imageError.set(productId, err.error?.message || 'Failed to upload image');
           this.uploadingImages.set(productId, false);
         },
       });
@@ -210,9 +224,9 @@ export class SellerDashboardComponent implements OnInit {
         this.successMessage = 'Image deleted successfully!';
         setTimeout(() => (this.successMessage = ''), 3000);
       },
-      error: (error) => {
-        console.error('Error deleting image:', error);
-        this.imageError.set(productId, error.error?.message || 'Failed to delete image');
+      error: (err) => {
+        console.error('Error deleting image:', err);
+        this.imageError.set(productId, err.error?.message || 'Failed to delete image');
       },
     });
   }
@@ -265,9 +279,9 @@ export class SellerDashboardComponent implements OnInit {
           this.finishProductCreation();
         }
       },
-      error: (error) => {
-        console.error('Error creating product:', error);
-        this.formError = error.error?.message || 'Failed to create product. Please try again.';
+      error: (err) => {
+        console.error('Error creating product:', err);
+        this.formError = err.error?.message || 'Failed to create product. Please try again.';
         this.submitting = false;
       },
     });
@@ -279,7 +293,7 @@ export class SellerDashboardComponent implements OnInit {
     this.showAddForm = false;
     this.creationStep = 1;
     this.newlyCreatedProductId = null;
-    this.newProductImages = [];
+    this.revokeNewProductPreviewUrls();
     setTimeout(() => (this.successMessage = ''), 3000);
   }
 
@@ -310,7 +324,7 @@ export class SellerDashboardComponent implements OnInit {
       validFiles.push(file);
     }
 
-    const currentCount = this.newProductImages.length;
+    const currentCount = this.newProductImageEntries.length;
     if (currentCount + validFiles.length > this.maxImagesPerProduct) {
       this.formError = `Can only add ${
         this.maxImagesPerProduct - currentCount
@@ -319,16 +333,25 @@ export class SellerDashboardComponent implements OnInit {
       return;
     }
 
-    this.newProductImages = [...this.newProductImages, ...validFiles];
+    validFiles.forEach((file) => {
+      this.newProductImageEntries.push({
+        file,
+        previewUrl: URL.createObjectURL(file),
+      });
+    });
     input.value = '';
   }
 
   removeNewProductImage(index: number): void {
-    this.newProductImages.splice(index, 1);
+    const entry = this.newProductImageEntries[index];
+    if (entry) {
+      URL.revokeObjectURL(entry.previewUrl);
+      this.newProductImageEntries.splice(index, 1);
+    }
   }
 
   uploadNewProductImages(): void {
-    if (!this.newlyCreatedProductId || this.newProductImages.length === 0) {
+    if (!this.newlyCreatedProductId || this.newProductImageEntries.length === 0) {
       this.finishProductCreation();
       return;
     }
@@ -337,10 +360,11 @@ export class SellerDashboardComponent implements OnInit {
     this.formError = '';
 
     let uploaded = 0;
-    const total = this.newProductImages.length;
+    const total = this.newProductImageEntries.length;
     const productId = this.newlyCreatedProductId;
+    const filesToUpload = this.newProductImageEntries.map((e) => e.file);
 
-    this.newProductImages.forEach((file) => {
+    filesToUpload.forEach((file) => {
       this.mediaService.uploadMedia(file, productId).subscribe({
         next: (media) => {
           uploaded++;
@@ -355,13 +379,13 @@ export class SellerDashboardComponent implements OnInit {
             this.showAddForm = false;
             this.creationStep = 1;
             this.newlyCreatedProductId = null;
-            this.newProductImages = [];
+            this.revokeNewProductPreviewUrls();
             setTimeout(() => (this.successMessage = ''), 3000);
           }
         },
-        error: (error) => {
-          console.error('Error uploading image:', error);
-          this.formError = error.error?.message || 'Failed to upload some images.';
+        error: (err) => {
+          console.error('Error uploading image:', err);
+          this.formError = err.error?.message || 'Failed to upload some images.';
           this.submitting = false;
         },
       });
@@ -408,9 +432,9 @@ export class SellerDashboardComponent implements OnInit {
         this.showEditForm = false;
         this.submitting = false;
       },
-      error: (error) => {
-        console.error('Error updating product:', error);
-        this.formError = error.error?.message || 'Failed to update product. Please try again.';
+      error: (err) => {
+        console.error('Error updating product:', err);
+        this.formError = err.error?.message || 'Failed to update product. Please try again.';
         this.submitting = false;
       },
     });
@@ -431,8 +455,8 @@ export class SellerDashboardComponent implements OnInit {
         this.myProducts = this.myProducts.filter((p) => p.id !== id);
         this.successMessage = 'Product deleted successfully!';
       },
-      error: (error) => {
-        console.error('Error deleting product:', error);
+      error: (err) => {
+        console.error('Error deleting product:', err);
         this.error = 'Failed to delete product. Please try again.';
       },
     });
@@ -448,7 +472,7 @@ export class SellerDashboardComponent implements OnInit {
     this.formError = '';
     this.creationStep = 1;
     this.newlyCreatedProductId = null;
-    this.newProductImages = [];
+    this.revokeNewProductPreviewUrls();
   }
 
   resetEditForm(): void {
