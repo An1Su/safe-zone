@@ -262,6 +262,108 @@
   }
 }
 
+// Edit Images Section
+.edit-images-section {
+  background: $bg-light;
+  border: 2px dashed $border-color;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+}
+
+.edit-images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.edit-image-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: $radius-md;
+  overflow: hidden;
+  background: white;
+  box-shadow: $shadow-sm;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .edit-image-delete {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: $radius-circle;
+    background: $danger-color;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity $transition-fast;
+
+    &:hover {
+      background: $danger-dark;
+    }
+  }
+
+  &:hover .edit-image-delete {
+    opacity: 1;
+  }
+}
+
+.edit-upload-area {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+.btn-upload-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: $spacing-xs $spacing-md;
+  background: white;
+  color: $text-primary;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: $primary-color;
+    color: white;
+    border-color: $primary-color;
+  }
+}
+
+.selected-files-inline {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-size: 0.85rem;
+  color: $text-secondary;
+
+  .btn-sm {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+}
+
+.image-count-text {
+  margin: $spacing-sm 0 0 0;
+  font-size: 0.8rem;
+  color: $text-muted;
+}
+
 // Products Grid
 .products-grid {
   @include responsive-grid(3, $spacing-xl);
