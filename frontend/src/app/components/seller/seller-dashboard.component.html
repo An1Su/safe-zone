@@ -267,104 +267,37 @@
   <div *ngIf="error" class="error">{{ error }}</div>
 
   <div *ngIf="!showAddForm && !showEditForm" class="products-grid">
-    <div *ngFor="let product of myProducts" class="product-card-modern">
-      <!-- Featured Image -->
-      <div class="product-featured-image">
+    <div *ngFor="let product of myProducts" class="product-card-compact">
+      <!-- Product Image -->
+      <div class="card-image">
         <img *ngIf="getProductImages(product.id!).length > 0" 
              [src]="getImageUrl(getProductImages(product.id!)[0])" 
-             [alt]="product.name" 
-             class="featured-img" />
-        <div *ngIf="getProductImages(product.id!).length === 0" class="no-image-placeholder">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-        </div>
-        <!-- Image count badge -->
-        <div class="image-count-badge" *ngIf="getProductImages(product.id!).length > 1">
-          +{{ getProductImages(product.id!).length - 1 }}
+             [alt]="product.name" />
+        <div *ngIf="getProductImages(product.id!).length === 0" class="no-image">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
         </div>
       </div>
 
-      <!-- Product Info -->
-      <div class="product-info">
-        <h3 class="product-title">{{ product.name }}</h3>
-        <p class="product-description">{{ product.description }}</p>
-        <div class="product-meta">
-          <span class="product-price">${{ product.price | number:'1.2-2' }}</span>
-          <span class="product-stock">Stock: {{ product.stock }}</span>
+      <!-- Card Body -->
+      <div class="card-body">
+        <h3 class="card-title">{{ product.name }}</h3>
+        <p class="card-desc">{{ product.description }}</p>
+        <div class="card-footer">
+          <span class="card-price">${{ product.price | number:'1.2-2' }}</span>
+          <span class="card-stock">Stock: {{ product.stock }}</span>
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="product-actions">
-        <button (click)="openEditForm(product)" class="btn-edit-modern">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+      <!-- Card Actions -->
+      <div class="card-actions">
+        <button (click)="openEditForm(product)" class="btn-edit-compact">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
           Edit
         </button>
-        <button (click)="deleteProduct(product.id!)" class="btn-delete-modern" title="Delete product">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+        <button (click)="deleteProduct(product.id!)" class="btn-delete-compact" title="Delete">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
         </button>
       </div>
-
-      <!-- Image Management (expandable) -->
-      <details class="image-management">
-        <summary class="image-management-toggle">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-          Manage Images ({{ getProductImages(product.id!).length }}/{{ maxImagesPerProduct }})
-        </summary>
-        <div class="image-management-content">
-          <!-- Image Gallery -->
-          <div class="images-gallery" *ngIf="getProductImages(product.id!).length > 0">
-            <div class="image-item" *ngFor="let media of getProductImages(product.id!)">
-              <img [src]="getImageUrl(media)" [alt]="media.fileName" />
-              <button
-                class="image-delete-btn"
-                (click)="deleteImage(product.id!, media.id!)"
-                title="Delete image"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Upload Controls -->
-          <div *ngIf="canAddMoreImages(product.id!)" class="upload-controls">
-            <label class="file-input-label">
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
-                multiple
-                (change)="onFileSelected($event, product.id!)"
-                [disabled]="isUploading(product.id!)"
-              />
-              <span class="btn-upload">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                Add Images
-              </span>
-            </label>
-
-            <div *ngIf="getSelectedFiles(product.id!).length > 0" class="selected-files">
-              <span>{{ getSelectedFiles(product.id!).length }} file(s) selected</span>
-              <button
-                class="btn-sm btn-primary"
-                (click)="uploadImages(product.id!)"
-                [disabled]="isUploading(product.id!)"
-              >
-                {{ isUploading(product.id!) ? 'Uploading...' : 'Upload' }}
-              </button>
-              <button class="btn-sm btn-secondary" (click)="clearSelectedFiles(product.id!)">
-                Cancel
-              </button>
-            </div>
-          </div>
-
-          <div *ngIf="!canAddMoreImages(product.id!)" class="upload-limit-reached">
-            Maximum images reached
-          </div>
-
-          <div *ngIf="getImageError(product.id!)" class="image-error">
-            {{ getImageError(product.id!) }}
-          </div>
-        </div>
-      </details>
     </div>
   </div>
 
