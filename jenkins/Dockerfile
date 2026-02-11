@@ -35,8 +35,14 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
   && apt-get install -y nodejs \
   && rm -rf /var/lib/apt/lists/*
 
-# Install Docker Compose standalone (ARM64 for Apple Silicon)
-RUN curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-linux-aarch64" -o /usr/local/bin/docker-compose \
+# Install Docker Compose standalone (auto-detect architecture)
+RUN ARCH=$(uname -m) && \
+  if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then \
+    COMPOSE_ARCH="aarch64"; \
+  else \
+    COMPOSE_ARCH="x86_64"; \
+  fi && \
+  curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-linux-${COMPOSE_ARCH}" -o /usr/local/bin/docker-compose \
   && chmod +x /usr/local/bin/docker-compose
 
 # Install SonarScanner CLI (Java-based, platform independent)

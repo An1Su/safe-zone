@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # Native ARM64 build for Apple Silicon (no platform override = Chromium works)
+    # Native build - architecture auto-detected at build time
     container_name: jenkins
     ports:
       - '9090:8080'
