@@ -287,8 +287,11 @@ pipeline {
                 node {
                     echo "Build completed: ${currentBuild.currentResult}"
 
-                    // Get commit message before cleaning workspace
-                    def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                    // Get commit message - handle case where git repo might not exist
+                    def commitMessage = sh(
+                        script: 'git log -1 --pretty=%B 2>/dev/null || echo "Commit message unavailable"',
+                        returnStdout: true
+                    ).trim()
                     env.COMMIT_MESSAGE = commitMessage
 
                     // Archive test results (backend and frontend combined)
