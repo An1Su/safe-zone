@@ -32,10 +32,6 @@
 
       <!-- User Menu (logged in) -->
       <div *ngIf="isLoggedIn() && currentUser" class="nav-user">
-        <a routerLink="/seller/dashboard" class="nav-link" *ngIf="isSeller()">Manage Products</a>
-        <a routerLink="/seller/orders" class="nav-link" *ngIf="isSeller()">📦 Orders</a>
-        <a routerLink="/my-orders" class="nav-link" *ngIf="isBuyer()">📋 My Orders</a>
-
         <!-- User Dropdown -->
         <div class="user-dropdown">
           <button class="user-menu-toggle" (click)="toggleDropdown()">
@@ -53,18 +49,42 @@
 
           <div class="dropdown-menu" *ngIf="dropdownOpen">
             <div class="dropdown-header">
-              <span class="greeting">Hello, {{ currentUser.name }}</span>
+              <span class="user-avatar-large" *ngIf="avatarUrl">
+                <img [src]="avatarUrl" alt="Avatar" class="avatar-img-large" />
+              </span>
+              <span class="user-avatar-placeholder-large" *ngIf="!avatarUrl">{{ getInitials() }}</span>
+              <div class="user-info">
+                <span class="user-name">{{ currentUser.name }}</span>
+                <span class="user-email">{{ currentUser.email }}</span>
+              </div>
             </div>
             <div class="dropdown-divider"></div>
-            <a routerLink="/profile" class="dropdown-item" (click)="closeDropdown()">
-              👤 My Profile
-            </a>
-            <a routerLink="/cart" class="dropdown-item" (click)="closeDropdown()" *ngIf="isBuyer()">
-              🛒 My Cart
-              <span class="cart-count-badge" *ngIf="cartItemCount > 0">{{ cartItemCount }}</span>
-            </a>
+
+            <!-- Seller Menu -->
+            <ng-container *ngIf="isSeller()">
+              <a routerLink="/profile" class="dropdown-item" (click)="closeDropdown()">
+                👤 My Profile
+              </a>
+              <a routerLink="/seller/dashboard" class="dropdown-item" (click)="closeDropdown()">
+                ✨ Manage Products
+              </a>
+              <a routerLink="/seller/orders" class="dropdown-item" (click)="closeDropdown()">
+                📦 Orders
+              </a>
+            </ng-container>
+
+            <!-- Buyer Menu -->
+            <ng-container *ngIf="isBuyer()">
+              <a routerLink="/profile" class="dropdown-item" (click)="closeDropdown()">
+                👤 My Profile
+              </a>
+              <a routerLink="/my-orders" class="dropdown-item" (click)="closeDropdown()">
+                📋 My Orders
+              </a>
+            </ng-container>
+
             <div class="dropdown-divider"></div>
-            <button class="dropdown-item logout" (click)="logout()">🚪 Logout</button>
+            <button class="dropdown-item logout" (click)="logout()">🚪 Sign Out</button>
           </div>
         </div>
       </div>
