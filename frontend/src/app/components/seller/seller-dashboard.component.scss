@@ -6,9 +6,70 @@
   @include container();
   padding-top: $spacing-xl;
   padding-bottom: $spacing-xl;
+  min-height: calc(100vh - 200px);
 }
 
-// Dashboard Header
+// Page Header - Modern Style
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-2xl;
+  flex-wrap: wrap;
+  gap: $spacing-lg;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: $text-primary;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+  font-size: 0.95rem;
+  color: $text-muted;
+  margin: 0;
+}
+
+// Add Product Button - Gradient Style
+.btn-add-product {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-lg;
+  background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 10%) 100%);
+  color: white;
+  border: none;
+  border-radius: $radius-full;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all $transition-normal;
+  box-shadow: 0 4px 14px rgba($primary-color, 0.35);
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba($primary-color, 0.45);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Dashboard Header (legacy - keep for compatibility)
 .dashboard-header {
   @include flex-between();
   margin-bottom: $spacing-2xl;
@@ -207,12 +268,238 @@
   margin-top: $spacing-xl;
 }
 
-// Product Actions in Cards
+// Product Actions in Cards (legacy)
 .product-card {
   .card-actions {
     display: flex;
     gap: $spacing-sm;
     margin-top: $spacing-md;
+  }
+}
+
+// Modern Product Card
+.product-card-modern {
+  background: white;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid $border-color;
+  transition: all $transition-normal;
+
+  &:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+}
+
+// Featured Image
+.product-featured-image {
+  position: relative;
+  aspect-ratio: 4/3;
+  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+  overflow: hidden;
+
+  .featured-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform $transition-normal;
+  }
+
+  &:hover .featured-img {
+    transform: scale(1.03);
+  }
+
+  .no-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba($primary-color, 0.4);
+  }
+
+  .image-count-badge {
+    position: absolute;
+    bottom: $spacing-sm;
+    right: $spacing-sm;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 4px 10px;
+    border-radius: $radius-full;
+    font-size: 0.75rem;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+  }
+}
+
+// Product Info Section
+.product-info {
+  padding: $spacing-lg;
+  padding-bottom: $spacing-md;
+}
+
+.product-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: $text-primary;
+  margin: 0 0 $spacing-xs 0;
+  line-height: 1.3;
+}
+
+.product-description {
+  font-size: 0.875rem;
+  color: $text-muted;
+  margin: 0 0 $spacing-md 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.product-price {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $primary-color;
+}
+
+.product-stock {
+  font-size: 0.8rem;
+  color: $text-muted;
+  background: $bg-light;
+  padding: 4px 10px;
+  border-radius: $radius-full;
+}
+
+// Action Buttons
+.product-actions {
+  display: flex;
+  gap: $spacing-sm;
+  padding: 0 $spacing-lg $spacing-md;
+}
+
+.btn-edit-modern {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-md;
+  background: white;
+  color: $text-primary;
+  border: 1.5px solid $border-color;
+  border-radius: $radius-md;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  svg {
+    color: $text-muted;
+  }
+
+  &:hover {
+    background: $bg-light;
+    border-color: $text-muted;
+  }
+}
+
+.btn-delete-modern {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba($danger-color, 0.08);
+  color: $danger-color;
+  border: none;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: $danger-color;
+    color: white;
+  }
+}
+
+// Image Management (expandable)
+.image-management {
+  border-top: 1px solid $border-color;
+
+  &[open] {
+    .image-management-toggle svg {
+      transform: rotate(0);
+    }
+  }
+}
+
+.image-management-toggle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md $spacing-lg;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: $text-secondary;
+  font-weight: 500;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $bg-light;
+  }
+
+  svg {
+    color: $text-muted;
+    transition: transform $transition-fast;
+  }
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+}
+
+.image-management-content {
+  padding: $spacing-md $spacing-lg $spacing-lg;
+  background: $bg-light;
+}
+
+// Empty State Modern
+.empty-state-modern {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: $spacing-4xl $spacing-xl;
+  background: linear-gradient(135deg, rgba($primary-color, 0.03) 0%, rgba($accent-gold, 0.03) 100%);
+  border-radius: $radius-xl;
+  border: 2px dashed $border-color;
+
+  .empty-icon {
+    color: rgba($primary-color, 0.3);
+    margin-bottom: $spacing-lg;
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $text-primary;
+    margin: 0 0 $spacing-sm 0;
+  }
+
+  .empty-message {
+    font-size: 1rem;
+    color: $text-muted;
+    margin: 0 0 $spacing-xl 0;
+    max-width: 300px;
   }
 }
 
