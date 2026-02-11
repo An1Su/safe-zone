@@ -56,6 +56,13 @@ select {
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 40px;
+  cursor: pointer;
+
+  option {
+    background-color: white;
+    color: $text-primary;
+    padding: 8px 12px;
+  }
 }
 
 // Input with Icon
