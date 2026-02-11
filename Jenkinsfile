@@ -283,33 +283,36 @@ pipeline {
     post {
         always {
             script {
-                echo "Build completed: ${currentBuild.currentResult}"
+                // Steps that need workspace (FilePath) must run inside node {}
+                node {
+                    echo "Build completed: ${currentBuild.currentResult}"
 
-                // Get commit message before cleaning workspace
-                def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
-                env.COMMIT_MESSAGE = commitMessage
+                    // Get commit message before cleaning workspace
+                    def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                    env.COMMIT_MESSAGE = commitMessage
 
-                // Archive test results (backend and frontend combined)
-                junit allowEmptyResults: true, testResults: 'backend/**/target/surefire-reports/*.xml, frontend/test-results/*.xml'
+                    // Archive test results (backend and frontend combined)
+                    junit allowEmptyResults: true, testResults: 'backend/**/target/surefire-reports/*.xml, frontend/test-results/*.xml'
 
-                // Archive test artifacts for download
-                archiveArtifacts artifacts: 'backend/**/target/surefire-reports/*.xml', allowEmptyArchive: true
-                archiveArtifacts artifacts: 'frontend/test-results/*.xml', allowEmptyArchive: true
+                    // Archive test artifacts for download
+                    archiveArtifacts artifacts: 'backend/**/target/surefire-reports/*.xml', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'frontend/test-results/*.xml', allowEmptyArchive: true
 
-                // Cleanup Docker resources
-                sh '''
-                    docker images --format "{{.Repository}}:{{.Tag}}" | grep -E "ecom-|e-commerce" | tail -n +6 | xargs -r docker rmi || true
-                    docker image prune -f || true
-                '''
+                    // Cleanup Docker resources
+                    sh '''
+                        docker images --format "{{.Repository}}:{{.Tag}}" | grep -E "ecom-|e-commerce" | tail -n +6 | xargs -r docker rmi || true
+                        docker image prune -f || true
+                    '''
 
-                // Cleanup workspace (done last, after getting commit message)
-                if (env.WORKSPACE) {
-                    cleanWs notFailBuild: true
-                } else {
-                    echo "No workspace available; skipping cleanWs"
+                    // Cleanup workspace (done last, after getting commit message)
+                    if (env.WORKSPACE) {
+                        cleanWs notFailBuild: true
+                    } else {
+                        echo "No workspace available; skipping cleanWs"
+                    }
                 }
 
-                // Send email notification
+                // Email does not require workspace; run outside node to avoid extra allocation if node block failed
                 def buildStatus = currentBuild.currentResult
                 def emailRecipients = env.EMAIL_RECIPIENTS ?: 'anastasia.suhareva@gmail.com'
                 def recipientList = emailRecipients.split(',').collect { it.trim() }
@@ -323,7 +326,7 @@ pipeline {
                     <h3>Build ${statusText}!</h3>
                     <p><strong>Project:</strong> ${env.JOB_NAME}<br>
                     <strong>Build Number:</strong> #${env.BUILD_NUMBER}<br>
-                    <strong>Commit:</strong> ${env.COMMIT_MESSAGE}<br>
+                    <strong>Commit:</strong> ${env.COMMIT_MESSAGE ?: 'N/A'}<br>
                     <strong>Build URL:</strong> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
                     ${buildStatus == 'SUCCESS' ? '' : '<p><em>Please check the build logs for details.</em></p>'}
                 """
