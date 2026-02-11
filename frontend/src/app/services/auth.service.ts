@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of, timeout } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environments';
 import { AuthResponse, LoginRequest, RegisterRequest, User } from '../models/ecommerce.model';
@@ -15,8 +15,19 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
   private router = inject(Router);
 
+  // Tracks whether initial auth check is complete (for guards to wait on)
+  private authReadySubject = new BehaviorSubject<boolean>(false);
+  public authReady$ = this.authReadySubject.asObservable();
+
   constructor(private http: HttpClient) {
     this.loadUserFromStorage();
+  }
+
+  /**
+   * Returns true when auth state is fully resolved
+   */
+  isAuthReady(): boolean {
+    return this.authReadySubject.value;
   }
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
@@ -136,37 +147,51 @@ export class AuthService {
         this.validateToken(user);
       } catch (error) {
         this.clearCurrentUser();
+        this.authReadySubject.next(true);
       }
+    } else {
+      // No stored credentials - auth is ready (user is not logged in)
+      this.authReadySubject.next(true);
     }
   }
 
   /**
    * Validates the stored token with the backend.
    * If token is expired or blacklisted, clears the session.
+   * On network errors, keeps the session (optimistic approach).
    */
   private validateToken(user: User): void {
     const token = localStorage.getItem('token');
     if (!token || !user.id) {
+      this.authReadySubject.next(true);
       return;
     }
 
     // Call backend to verify token is still valid
     // Using the user endpoint as a validation check
+    // Timeout after 5 seconds to prevent blocking page load
     this.http
       .get<User>(`${environment.apiUrl}/users/${user.id}`, {
         headers: new HttpHeaders({
           Authorization: `Bearer ${token}`,
         }),
+        withCredentials: true,
       })
       .pipe(
+        timeout(5000), // Don't block page load for more than 5 seconds
         catchError((error) => {
-          // Token is invalid/expired/blacklisted - clear session
-          console.warn('Token validation failed - clearing session', error.status);
-          this.clearCurrentUser();
-
-          // Show user feedback and redirect to login
-          alert('Your session has expired. Please log in again.');
-          this.router.navigate(['/login']);
+          // Only clear session on 401 (token invalid/expired/blacklisted)
+          // Keep session on network errors (offline, timeout, etc.)
+          if (error.status === 401 || error.status === 403) {
+            console.warn('Token validation failed - clearing session', error.status);
+            this.clearCurrentUser();
+            alert('Your session has expired. Please log in again.');
+            this.router.navigate(['/login']);
+          } else {
+            // Network error, timeout, or server error - keep the session
+            // User can still try to use the app, API calls will fail if token is truly invalid
+            console.warn('Token validation request failed (network/timeout/server error), keeping session', error.status || error.message);
+          }
 
           return of(null);
         })
@@ -176,6 +201,8 @@ export class AuthService {
           // Update user data in case it changed on backend
           this.setCurrentUser(validatedUser);
         }
+        // Mark auth as ready after validation completes
+        this.authReadySubject.next(true);
       });
   }
 }

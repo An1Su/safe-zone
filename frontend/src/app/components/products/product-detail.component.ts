@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CartItem } from '../../models/cart.model';
 import { Media, Product } from '../../models/ecommerce.model';
+import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
 import { MediaService } from '../../services/media.service';
 import { ProductService } from '../../services/product.service';
@@ -26,7 +27,12 @@ export class ProductDetailComponent implements OnInit {
     private productService: ProductService,
     private mediaService: MediaService,
     private cartService: CartService,
+    private authService: AuthService,
   ) {}
+
+  isBuyer(): boolean {
+    return this.authService.isLoggedIn() && this.authService.isClient();
+  }
 
   ngOnInit(): void {
     const productId = this.route.snapshot.paramMap.get('id');

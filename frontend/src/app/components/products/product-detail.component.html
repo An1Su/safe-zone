@@ -26,6 +26,7 @@
       <p class="seller">Sold by: {{ product.user }}</p>
 
       <button
+        *ngIf="isBuyer()"
         class="btn btn-primary btn-add-to-cart"
         (click)="addToCart()"
         [disabled]="product.stock === 0"

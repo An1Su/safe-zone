@@ -305,6 +305,11 @@ public class OrderService {
             throw new IllegalArgumentException("Order does not contain seller's products");
         }
 
+        // If cancelling the order, restore stock for all items
+        if (newStatus == OrderStatus.CANCELLED && order.getStatus() != OrderStatus.CANCELLED) {
+            restoreStockForItems(order.getItems());
+        }
+
         // Use Order's updateStatus() method which validates transition and updates timestamp
         order.updateStatus(newStatus);
         Order savedOrder = orderRepository.save(order);
