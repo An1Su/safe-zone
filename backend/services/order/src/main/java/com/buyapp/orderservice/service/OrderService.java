@@ -34,14 +34,17 @@ public class OrderService {
     /**
      * Service URLs for Eureka service discovery.
      * These match the spring.application.name from each service's application.yml.
-     * @LoadBalanced WebClient resolves these through Eureka to find the actual service instances.
+     *
+     * @LoadBalanced WebClient resolves these through Eureka to find the actual
+     *               service instances.
      */
     private static final String PRODUCT_SERVICE_URL = "http://product-service";
     private static final String USER_SERVICE_URL = "http://user-service";
     private static final String ORDER_NOT_FOUND_MESSAGE = "Order not found with id: ";
     private static final String CART_NOT_FOUND_MESSAGE = "Cart not found for user: ";
 
-    public OrderService(OrderRepository orderRepository, CartRepository cartRepository, WebClient.Builder webClientBuilder) {
+    public OrderService(OrderRepository orderRepository, CartRepository cartRepository,
+            WebClient.Builder webClientBuilder) {
         this.orderRepository = orderRepository;
         this.cartRepository = cartRepository;
         this.webClientBuilder = webClientBuilder;
@@ -49,13 +52,13 @@ public class OrderService {
 
     // Cart
 
-    //Get user's cart or create a new one if it doesn't exist
+    // Get user's cart or create a new one if it doesn't exist
     public CartDto getCart(String userId) {
         Cart cart = getOrCreateCart(userId);
         return toCartDto(cart, true); // Validate availability when fetching cart
     }
 
-    //Add item to cart or update quantity if item already exists
+    // Add item to cart or update quantity if item already exists
 
     public CartDto addItem(String userId, CartItemDto itemDto) {
         // Validate product exists and stock availability
@@ -88,7 +91,7 @@ public class OrderService {
         return toCartDto(savedCart, false); // No need to validate again, we just validated
     }
 
-    //Update item quantity in cart
+    // Update item quantity in cart
     public CartDto updateItemQuantity(String userId, String productId, Integer quantity) {
         if (quantity < 1) {
             throw new IllegalArgumentException("Quantity must be at least 1");
@@ -127,9 +130,9 @@ public class OrderService {
         cartRepository.save(cart);
     }
 
-    //Order
+    // Order
 
-    //Create order from cart
+    // Create order from cart
     public OrderDto createOrder(String userId, ShippingAddressDto shippingAddressDto) {
         // Get cart from local repository
         Cart cart = cartRepository.findByUserId(userId)
@@ -163,7 +166,8 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
 
         // Reduce stock for all products (after order is saved)
-        // If this fails, order exists but stock wasn't reduced - consider transaction management
+        // If this fails, order exists but stock wasn't reduced - consider transaction
+        // management
         reduceStockForItems(orderItems);
 
         // Clear cart after successful order creation and stock reduction
@@ -248,7 +252,8 @@ public class OrderService {
             LocalDateTime dateFrom, LocalDateTime dateTo) {
         List<Order> orders;
 
-        // Optimize database query: use status filter if no date range and status is provided
+        // Optimize database query: use status filter if no date range and status is
+        // provided
         if (dateFrom != null && dateTo != null) {
             orders = orderRepository.findByUserIdAndCreatedAtBetweenOrderByCreatedAtDesc(
                     userId, dateFrom, dateTo);
@@ -259,7 +264,8 @@ public class OrderService {
             orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
         }
 
-        // Filter by status if not already filtered at DB level (when date range was used)
+        // Filter by status if not already filtered at DB level (when date range was
+        // used)
         if (status != null && dateFrom != null && dateTo != null) {
             orders = orders.stream()
                     .filter(order -> order.getStatus() == status)
@@ -310,7 +316,8 @@ public class OrderService {
             restoreStockForItems(order.getItems());
         }
 
-        // Use Order's updateStatus() method which validates transition and updates timestamp
+        // Use Order's updateStatus() method which validates transition and updates
+        // timestamp
         order.updateStatus(newStatus);
         Order savedOrder = orderRepository.save(order);
 
@@ -420,7 +427,8 @@ public class OrderService {
                     .bodyToMono(Void.class)
                     .block();
         } catch (Exception e) {
-            throw new BadRequestException("Failed to " + action + " stock for product: " + productId + ": " + e.getMessage());
+            throw new BadRequestException(
+                    "Failed to " + action + " stock for product: " + productId + ": " + e.getMessage());
         }
     }
 
