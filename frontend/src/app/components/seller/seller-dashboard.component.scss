@@ -48,7 +48,7 @@
   background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 10%) 100%);
   color: white;
   border: none;
-  border-radius: $radius-full;
+  border-radius: $radius-pill;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
@@ -326,7 +326,7 @@
     background: rgba(0, 0, 0, 0.6);
     color: white;
     padding: 4px 10px;
-    border-radius: $radius-full;
+    border-radius: $radius-pill;
     font-size: 0.75rem;
     font-weight: 600;
     backdrop-filter: blur(4px);
@@ -375,7 +375,7 @@
   color: $text-muted;
   background: $bg-light;
   padding: 4px 10px;
-  border-radius: $radius-full;
+  border-radius: $radius-pill;
 }
 
 // Action Buttons
