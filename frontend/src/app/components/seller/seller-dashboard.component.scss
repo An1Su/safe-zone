@@ -323,6 +323,14 @@
   align-items: center;
   gap: $spacing-sm;
   flex-wrap: wrap;
+
+  .file-input-label {
+    cursor: pointer;
+
+    input[type='file'] {
+      display: none;
+    }
+  }
 }
 
 .btn-upload-inline {
