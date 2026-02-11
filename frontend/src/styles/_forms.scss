@@ -5,7 +5,8 @@
 .form-group {
   margin-bottom: $spacing-lg;
 
-  label {
+  label,
+  .form-label {
     display: block;
     margin-bottom: $spacing-sm;
     font-weight: 500;
