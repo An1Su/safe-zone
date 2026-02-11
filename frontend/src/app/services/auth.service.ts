@@ -16,7 +16,7 @@ export class AuthService {
   private router = inject(Router);
 
   // Tracks whether initial auth check is complete (for guards to wait on)
-  private authReadySubject = new BehaviorSubject<boolean>(false);
+  private readonly authReadySubject = new BehaviorSubject<boolean>(false);
   public authReady$ = this.authReadySubject.asObservable();
 
   constructor(private http: HttpClient) {

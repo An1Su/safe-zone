@@ -27,7 +27,7 @@ export class ProductDetailComponent implements OnInit {
     private productService: ProductService,
     private mediaService: MediaService,
     private cartService: CartService,
-    private authService: AuthService,
+    private readonly authService: AuthService,
   ) {}
 
   isBuyer(): boolean {
