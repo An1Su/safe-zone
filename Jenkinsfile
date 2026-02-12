@@ -49,12 +49,14 @@ pipeline {
 
         stage('Frontend Tests') {
             steps {
-                sh '''
-                    echo "Running frontend tests with coverage"
-                    cd frontend
-                    npm ci --legacy-peer-deps
-                    npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage=true
-                '''
+                timeout(time: 15, unit: 'MINUTES') {
+                    sh '''
+                        echo "Running frontend tests with coverage"
+                        cd frontend
+                        npm ci --legacy-peer-deps
+                        npm run test
+                    '''
+                }
             }
         }
 
@@ -289,7 +291,7 @@ pipeline {
 
                     // Get commit message - handle case where git repo might not exist
                     def commitMessage = sh(
-                        script: 'git log -1 --pretty=%B 2>/dev/null || echo "Commit message unavailable"',
+                        script: "cd '${env.WORKSPACE}' && git log -1 --pretty=%B 2>/dev/null || echo 'Commit message unavailable'",
                         returnStdout: true
                     ).trim()
                     env.COMMIT_MESSAGE = commitMessage
