@@ -1,297 +1,123 @@
-# E-Commerce Platform - Test Suite Documentation
+# Testing Guide
+
+Single reference for the safe-zone test suite: what exists, how to run it, and how it fits into CI.
+
+---
 
 ## Overview
 
-This document describes the test suite implemented for the CI/CD pipeline as part of the Jenkins automation task (MJ-Task.md).
+- **CI (Jenkins)** runs backend unit tests (user, product, media, order, eureka, api-gateway) and frontend unit tests (Karma/Jasmine). No controller-level integration tests with Testcontainers are active in CI.
+- **Backend:** Maven Wrapper (`mvnw`). Shared module is built first, then each service runs its tests. JUnit XML and JaCoCo reports are produced.
+- **Frontend:** Angular/Karma, ChromeHeadlessNoSandbox in CI. Coverage (LCOV) and JUnit XML for Jenkins. Optional E2E with Cypress.
 
-## Test Categories
+---
 
-### Frontend Tests
+## Quick commands
 
-#### Unit Tests (Jasmine/Karma)
-
-Located in `frontend/src/app/**/*.spec.ts`
-
-**Component Tests:**
-
-- `login.component.spec.ts` - Login form validation, submission, error handling
-- `home.component.spec.ts` - Home page rendering, product loading, user state
-
-**Service Tests:**
-
-- `auth.service.spec.ts` - Authentication, login, logout, user state management
-- `product.service.spec.ts` - Product CRUD operations, API calls
-- `cart.service.spec.ts` - Cart management, item addition/removal, local storage
-
-**Running Unit Tests:**
+### Backend (from repo root)
 
 ```bash
-cd frontend
-npm install
-npm test                 # Interactive mode
-npm run test:ci          # CI mode (headless, single-run, with coverage)
-```
-
-**Coverage Reports:**
-Generated in `frontend/coverage/` directory
-
-- HTML report: `frontend/coverage/e-com/index.html`
-- LCOV format for CI tools
-
-#### E2E Tests (Cypress)
-
-Located in `frontend/cypress/e2e/**/*.cy.ts`
-
-**Test Scenarios:**
-
-- `critical-path.cy.ts` - Complete user journey (home → login → products)
-- Navigation flows
-- Form validation
-- API mocking for isolated testing
-
-**Running E2E Tests:**
-
-```bash
-cd frontend
-npm run e2e              # Run headless
-npm run e2e:open         # Interactive mode
-```
-
-**Requirements:**
-
-- Frontend dev server must be running for full E2E tests
-- Tests use API mocks via `cy.intercept()` for isolation
-
-### Backend Tests
-
-#### Unit Tests (JUnit 5 + Mockito)
-
-Located in `backend/services/*/src/test/java/**/*Test.java`
-
-**Service Tests:**
-
-- `UserServiceTest.java` - User CRUD, authentication, validation
-- `ProductServiceTest.java` - Product management, ownership checks
-- `MediaServiceTest.java` - File upload validation, media operations
-
-**Running Backend Tests:**
-
-```bash
-# All services
 cd backend
-mvn test
 
-# Individual service
+# Build shared then run all service tests (same order as Jenkins)
+cd shared && ../mvnw clean install -DskipTests && cd ..
+cd services/user    && ../../mvnw test && cd ../..
+cd services/product && ../../mvnw test && cd ../..
+cd services/media   && ../../mvnw test && cd ../..
+cd services/order   && ../../mvnw test && cd ../..
+cd services/eureka  && ../../mvnw test && cd ../..
+cd api-gateway      && ../mvnw test
+```
+
+Or from backend root: `./mvnw test` (if your multi-module setup runs all modules).
+
+**Single service / single class / coverage:**
+
+```bash
 cd backend/services/user
-mvn test
-
-# With coverage report
-mvn test jacoco:report
+../../mvnw test
+../../mvnw test -Dtest=UserServiceTest
+../../mvnw test jacoco:report
+# Report: target/site/jacoco/index.html
 ```
 
-**Coverage Reports:**
-Generated in `backend/services/*/target/site/jacoco/index.html`
-
-## Test Audit Compliance
-
-### Functional Requirements ✅
-
-- **Pipeline runs successfully**: Tests execute without infrastructure dependencies
-- **Build error detection**: Tests fail appropriately on code issues
-- **Automated testing**: Unit tests run automatically in pipeline
-- **Pipeline halts on failure**: Non-zero exit codes stop the pipeline
-- **Auto-trigger on commit**: Tests designed for commit-based triggers
-- **Deployment verification**: Smoke tests included in E2E suite
-- **Rollback strategy**: Tests verify deployment health checks
-
-### Security Requirements ✅
-
-- **No hardcoded credentials**: All tests use mocks or test fixtures
-- **Sensitive data handling**: Tests verify JWT token management
-- **Input validation**: Tests cover form validation and API input checks
-
-### Code Quality Requirements ✅
-
-- **Well-organized tests**: Clear arrange-act-assert structure
-- **Test reports**: JUnit XML and coverage reports generated
-- **Comprehensive coverage**: Key components, services, and critical paths tested
-- **Notifications**: Test results available for Jenkins reporting plugins
-
-## Jenkins Pipeline Integration
-
-### Recommended Stages
-
-```groovy
-pipeline {
-    agent any
-
-    stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/An1Su/safe-zone.git'
-            }
-        }
-
-        stage('Backend Tests') {
-            steps {
-                dir('backend') {
-                    sh 'mvn clean test'
-                }
-            }
-            post {
-                always {
-                    junit 'backend/services/*/target/surefire-reports/*.xml'
-                    jacoco(
-                        execPattern: 'backend/services/*/target/jacoco.exec'
-                    )
-                }
-            }
-        }
-
-        stage('Frontend Tests') {
-            steps {
-                dir('frontend') {
-                    sh 'npm ci'
-                    sh 'npm run test:ci'
-                }
-            }
-            post {
-                always {
-                    publishHTML([
-                        reportDir: 'frontend/coverage/e-com',
-                        reportFiles: 'index.html',
-                        reportName: 'Frontend Coverage'
-                    ])
-                }
-            }
-        }
-
-        stage('Build') {
-            parallel {
-                stage('Build Backend') {
-                    steps {
-                        dir('backend') {
-                            sh 'mvn clean package -DskipTests'
-                        }
-                    }
-                }
-                stage('Build Frontend') {
-                    steps {
-                        dir('frontend') {
-                            sh 'npm run build'
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('E2E Tests') {
-            when {
-                branch 'main'
-            }
-            steps {
-                // Requires deployed services
-                dir('frontend') {
-                    sh 'npm run e2e'
-                }
-            }
-        }
-
-        stage('Deploy') {
-            when {
-                branch 'main'
-            }
-            steps {
-                sh './docker-compose up -d'
-            }
-        }
-    }
-
-    post {
-        failure {
-            emailext(
-                subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: "The build has failed. Check console output.",
-                to: "team@example.com"
-            )
-        }
-        success {
-            emailext(
-                subject: "Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: "The build completed successfully.",
-                to: "team@example.com"
-            )
-        }
-    }
-}
-```
-
-## Test Execution Summary
-
-### Without Running Servers
-
-- ✅ Backend unit tests (`mvn test`)
-- ✅ Frontend unit tests (`npm run test:ci`)
-- ⚠️ E2E tests (require mocked APIs or deployed services)
-
-### With Running Servers
-
-- ✅ Full E2E integration tests
-- ✅ Smoke tests against deployed environment
-- ✅ API contract verification
-
-## Quick Start Commands
-
-**Run all tests locally:**
+### Frontend
 
 ```bash
-# Backend
-cd backend && mvn test
-
-# Frontend unit
-cd frontend && npm install && npm run test:ci
-
-# Frontend E2E (requires server)
-cd frontend && npm run e2e
+cd frontend
+npm ci
+npm run test                    # Headless, single run, coverage (CI-style)
+npm run e2e                     # Cypress headless
+npm run e2e:open                # Cypress UI
 ```
 
-**CI/CD one-liner:**
+Note: There is no `test:ci` script; `npm run test` is already headless with coverage.
+
+### Full local run (backend + frontend)
 
 ```bash
-cd backend && mvn test && cd ../frontend && npm ci && npm run test:ci
+cd backend && ./mvnw test && cd ../frontend && npm ci && npm run test
 ```
 
-## Test Metrics
+---
 
-**Target Coverage:**
+## Backend test structure
 
-- Backend: >70% line coverage
-- Frontend: >60% line coverage
-- Critical paths: 100% coverage
+| Service      | What runs in CI                         | Notes |
+| ------------ | --------------------------------------- | ----- |
+| User         | Unit / service tests                    | `AuthControllerIntegrationTest` exists but is commented out |
+| Product      | Unit / service / listener tests         | No controller integration test class |
+| Media        | Unit / event producer tests             | No controller integration test class |
+| Order        | Unit / controller (MockMvc + mocks)     | `OrderControllerTest`, `OrderServiceTest`, etc. |
+| Eureka       | @SpringBootTest smoke                   | `EurekaServerApplicationTests` |
+| API Gateway  | Unit tests                              | See `backend/api-gateway` |
 
-**Test Counts:**
+**Key paths:**
 
-- Frontend: 60+ unit tests, 10+ E2E scenarios
-- Backend: 30+ tests per service (User, Product, Media)
+- Tests: `backend/services/*/src/test/java/**/*Test.java`
+- JUnit XML (CI): `backend/**/target/surefire-reports/*.xml`
+- JaCoCo: `backend/services/*/target/site/jacoco/index.html`
+- Shared test util (JWT): `backend/shared/src/main/java/com/buyapp/common/test/JwtTestUtil.java`
 
-## Maintenance
+**Integration tests (future):** Controller-level tests with Testcontainers + MockMvc + `JwtTestUtil` are not active. When added, use the same pattern as the commented `AuthControllerIntegrationTest` (Testcontainers MongoDB, `@DynamicPropertySource` for `spring.data.mongodb.uri`). See [Testcontainers](https://www.testcontainers.org/) and [Spring Boot Testing](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.testing).
 
-**Adding New Tests:**
+---
 
-1. Follow existing naming conventions (`*.spec.ts`, `*Test.java`)
-2. Use mocks for external dependencies
-3. Keep tests isolated and idempotent
-4. Update this documentation
+## Frontend test structure
 
-**Common Issues:**
+- **Unit:** `frontend/src/app/**/*.spec.ts` (components, services). Karma config: `frontend/karma.conf.js` (ChromeHeadlessNoSandbox, JUnit output under `frontend/test-results/`).
+- **E2E:** `frontend/cypress/e2e/**/*.cy.ts` (e.g. `critical-path.cy.ts`). Run with dev server or against deployed app; tests can use `cy.intercept()` for API mocking.
+- **Coverage:** `frontend/coverage/` (LCOV for SonarQube). CI uses `coverage/lcov.info`.
 
-- **Frontend tests timeout**: Check karma.conf.js timeout settings
-- **Backend tests fail**: Ensure MockitoExtension is enabled
-- **E2E tests flaky**: Increase wait times or improve selectors
+---
 
-## Additional Resources
+## CI (Jenkins)
 
-- [Jenkins Documentation](https://www.jenkins.io/doc/)
+Pipeline is in `Jenkinsfile`. Main test-related stages:
+
+1. **Checkout**
+2. **Backend Tests** — build shared, then `../../mvnw test` in each service (user, product, media, order, eureka, api-gateway).
+3. **Frontend Tests** — `npm ci`, `npm run test` (15 min timeout).
+4. **SonarQube** — backend JaCoCo + frontend LCOV; then quality gate.
+
+Artifacts: `backend/**/target/surefire-reports/*.xml`, `frontend/test-results/*.xml`.
+
+---
+
+## Troubleshooting
+
+- **Docker (Testcontainers):** If you enable integration tests, ensure Docker is running (`docker ps`). First run may pull images (e.g. `mongo:7.0`).
+- **Port 27017:** Usually not an issue; Testcontainers assigns ports. If needed: `lsof -ti:27017 | xargs kill -9`.
+- **Maven OOM:** `export MAVEN_OPTS="-Xmx2048m"` then re-run.
+- **Frontend timeouts:** See `karma.conf.js` (`captureTimeout`, `browserNoActivityTimeout`). Jenkins allows 15 min for the frontend test stage.
+- **Chrome in CI:** `CHROME_BIN=/usr/bin/chromium` is set in Jenkins; the image must provide Chromium.
+
+---
+
+## References
+
+- [Spring Boot Testing](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.testing)
+- [Testcontainers](https://www.testcontainers.org/)
 - [JUnit 5](https://junit.org/junit5/docs/current/user-guide/)
 - [Jasmine](https://jasmine.github.io/)
 - [Cypress](https://www.cypress.io/)

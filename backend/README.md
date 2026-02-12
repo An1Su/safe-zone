@@ -427,7 +427,7 @@ cd services/user
 - Product Service: 10 tests (CRUD, authorization, ownership)
 - Media Service: 10 tests (upload, download, size limits, MIME types)
 
-See [INTEGRATION-TESTING.md](../INTEGRATION-TESTING.md) for complete testing guide.
+See [TESTING.md](../TESTING.md) for the testing guide.
 
 ### Manual Testing with curl
 
@@ -561,5 +561,5 @@ backend/
 
 - [Main README](../README.md) - Project overview and Docker setup
 - [Frontend README](../frontend/README.md) - Angular frontend documentation
-- [INTEGRATION-TESTING.md](../INTEGRATION-TESTING.md) - Testing guide
+- [TESTING.md](../TESTING.md) - Testing guide
 - [Task.md](../Task.md) - Original project requirements
