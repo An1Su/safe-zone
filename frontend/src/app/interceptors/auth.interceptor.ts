@@ -7,6 +7,7 @@ import { catchError, throwError } from 'rxjs';
  * AuthInterceptor - Functional HTTP interceptor
  * 1. Attaches JWT token to all outgoing requests
  * 2. Handles 401 (Unauthorized) and 403 (Forbidden) responses globally
+ *    (except for token validation requests which handle errors themselves)
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
@@ -24,9 +25,18 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     });
   }
 
+  // Skip global error handling for token validation requests
+  // These requests handle their own 401 errors to avoid redirect loops
+  const isTokenValidation = req.url.includes('/users/') && req.method === 'GET';
+
   // Handle the request and catch errors
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
+      // Skip global handling for token validation - it has its own error handling
+      if (isTokenValidation) {
+        return throwError(() => error);
+      }
+
       if (error.status === 401) {
         // Token expired or invalid - clear storage and redirect to login
         localStorage.removeItem('token');

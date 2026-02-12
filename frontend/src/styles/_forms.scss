@@ -5,7 +5,8 @@
 .form-group {
   margin-bottom: $spacing-lg;
 
-  label {
+  label,
+  .form-label {
     display: block;
     margin-bottom: $spacing-sm;
     font-weight: 500;
@@ -55,6 +56,13 @@ select {
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 40px;
+  cursor: pointer;
+
+  option {
+    background-color: white;
+    color: $text-primary;
+    padding: 8px 12px;
+  }
 }
 
 // Input with Icon

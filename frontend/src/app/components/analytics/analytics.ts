@@ -95,6 +95,10 @@ export class Analytics implements OnInit {
     scales: {
       y: {
         beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          callback: (value) => Number.isInteger(value) ? value : null,
+        },
       },
       x: {
         ticks: {

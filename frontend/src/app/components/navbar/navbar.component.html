@@ -2,8 +2,10 @@
   <div class="navbar-container">
     <!-- Logo -->
     <a routerLink="/" class="navbar-logo">
+      <svg class="sparkle-left" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
       <span class="logo-glam">GLAM</span>
       <span class="logo-beauty">Beauty</span>
+      <svg class="sparkle-right" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
     </a>
 
     <!-- Navigation Links - Keep original routes -->
@@ -32,10 +34,6 @@
 
       <!-- User Menu (logged in) -->
       <div *ngIf="isLoggedIn() && currentUser" class="nav-user">
-        <a routerLink="/seller/dashboard" class="nav-link" *ngIf="isSeller()">Manage Products</a>
-        <a routerLink="/seller/orders" class="nav-link" *ngIf="isSeller()">📦 Orders</a>
-        <a routerLink="/orders" class="nav-link" *ngIf="isBuyer()">📋 My Orders</a>
-
         <!-- User Dropdown -->
         <div class="user-dropdown">
           <button class="user-menu-toggle" (click)="toggleDropdown()">
@@ -53,18 +51,50 @@
 
           <div class="dropdown-menu" *ngIf="dropdownOpen">
             <div class="dropdown-header">
-              <span class="greeting">Hello, {{ currentUser.name }}</span>
+              <span class="user-avatar-large" *ngIf="avatarUrl">
+                <img [src]="avatarUrl" alt="Avatar" class="avatar-img-large" />
+              </span>
+              <span class="user-avatar-placeholder-large" *ngIf="!avatarUrl">{{ getInitials() }}</span>
+              <div class="user-info">
+                <span class="user-name">{{ currentUser.name }}</span>
+                <span class="user-email">{{ currentUser.email }}</span>
+              </div>
             </div>
             <div class="dropdown-divider"></div>
-            <a routerLink="/profile" class="dropdown-item" (click)="closeDropdown()">
-              👤 My Profile
-            </a>
-            <a routerLink="/cart" class="dropdown-item" (click)="closeDropdown()" *ngIf="isBuyer()">
-              🛒 My Cart
-              <span class="cart-count-badge" *ngIf="cartItemCount > 0">{{ cartItemCount }}</span>
-            </a>
+
+            <!-- Seller Menu -->
+            <ng-container *ngIf="isSeller()">
+              <a routerLink="/profile" class="dropdown-item" (click)="closeDropdown()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                My Dashboard
+              </a>
+              <a routerLink="/seller/dashboard" class="dropdown-item" (click)="closeDropdown()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+                Manage Products
+              </a>
+              <a routerLink="/seller/orders" class="dropdown-item" (click)="closeDropdown()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                Orders
+              </a>
+            </ng-container>
+
+            <!-- Buyer Menu -->
+            <ng-container *ngIf="isBuyer()">
+              <a routerLink="/profile" class="dropdown-item" (click)="closeDropdown()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                My Dashboard
+              </a>
+              <a routerLink="/my-orders" class="dropdown-item" (click)="closeDropdown()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                Order History
+              </a>
+            </ng-container>
+
             <div class="dropdown-divider"></div>
-            <button class="dropdown-item logout" (click)="logout()">🚪 Logout</button>
+            <button class="dropdown-item logout" (click)="logout()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+              Sign Out
+            </button>
           </div>
         </div>
       </div>

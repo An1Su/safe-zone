@@ -6,9 +6,70 @@
   @include container();
   padding-top: $spacing-xl;
   padding-bottom: $spacing-xl;
+  min-height: calc(100vh - 200px);
 }
 
-// Dashboard Header
+// Page Header - Modern Style
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-2xl;
+  flex-wrap: wrap;
+  gap: $spacing-lg;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: $text-primary;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+  font-size: 0.95rem;
+  color: $text-muted;
+  margin: 0;
+}
+
+// Add Product Button - Gradient Style
+.btn-add-product {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-lg;
+  background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 10%) 100%);
+  color: white;
+  border: none;
+  border-radius: $radius-pill;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all $transition-normal;
+  box-shadow: 0 4px 14px rgba($primary-color, 0.35);
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba($primary-color, 0.45);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Dashboard Header (legacy - keep for compatibility)
 .dashboard-header {
   @include flex-between();
   margin-bottom: $spacing-2xl;
@@ -201,18 +262,293 @@
   }
 }
 
+// Edit Images Section
+.edit-images-section {
+  background: $bg-light;
+  border: 2px dashed $border-color;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+}
+
+.edit-images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.edit-image-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: $radius-md;
+  overflow: hidden;
+  background: white;
+  box-shadow: $shadow-sm;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .edit-image-delete {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: $radius-circle;
+    background: $danger-color;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity $transition-fast;
+
+    &:hover {
+      background: $danger-dark;
+    }
+  }
+
+  &:hover .edit-image-delete {
+    opacity: 1;
+  }
+}
+
+.edit-upload-area {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+
+  .file-input-label {
+    cursor: pointer;
+
+    input[type='file'] {
+      display: none;
+    }
+  }
+}
+
+.btn-upload-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: $spacing-xs $spacing-md;
+  background: white;
+  color: $text-primary;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: $primary-color;
+    color: white;
+    border-color: $primary-color;
+  }
+}
+
+.selected-files-inline {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-size: 0.85rem;
+  color: $text-secondary;
+
+  .btn-sm {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+}
+
+.image-count-text {
+  margin: $spacing-sm 0 0 0;
+  font-size: 0.8rem;
+  color: $text-muted;
+}
+
 // Products Grid
 .products-grid {
   @include responsive-grid(3, $spacing-xl);
   margin-top: $spacing-xl;
 }
 
-// Product Actions in Cards
+// Product Actions in Cards (legacy)
 .product-card {
   .card-actions {
     display: flex;
     gap: $spacing-sm;
     margin-top: $spacing-md;
+  }
+}
+
+// Compact Product Card
+.product-card-compact {
+  background: white;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid $border-color;
+  transition: all $transition-normal;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+
+    .card-image img {
+      transform: scale(1.05);
+    }
+  }
+}
+
+.card-image {
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform $transition-normal;
+  }
+
+  .no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba($primary-color, 0.3);
+  }
+}
+
+.card-body {
+  padding: $spacing-md;
+}
+
+.card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $text-primary;
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-desc {
+  font-size: 0.8rem;
+  color: $text-muted;
+  margin: 0 0 $spacing-sm 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: $primary-color;
+}
+
+.card-stock {
+  font-size: 0.75rem;
+  color: $text-muted;
+}
+
+.card-actions {
+  display: flex;
+  gap: $spacing-xs;
+  padding: 0 $spacing-md $spacing-md;
+}
+
+.btn-edit-compact {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: $spacing-xs $spacing-sm;
+  background: white;
+  color: $text-primary;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  svg {
+    color: $text-muted;
+  }
+
+  &:hover {
+    background: $bg-light;
+    border-color: $text-muted;
+  }
+}
+
+.btn-delete-compact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba($danger-color, 0.08);
+  color: $danger-color;
+  border: none;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: $danger-color;
+    color: white;
+  }
+}
+
+// Empty State Modern
+.empty-state-modern {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: $spacing-4xl $spacing-xl;
+  background: linear-gradient(135deg, rgba($primary-color, 0.03) 0%, rgba($accent-gold, 0.03) 100%);
+  border-radius: $radius-xl;
+  border: 2px dashed $border-color;
+
+  .empty-icon {
+    color: rgba($primary-color, 0.3);
+    margin-bottom: $spacing-lg;
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $text-primary;
+    margin: 0 0 $spacing-sm 0;
+  }
+
+  .empty-message {
+    font-size: 1rem;
+    color: $text-muted;
+    margin: 0 0 $spacing-xl 0;
+    max-width: 300px;
   }
 }
 
